@@ -14,7 +14,7 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+
 
 # Fortran module files
 *.mod
@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# VS files
+*.tlog
+*/.vs
+CGWork/Release
+bin/Release/CGWork.bsc
