@@ -35,4 +35,6 @@
 *.tlog
 */.vs
 CGWork/Release
+CGWork/Debug
 bin/Release/CGWork.bsc
+bin/Debug
