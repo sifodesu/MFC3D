@@ -16,91 +16,68 @@
       <UniqueIdentifier>{550aedc7-a085-4e7a-9f4f-12bd8107d19e}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="Source Files\hw_files">
+      <UniqueIdentifier>{2e06dbc6-cf9a-4726-a24c-5b26917240df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hw_files">
+      <UniqueIdentifier>{e5cbf0af-45c2-46e5-b48f-b2064fa39e53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CGWork.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CGWorkDoc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CGWorkView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="iritSkel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LightDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainFrm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MaterialDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PngWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Polygon.cpp">
+    <ClCompile Include="CObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vertice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vec.cpp">
+    <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="CGWork.rc">
+    <ClCompile Include="Model.cpp">
       <Filter>Source Files</Filter>
-    </ResourceCompile>
+    </ClCompile>
+    <ClCompile Include="Polygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CGWork.cpp">
+      <Filter>Source Files\hw_files</Filter>
+    </ClCompile>
+    <ClCompile Include="CGWorkDoc.cpp">
+      <Filter>Source Files\hw_files</Filter>
+    </ClCompile>
+    <ClCompile Include="LightDialog.cpp">
+      <Filter>Source Files\hw_files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>Source Files\hw_files</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialDlg.cpp">
+      <Filter>Source Files\hw_files</Filter>
+    </ClCompile>
+    <ClCompile Include="PngWrapper.cpp">
+      <Filter>Source Files\hw_files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files\hw_files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CGWork.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CGWorkDoc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CGWorkView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="iritSkel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LightDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainFrm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PngWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StdAfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\allocate.h">
@@ -193,6 +170,36 @@
     <ClInclude Include="Mat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CGWork.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="CGWorkDoc.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightDialog.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialDlg.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="PngWrapper.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\CGWork.ico">
@@ -205,5 +212,13 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="ReadMe.txt" />
+    <None Include="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\atlmfc\include\afx.inl">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CGWork.rc">
+      <Filter>Source Files\hw_files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

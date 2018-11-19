@@ -15,6 +15,10 @@
 
 
 #include "Light.h"
+#include "Model.h"
+#include "Camera.h"
+#include "Mat.h"
+#include "vector"
 
 class CCGWorkView : public CView
 {
@@ -115,6 +119,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	void draw_line(int x1, int y1, int x2, int y2, COLORREF color = RGB(255, 255, 255));
+	std::vector<Model> models;
+	Camera camera;
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

@@ -1,0 +1,34 @@
+# Tue Oct 27 19:16:44 1992
+#
+#	Cow (moo)
+#
+# Courtesy of:
+#
+#	Viewpoint Animation Engineering
+#	870 West Center
+#	Orem, Utah 84057
+#	(801)224-2222
+#	1-800-DATASET
+#
+# by Scott R. Nelson of Sun Microsystems (srnelson@eng.sun.com)
+#
+#	(c) Copyright 1992 Viewpoint Animation Engineering Inc.
+#	Sun Microsystems has been authorized to freely distribute
+#	these Datasets.  They are provided for unlimited use in
+#	existing or modified form.  The actual Dataset (ie, geometry)
+#	may not, however, be resold in existing or modified form.
+#
+# 2903 vertices
+# 0 vertex parms
+# 0 texture vertices
+# 3267 normals
+# 3263 elements
+
+[OBJECT hide
+    [POLYGON 4
+        [0.1 0.1 0]
+        [0.1 0.2 0]
+        [0.2 0.2 0]
+        [0.2 0.1 0]
+    ]
+]

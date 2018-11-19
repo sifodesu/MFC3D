@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "Polygon.h"
+#include "CObject.h"
 #include "Mat.h"
 
 using namespace std;
@@ -8,12 +8,13 @@ using namespace std;
 class Model
 {
 public:
-	vector<Polygon> polygons;
+	vector<ModelObject> objects;
 	Mat transform;
+	Mat position;
 
 	Model();
 	~Model();
-	std::vector<Polygon> polygons;
-	void addPolygon();
+	void reset();
+	void add_object(const ModelObject& object);
 };
 

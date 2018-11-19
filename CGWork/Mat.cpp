@@ -57,9 +57,20 @@ Mat Mat::operator*(const Mat & m) const
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			for (int k = 0; k < 4; k++) {
-				new_mat[i][k] = this->m[i][j] * m[j][k];
+				new_mat[i][k] += this->m[i][j] * m[j][k];
 			}
 		}
 	}
 	return new_mat;
+}
+
+Vec Mat::operator*(const Vec & v) const
+{
+	Vec new_vec;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			new_vec[i] += this->m[i][j] * v[j];
+		}
+	}
+	return new_vec;
 }

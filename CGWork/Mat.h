@@ -14,5 +14,6 @@ public:
 	Mat operator+ (const Mat& m) const;
 	Mat operator* (float s) const;
 	Mat operator* (const Mat& m) const;
+	Vec operator* (const Vec& v) const;
 };
 

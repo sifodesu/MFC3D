@@ -4,6 +4,7 @@
 
 Camera::Camera()
 {
+	projection[2][2] = 0;
 }
 
 

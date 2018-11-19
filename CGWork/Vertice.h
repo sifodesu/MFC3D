@@ -4,7 +4,7 @@
 class Vertice
 {
 public:
-	Vec vertice;
+	Vec point;
 	Vec normal;
 	bool has_normal;
 	Vertice(const Vec& vertice);

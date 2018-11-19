@@ -4,15 +4,15 @@
 
 using namespace std;
 
-class Polygon
+class CPolygon
 {
 public:
 	vector<Vertice> vertices;
 	Vec normal;
 	bool has_normal;
-	Polygon();
-	Polygon(const Vec& normal);
-	~Polygon();
+	CPolygon();
+	CPolygon(const Vec& normal);
+	~CPolygon();
 	void add_vertice(const Vertice& vertice);
 };
 

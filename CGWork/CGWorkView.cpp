@@ -21,7 +21,6 @@ static char THIS_FILE[] = __FILE__;
 #include "PngWrapper.h"
 #include "iritSkel.h"
 
-
 // For Status Bar access
 #include "MainFrm.h"
 
@@ -249,29 +248,35 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	GetClientRect(&r);
 	CDC *pDCToUse = /*m_pDC*/m_pDbDC;
 	
-	pDCToUse->FillSolidRect(&r, RGB(255, 255, 0));
-	
-	int numLines = 100;
-	float radius = r.right / 3;
-	
-	if (r.right > r.bottom) {
-		radius = r.bottom / 3;
+	pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
+
+	Mat screen_scale(200.0f);
+	for (std::vector<Model>::iterator model = models.begin(); model != models.end(); model++) {
+		Mat rendering_mat = screen_scale * camera.projection * model->position * model->transform;
+		for (std::vector<ModelObject>::iterator obj = model->objects.begin(); obj != model->objects.end(); obj++) {
+			for (std::vector<CPolygon>::iterator poly = obj->polygons.begin(); poly != obj->polygons.end(); poly++) {
+				Vertice first = poly->vertices[0];
+				Vec p1 = rendering_mat * first.point;
+				Vec p2;
+				Vec pfirst = p1;
+				for (std::vector<Vertice>::iterator v = poly->vertices.begin(); v != poly->vertices.end(); v++) {
+					if (std::next(v) != poly->vertices.end()) {
+						p2 = rendering_mat * std::next(v)->point;
+					}
+					else {
+						p2 = pfirst;
+					}
+					draw_line(p1.x, p1.y, p2.x, p2.y);					
+					p1 = p2;
+				}
+			}
+		}
 	}
-	
-	for (int i = 0; i < numLines; ++i)
-	{
-		float finalTheta = 2 * M_PI / numLines*i + theta*M_PI/180.0f;
-		
-		pDCToUse->MoveTo(r.right / 2, r.bottom / 2);
-		pDCToUse->LineTo(r.right / 2 + radius*cos(finalTheta), r.bottom / 2 + radius*sin(finalTheta));
-	}	
 
 	if (pDCToUse != m_pDC) 
 	{
 		m_pDC->BitBlt(r.left, r.top, r.Width(), r.Height(), pDCToUse, r.left, r.top, SRCCOPY);
 	}
-	
-	theta += 5;	
 }
 
 
@@ -311,9 +316,11 @@ void CCGWorkView::OnFileLoad()
 	CFileDialog dlg(TRUE, _T("itd"), _T("*.itd"), OFN_FILEMUSTEXIST | OFN_HIDEREADONLY ,szFilters);
 
 	if (dlg.DoModal () == IDOK) {
+		reset_current_model();
 		m_strItdFileName = dlg.GetPathName();		// Full path and filename
 		PngWrapper p;
 		CGSkelProcessIritDataFiles(m_strItdFileName, 1);
+		models.push_back(get_current_model());
 		// Open the file and read it.
 		// Your code here...
 
@@ -496,4 +503,100 @@ void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
 	CView::OnTimer(nIDEvent);
 	if (nIDEvent == 1)
 		Invalidate();
+}
+
+
+void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
+{
+	int dx = x2 - x1, dy = y2 - y1, d, delta_e, delta_ne;
+
+	if (dx < 0) {
+		int tmp = x2;
+		x2 = x1;
+		x1 = tmp;
+		tmp = y2;
+		y2 = y1;
+		y1 = tmp;
+		dx = x2 - x1;
+		dy = y2 - y1;
+	}
+
+	POINT p;
+	p.x = x1;
+	p.y = y1;
+	m_pDbDC->SetPixel(p, color);
+
+	if (dy >= 0) {
+		if (dx >= dy) {
+			d = 2 * dy - dx;
+			delta_e = 2 * dy;
+			delta_ne = 2 * (dy - dx);
+			while (p.x < x2) {
+				if (d < 0) {
+					d += delta_e;
+					p.x++;
+				}
+				else {
+					d += delta_ne;
+					p.x++;
+					p.y++;
+				}
+				m_pDbDC->SetPixel(p, color);
+			}
+		}
+		else {
+			d = 2 * dx - dy;
+			delta_e = 2 * dx;
+			delta_ne = 2 * (dx - dy);
+			while (p.y < y2) {
+				if (d < 0) {
+					d += delta_e;
+					p.y++;
+				}
+				else {
+					d += delta_ne;
+					p.x++;
+					p.y++;
+				}
+				m_pDbDC->SetPixel(p, color);
+			}
+		}
+	}
+	else {
+		if (dx >= -dy) {
+			d = 2 * dy + dx;
+			delta_e = 2 * dy;
+			delta_ne = 2 * (dy + dx);
+			while (p.x < x2) {
+				if (d > 0) {
+					d += delta_e;
+					p.x++;
+				}
+				else {
+					d += delta_ne;
+					p.x++;
+					p.y--;
+				}
+				m_pDbDC->SetPixel(p, color);
+			}
+		}
+		else {
+			d = 2 * dx + dy;
+			delta_e = 2 * dx;
+			delta_ne = 2 * (dx + dy);
+			while (p.y > y2) {
+				if (d < 0) {
+					d += delta_e;
+					p.y--;
+				}
+				else {
+					d += delta_ne;
+					p.x++;
+					p.y--;
+				}
+				m_pDbDC->SetPixel(p, color);
+			}
+		}
+	}
+
 }

@@ -191,6 +191,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="CObject.cpp" />
     <ClCompile Include="iritSkel.cpp" />
     <ClCompile Include="LightDialog.cpp" />
     <ClCompile Include="MainFrm.cpp">
@@ -231,6 +232,7 @@
     <ClInclude Include="CGWork.h" />
     <ClInclude Include="CGWorkDoc.h" />
     <ClInclude Include="CGWorkView.h" />
+    <ClInclude Include="CObject.h" />
     <ClInclude Include="iritSkel.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightDialog.h" />
@@ -270,6 +272,7 @@
     <ClInclude Include="Vertice.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\atlmfc\include\afx.inl" />
     <None Include="res\CGWork.ico" />
     <None Include="res\CGWorkDoc.ico" />
     <None Include="res\Toolbar.bmp" />

@@ -1,20 +1,20 @@
 #include "Polygon.h"
 
-Polygon::Polygon() :
+CPolygon::CPolygon() :
 	has_normal(false)
 {
 }
 
-Polygon::Polygon(const Vec & normal) :
+CPolygon::CPolygon(const Vec & normal) :
 	normal(normal), has_normal(true)
 {
 }
 
-Polygon::~Polygon()
+CPolygon::~CPolygon()
 {
 }
 
-void Polygon::add_vertice(const Vertice & vertice)
+void CPolygon::add_vertice(const Vertice & vertice)
 {
 	vertices.push_back(vertice);
 }

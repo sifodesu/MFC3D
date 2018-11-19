@@ -8,7 +8,7 @@ public:
 	float w;
 
 	Vec(float s = 0.0f);
-	Vec(float x, float y, float z, float w);
+	Vec(float x, float y, float z, float w = 1);
 	~Vec();
 	float operator[](int i) const;
 	float& operator[](int i);

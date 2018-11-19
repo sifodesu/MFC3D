@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "iritSkel.h"
+#include "Model.h"
+#include "Polygon.h"
+#include "Vertice.h"
 /*****************************************************************************
 * Skeleton for an interface to a parser to read IRIT data files.			 *
 ******************************************************************************
@@ -30,7 +33,17 @@ IPFreeformConvStateStruct CGSkelFFCState = {
 };
 
 //CGSkelProcessIritDataFiles(argv + 1, argc - 1);
+Model current;
 
+void reset_current_model()
+{
+	current.reset();
+}
+
+Model & get_current_model()
+{
+	return current;
+}
 
 /*****************************************************************************
 * DESCRIPTION:                                                               *
@@ -68,7 +81,7 @@ bool CGSkelProcessIritDataFiles(CString &FileNames, int NumFiles)
 
 	/* Traverse ALL the parsed data, recursively. */
 	IPTraverseObjListHierarchy(PObjects, CrntViewMat,
-        CGSkelDumpOneTraversedObject);
+		CGSkelDumpOneTraversedObject);
 	return true;
 }
 
@@ -86,8 +99,8 @@ bool CGSkelProcessIritDataFiles(CString &FileNames, int NumFiles)
 *   void									                                 *
 *****************************************************************************/
 void CGSkelDumpOneTraversedObject(IPObjectStruct *PObj,
-                                  IrtHmgnMatType Mat,
-                                  void *Data)
+	IrtHmgnMatType Mat,
+	void *Data)
 {
 	IPObjectStruct *PObjs;
 
@@ -96,8 +109,8 @@ void CGSkelDumpOneTraversedObject(IPObjectStruct *PObj,
 	else
 		PObjs = PObj;
 
-	for (PObj = PObjs; PObj != NULL; PObj = PObj -> Pnext)
-		if (!CGSkelStoreData(PObj)) 
+	for (PObj = PObjs; PObj != NULL; PObj = PObj->Pnext)
+		if (!CGSkelStoreData(PObj))
 			exit(1);
 }
 
@@ -120,14 +133,14 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 	IPPolygonStruct *PPolygon;
 	IPVertexStruct *PVertex;
 	const IPAttributeStruct *Attrs =
-        AttrTraceAttributes(PObj -> Attr, PObj -> Attr);
+		AttrTraceAttributes(PObj->Attr, PObj->Attr);
 
-	if (PObj -> ObjType != IP_OBJ_POLY) {
+	if (PObj->ObjType != IP_OBJ_POLY) {
 		AfxMessageBox(_T("Non polygonal object detected and ignored"));
 		return true;
 	}
 
-	/* You can use IP_IS_POLYGON_OBJ(PObj) and IP_IS_POINTLIST_OBJ(PObj) 
+	/* You can use IP_IS_POLYGON_OBJ(PObj) and IP_IS_POINTLIST_OBJ(PObj)
 	   to identify the type of the object*/
 
 	if (CGSkelGetObjectColor(PObj, RGB))
@@ -146,7 +159,7 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 	{
 		/* parametric texture code */
 	}
-	if (Attrs != NULL) 
+	if (Attrs != NULL)
 	{
 		printf("[OBJECT\n");
 		while (Attrs) {
@@ -154,34 +167,48 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 			Attrs = AttrTraceAttributes(Attrs, NULL);
 		}
 	}
-	for (PPolygon = PObj -> U.Pl; PPolygon != NULL;	PPolygon = PPolygon -> Pnext) 
+
+	ModelObject object;
+	for (PPolygon = PObj->U.Pl; PPolygon != NULL; PPolygon = PPolygon->Pnext)
 	{
-			if (PPolygon -> PVertex == NULL) {
-				AfxMessageBox(_T("Dump: Attemp to dump empty polygon"));
-				return false;
+		if (PPolygon->PVertex == NULL) {
+			AfxMessageBox(_T("Dump: Attemp to dump empty polygon"));
+			return false;
+		}
+
+		/* Count number of vertices. */
+		for (PVertex = PPolygon->PVertex->Pnext, i = 1;
+			PVertex != PPolygon->PVertex && PVertex != NULL;
+			PVertex = PVertex->Pnext, i++);
+
+		CPolygon p;
+		if (IP_HAS_PLANE_POLY(PPolygon)) {
+			Vec normal(PPolygon->Plane[0], PPolygon->Plane[1], PPolygon->Plane[2]);
+			p.normal = normal;
+			p.has_normal = true;
+		}
+
+		/* use if(IP_HAS_PLANE_POLY(PPolygon)) to know whether a normal is defined for the polygon
+		   access the normal by the first 3 components of PPolygon->Plane */
+		PVertex = PPolygon->PVertex;
+		do {			     /* Assume at least one edge in polygon! */
+			/* code handeling all vertex/normal/texture coords */
+			Vec point(PVertex->Coord[0], PVertex->Coord[1], PVertex->Coord[2]);
+			Vertice v(point);
+			if (IP_HAS_NORMAL_VRTX(PVertex))
+			{
+				Vec normal(PVertex->Normal[0], PVertex->Normal[1], PVertex->Normal[2]);
+				v.normal = normal;
+				v.has_normal = true;
 			}
 
-			/* Count number of vertices. */
-			for (PVertex = PPolygon -> PVertex -> Pnext, i = 1;
-				PVertex != PPolygon -> PVertex && PVertex != NULL;
-				PVertex = PVertex -> Pnext, i++);
-			/* use if(IP_HAS_PLANE_POLY(PPolygon)) to know whether a normal is defined for the polygon
-			   access the normal by the first 3 components of PPolygon->Plane */
-			PVertex = PPolygon -> PVertex;
-			do {			     /* Assume at least one edge in polygon! */
-				/* code handeling all vertex/normal/texture coords */
-				if(IP_HAS_NORMAL_VRTX(PVertex)) 
-				{
-				    int x;
-				    ++x;
-				}
-
-
-				PVertex = PVertex -> Pnext;
-			}
-			while (PVertex != PPolygon -> PVertex && PVertex != NULL);
-			/* Close the polygon. */
+			p.add_vertice(point);
+			PVertex = PVertex->Pnext;
+		} while (PVertex != PPolygon->PVertex && PVertex != NULL);
+		/* Close the polygon. */
+		object.add_polygon(p);
 	}
+	current.add_object(object);
 	/* Close the object. */
 	return true;
 }
@@ -231,16 +258,16 @@ int CGSkelGetObjectColor(IPObjectStruct *PObj, double RGB[3])
 
 	if (AttrGetObjectRGBColor(PObj,
 		&RGBIColor[0], &RGBIColor[1], &RGBIColor[2])) {
-			for (i = 0; i < 3; i++)
-				RGB[i] = RGBIColor[i] / 255.0;
+		for (i = 0; i < 3; i++)
+			RGB[i] = RGBIColor[i] / 255.0;
 
-			return TRUE;
+		return TRUE;
 	}
 	else if ((Color = AttrGetObjectColor(PObj)) != IP_ATTR_NO_COLOR) {
 		for (i = 0; TransColorTable[i][0] >= 0; i++) {
 			if (TransColorTable[i][0] == Color) {
 				for (j = 0; j < 3; j++)
-					RGB[j] = TransColorTable[i][j+1] / 255.0;
+					RGB[j] = TransColorTable[i][j + 1] / 255.0;
 				return TRUE;
 			}
 		}
