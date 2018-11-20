@@ -1,20 +1,19 @@
 #pragma once
 #include <vector>
-#include "CObject.h"
+#include "Polygon.h"
 #include "Mat.h"
 
 using namespace std;
 
-class Model
+class CModel
 {
 public:
-	vector<ModelObject> objects;
-	Mat transform;
-	Mat position;
+	vector<CPolygon> polygons;
+	mat3 transform;
+	mat3 position;
 
-	Model();
-	~Model();
+	CModel();
 	void reset();
-	void add_object(const ModelObject& object);
+	void add_polygon(const CPolygon& polygon);
 };
 

@@ -120,7 +120,7 @@ protected:
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	void draw_line(int x1, int y1, int x2, int y2, COLORREF color = RGB(255, 255, 255));
-	std::vector<Model> models;
+	std::vector<CModel> models;
 	Camera camera;
 };
 

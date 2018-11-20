@@ -20,6 +20,8 @@ static char THIS_FILE[] = __FILE__;
 
 #include "PngWrapper.h"
 #include "iritSkel.h"
+//#include <chrono>
+//#include <sstream>
 
 // For Status Bar access
 #include "MainFrm.h"
@@ -250,28 +252,27 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	
 	pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
 
-	Mat screen_scale(200.0f);
-	for (std::vector<Model>::iterator model = models.begin(); model != models.end(); model++) {
-		Mat rendering_mat = screen_scale * camera.projection * model->position * model->transform;
-		for (std::vector<ModelObject>::iterator obj = model->objects.begin(); obj != model->objects.end(); obj++) {
-			for (std::vector<CPolygon>::iterator poly = obj->polygons.begin(); poly != obj->polygons.end(); poly++) {
-				Vertice first = poly->vertices[0];
-				Vec p1 = rendering_mat * first.point;
-				Vec p2;
-				Vec pfirst = p1;
-				for (std::vector<Vertice>::iterator v = poly->vertices.begin(); v != poly->vertices.end(); v++) {
-					if (std::next(v) != poly->vertices.end()) {
-						p2 = rendering_mat * std::next(v)->point;
-					}
-					else {
-						p2 = pfirst;
-					}
-					draw_line(p1.x, p1.y, p2.x, p2.y);					
-					p1 = p2;
-				}
+	mat3 screen_scale(200.0f);
+	for (CModel& model : models) {
+		mat3 rendering_mat = screen_scale * camera.projection * model.position * model.transform;
+		for (CPolygon& polygon : model.polygons) {
+			vector<vec3> points;
+			for (vec3& point : polygon.vertices) {
+				points.push_back(rendering_mat * point);
 			}
+			int size = points.size() - 1;
+			for (int i = 0; i < size; i++) {
+				draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+			}
+			draw_line(points[size].x, points[size].y, points[0].x, points[0].y);
 		}
 	}
+	/*auto t1 = std::chrono::high_resolution_clock::now();
+	pDCToUse->SetPixel(0, 0, RGB(255, 255, 255));
+	auto t2 = std::chrono::high_resolution_clock::now();
+	std::ostringstream ss;
+	ss << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << endl;
+	OutputDebugStringA(ss.str().c_str());*/
 
 	if (pDCToUse != m_pDC) 
 	{
@@ -508,18 +509,16 @@ void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
 
 void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
 {
-	int dx = x2 - x1, dy = y2 - y1, d, delta_e, delta_ne;
-
-	if (dx < 0) {
+	if (x2 - x1 < 0) {
 		int tmp = x2;
 		x2 = x1;
 		x1 = tmp;
 		tmp = y2;
 		y2 = y1;
 		y1 = tmp;
-		dx = x2 - x1;
-		dy = y2 - y1;
 	}
+
+	int dx = x2 - x1, dy = y2 - y1, d, delta_e, delta_ne;
 
 	POINT p;
 	p.x = x1;

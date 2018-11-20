@@ -30,25 +30,13 @@
     <ClCompile Include="iritSkel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Vertice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Polygon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Vec.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CGWork.cpp">
@@ -161,16 +149,10 @@
     <ClInclude Include="Polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vertice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CGWork.h">

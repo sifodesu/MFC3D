@@ -4,8 +4,8 @@
 class Camera
 {
 public:
-	Mat transform;
-	Mat projection;
+	mat3 transform;
+	mat3 projection;
 
 	Camera();
 	~Camera();

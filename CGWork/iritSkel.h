@@ -17,7 +17,7 @@
 #include "Model.h"
 
 void reset_current_model();
-Model& get_current_model();
+CModel& get_current_model();
 
 bool CGSkelProcessIritDataFiles(CString &FileNames, int NumFiles);
 void CGSkelDumpOneTraversedObject(IPObjectStruct *PObj, IrtHmgnMatType Mat, void *Data);
