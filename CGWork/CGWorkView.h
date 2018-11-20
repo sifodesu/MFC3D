@@ -122,6 +122,9 @@ public:
 	void draw_line(int x1, int y1, int x2, int y2, COLORREF color = RGB(255, 255, 255));
 	std::vector<CModel> models;
 	Camera camera;
+	float SetScreenScale();
+	void setBoundingBox(vec3** box, vec3* point);
+	void DrawBoundingBox(vec3* box[2], mat3& rendering_mat);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp
