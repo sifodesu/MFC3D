@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace std;
+
 class vec2
 {
 public:
@@ -13,6 +15,12 @@ public:
 		x(x), y(y) {}
 
 	vec2(const vec2& v) :
+		x(v.x), y(v.y) {}
+
+	vec2(const vec3& v) :
+		x(v.x), y(v.y) {}
+
+	vec2(const vec4& v) :
 		x(v.x), y(v.y) {}
 
 	float& operator[] (int i) {
@@ -62,6 +70,9 @@ public:
 		x(x), y(y), z(z) {}
 
 	vec3(const vec3& v) :
+		x(v.x), y(v.y), z(v.z) {}
+
+	vec3(const vec4& v) :
 		x(v.x), y(v.y), z(v.z) {}
 
 	float& operator[] (int i) {
@@ -146,3 +157,28 @@ public:
 		return *this * (1.0f / s);
 	}
 };
+
+float norm(const vec3& v) {
+	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+float norm(const vec4& v) {
+	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
+}
+
+vec3 normalized(const vec3& v) {
+	return v / norm(v);
+}
+
+vec4 normalized(const vec4& v) {
+	return v / norm(v);
+}
+
+vec3 cross(const vec3& v1, const vec3& v2)
+{
+	return vec3(
+		v1.y * v2.z - v1.z * v2.y,
+		v1.z * v2.x - v1.x * v2.z,
+		v1.x * v2.y - v1.y * v2.x
+	);
+}

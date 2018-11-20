@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec.h"
+#include "Globals.h"
 
 class mat2
 {
@@ -19,6 +20,21 @@ public:
 	mat2(const mat2& m) {
 		M[0] = m[0];
 		M[1] = m[1];
+	}
+
+	mat2(const mat3& m) {
+		M[0] = m[0];
+		M[1] = m[1];
+	}
+
+	mat2(const mat4& m) {
+		M[0] = m[0];
+		M[1] = m[1];
+	}
+
+	mat2(const float a[2][2]) {
+		M[0] = vec2(a[0][0], a[0][1]);
+		M[1] = vec2(a[1][0], a[1][1]);
 	}
 
 	vec2& operator[] (int i) {
@@ -63,6 +79,13 @@ public:
 	mat2 operator/ (float s) const {
 		return *this * (1.0f / s);
 	}
+
+	mat2 transpose() {
+		return mat2({
+			{M[0][0], M[1][0]}, 
+			{M[0][1], M[1][1]}}
+		);
+	}
 };
 
 class mat3
@@ -86,6 +109,18 @@ public:
 		M[0] = m[0];
 		M[1] = m[1];
 		M[2] = m[2];
+	}
+
+	mat3(const mat4& m) {
+		M[0] = m[0];
+		M[1] = m[1];
+		M[2] = m[2];
+	}
+
+	mat3(const float a[3][3]) {
+		M[0] = vec3(a[0][0], a[0][1], a[0][2]);
+		M[1] = vec3(a[1][0], a[1][1], a[1][2]);
+		M[2] = vec3(a[2][0], a[2][1], a[2][2]);
 	}
 
 	vec3& operator[] (int i) {
@@ -131,6 +166,14 @@ public:
 	mat3 operator/ (float s) const {
 		return *this * (1.0f / s);
 	}
+
+	mat3 transpose() {
+		return mat3({
+			{M[0][0], M[1][0], M[2][0]},
+			{M[0][1], M[1][1], M[2][1]},
+			{M[0][2], M[1][2], M[2][2]}}
+		);
+	}
 };
 
 class mat4
@@ -157,6 +200,13 @@ public:
 		M[1] = m[1];
 		M[2] = m[2];
 		M[3] = m[3];
+	}
+
+	mat4(const float a[4][4]) {
+		M[0] = vec4(a[0][0], a[0][1], a[0][2], a[0][3]);
+		M[0] = vec4(a[1][0], a[1][1], a[1][2], a[1][3]);
+		M[0] = vec4(a[2][0], a[2][1], a[2][2], a[2][3]);
+		M[0] = vec4(a[3][0], a[3][1], a[3][2], a[3][3]);
 	}
 
 	vec4& operator[] (int i) {
@@ -203,5 +253,61 @@ public:
 	mat4 operator/ (float s) const {
 		return *this * (1.0f / s);
 	}
+
+	mat4 transpose() {
+		return mat4({
+			{M[0][0], M[1][0], M[2][0], M[3][0]},
+			{M[0][1], M[1][1], M[2][1], M[3][1]},
+			{M[0][2], M[1][2], M[2][2], M[3][2]},
+			{M[0][3], M[1][3], M[2][3], M[3][3]}}
+		);
+	}
 };
 
+mat4 rotation_X(float angle) {
+	float t = (PI / 180.0f) * angle;
+	return mat4({
+		{1.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, cos(t), -sin(t), 0.0f},
+		{0.0f, sin(t), cos(t), 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f}}
+	);
+}
+
+mat4 rotation_Y(float angle) {
+	float t = (PI / 180.0f) * angle;
+	return mat4({
+		{cos(t), 0.0f, sin(t), 0.0f},
+		{0.0f, 1.0f, 0.0f, 0.0f},
+		{-sin(t), 0.0f, cos(t), 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f}}
+	);
+}
+
+mat4 rotation_Z(float angle) {
+	float t = (PI / 180.0f) * angle;
+	return mat4({
+		{cos(t), -sin(t), 0.0f, 0.0f},
+		{sin(t), cos(t), 0.0f, 0.0f},
+		{0.0f, 0.0f, 1.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f}}
+	);
+}
+
+mat4 translation(float x, float y, float z) {
+	return mat4({
+		{1.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 1.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 1.0f, 0.0f},
+		{x, y, z, 1.0f}}
+	);
+}
+
+mat4 scaling(float x, float y, float z) {
+	return mat4({
+		{x, 0.0f, 0.0f, 0.0f},
+		{0.0f, y, 0.0f, 0.0f},
+		{0.0f, 0.0f, z, 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f} }
+	);
+}
