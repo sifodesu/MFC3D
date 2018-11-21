@@ -20,8 +20,6 @@ static char THIS_FILE[] = __FILE__;
 
 #include "PngWrapper.h"
 #include "iritSkel.h"
-//#include <chrono>
-//#include <sstream>
 
 // For Status Bar access
 #include "MainFrm.h"
@@ -79,7 +77,8 @@ void auxSolidCone(GLdouble radius, GLdouble height) {
 /////////////////////////////////////////////////////////////////////////////
 // CCGWorkView construction/destruction
 
-CCGWorkView::CCGWorkView()
+CCGWorkView::CCGWorkView() :
+	scene(this)
 {
 	// Set default values
 	m_nAxis = ID_AXIS_X;
@@ -250,29 +249,30 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	GetClientRect(&r);
 	CDC *pDCToUse = /*m_pDC*/m_pDbDC;
 
-	pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
+	scene.draw(pDCToUse);
+	//pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
 
-	mat3 screen_scale(SetScreenScale());	////
-	vec3* boundingBox[2] = { NULL };			////
-	for (CModel& model : models) {
-		mat3 rendering_mat = screen_scale * camera.projection * model.position * model.transform;
-		for (CPolygon& polygon : model.polygons) {
-			vector<vec3> points;
-			for (vec3& point : polygon.vertices) {
-				points.push_back(rendering_mat * point);
-				setBoundingBox(boundingBox, &point);			////
-			}
-			int size = points.size() - 1;
-			for (int i = 0; i < size; i++) {
-				draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
-			}
-			draw_line(points[size].x, points[size].y, points[0].x, points[0].y);
+	//mat3 screen_scale(SetScreenScale());	////
+	//vec3* boundingBox[2] = { NULL };			////
+	//for (CModel& model : models) {
+	//	mat3 rendering_mat = screen_scale * camera.projection * model.position * model.transform;
+	//	for (CPolygon& polygon : model.polygons) {
+	//		vector<vec3> points;
+	//		for (vec3& point : polygon.vertices) {
+	//			points.push_back(rendering_mat * point);
+	//			setBoundingBox(boundingBox, &point);			////
+	//		}
+	//		int size = points.size() - 1;
+	//		for (int i = 0; i < size; i++) {
+	//			draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+	//		}
+	//		draw_line(points[size].x, points[size].y, points[0].x, points[0].y);
 
-		}
-		DrawBoundingBox(boundingBox, rendering_mat);		////
-		delete boundingBox[0]; delete boundingBox[1];
-		boundingBox[0] = boundingBox[1] = NULL;
-	}
+	//	}
+	//	DrawBoundingBox(boundingBox, rendering_mat);		////
+	//	delete boundingBox[0]; delete boundingBox[1];
+	//	boundingBox[0] = boundingBox[1] = NULL;
+	//}
 	/*auto t1 = std::chrono::high_resolution_clock::now();
 	pDCToUse->SetPixel(0, 0, RGB(255, 255, 255));
 	auto t2 = std::chrono::high_resolution_clock::now();
@@ -327,7 +327,9 @@ void CCGWorkView::OnFileLoad()
 		m_strItdFileName = dlg.GetPathName();		// Full path and filename
 		PngWrapper p;
 		CGSkelProcessIritDataFiles(m_strItdFileName, 1);
-		models.push_back(get_current_model());
+		CModel model = get_current_model();
+		model.set_bounding_box();
+		scene.add_model(model);
 		// Open the file and read it.
 		// Your code here...
 
@@ -512,16 +514,17 @@ void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
 		Invalidate();
 }
 
+CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
+	parent(parent), context(nullptr),
+	background_color(RGB(0, 0, 0)),
+	bounding_box_color(RGB(255, 255, 0)) {}
 
-void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
+void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color)
 {
+	int x1 = (int)v1.x, x2 = (int)v2.x, y1 = (int)v1.y, y2 = (int)v2.y;
 	if (x2 - x1 < 0) {
-		int tmp = x2;
-		x2 = x1;
-		x1 = tmp;
-		tmp = y2;
-		y2 = y1;
-		y1 = tmp;
+		std::swap(x1, x2);
+		std::swap(y1, y2);
 	}
 
 	int dx = x2 - x1, dy = y2 - y1, d, delta_e, delta_ne;
@@ -529,7 +532,7 @@ void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
 	POINT p;
 	p.x = x1;
 	p.y = y1;
-	m_pDbDC->SetPixel(p, color);
+	context->SetPixel(p, color);
 
 	if (dy >= 0) {
 		if (dx >= dy) {
@@ -546,7 +549,7 @@ void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
 					p.x++;
 					p.y++;
 				}
-				m_pDbDC->SetPixel(p, color);
+				context->SetPixel(p, color);
 			}
 		}
 		else {
@@ -563,7 +566,7 @@ void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
 					p.x++;
 					p.y++;
 				}
-				m_pDbDC->SetPixel(p, color);
+				context->SetPixel(p, color);
 			}
 		}
 	}
@@ -582,7 +585,7 @@ void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
 					p.x++;
 					p.y--;
 				}
-				m_pDbDC->SetPixel(p, color);
+				context->SetPixel(p, color);
 			}
 		}
 		else {
@@ -599,54 +602,88 @@ void CCGWorkView::draw_line(int x1, int y1, int x2, int y2, COLORREF color)
 					p.x++;
 					p.y--;
 				}
-				m_pDbDC->SetPixel(p, color);
+				context->SetPixel(p, color);
 			}
 		}
 	}
-
 }
 
-float CCGWorkView::SetScreenScale()
+vec2 CCGWorkView::CRenderer::cast(const vec2& v)
 {
-	CRect r;
-	GetClientRect(&r);
-	float scale = (float)min(r.Width(), r.Height());
-	return scale / 10;
+	int width = screen.Width(), height = screen.Height();
+	int scale = min(height, width);
+	vec2 v2(v.x * scale + width / 2, -v.y * scale + height / 2);
+	return v2;
 }
 
-
-void CCGWorkView::setBoundingBox(vec3* box[2], vec3* point)
+void CCGWorkView::CRenderer::set_context(CDC* context)
 {
-	if (box[0] == NULL) {
-		box[0] = new vec3; box[1] = new vec3;
-		*box[0] = *box[1] = *point;
-		return;
+	this->context = context;
+	parent->GetClientRect(&screen);
+}
+
+void CCGWorkView::CRenderer::draw_background()
+{
+	context->FillSolidRect(&screen, background_color);
+}
+
+bool CCGWorkView::CRenderer::bounding_box_toggled()
+{
+	return true;
+}
+
+void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
+{
+	mat4 transform = model.model_transform;
+	transform = model.view_transform * transform;
+	transform = camera.transform * transform;
+	transform = camera.projection * transform;
+	//mat4 transform = camera.projection * camera.transform * model.view_transform * model.model_transform;
+	for (const CPolygon& polygon : model.polygons) {
+		vector<vec2> points;
+		for (const vec3& point : polygon.vertices) {
+			points.push_back(cast(vec2(transform * vec4(point.x, point.y, point.z, 1.0f))));
+		}
+		int size = points.size() - 1;
+		for (int i = 0; i < size; i++) {
+			draw_line(points[i], points[i + 1], model.color);
+		}
+		draw_line(points[size], points[0], model.color);
 	}
-
-	box[0]->x = min(point->x, box[0]->x);
-	box[0]->y = min(point->y, box[0]->y);
-	box[0]->z = min(point->z, box[0]->z);
-
-	box[1]->x = max(point->x, box[1]->x);
-	box[1]->y = max(point->y, box[1]->y);
-	box[1]->z = max(point->z, box[1]->z);
-}
-
-
-void CCGWorkView::DrawBoundingBox(vec3* box[2], mat3& rendering_mat)
-{
-	vector<vec3> points;
-	for (int i = 0; i < 2; i++)
-		for (int j = 0; j < 2; j++)
-			for (int k = 0; k < 2; k++)
-				points.push_back(vec3(box[i]->x, box[j]->y, box[k]->z));
-
-	for (auto i = points.begin(); i != points.end(); i++)
-		for (auto j = points.begin(); j != points.end(); j++) {
-			vec3 res = *i - *j;
-			if ((!res.x && !res.y) || (!res.y && !res.z) || (!res.x && !res.z)) {
-				vec3 A = rendering_mat * *i; vec3 B = rendering_mat * *j;
-				draw_line(A.x, A.y, B.x, B.y);
+	if (bounding_box_toggled()) {
+		for (const vec3& p1 : model.bounding_box) {
+			for (const vec3& p2 : model.bounding_box) {
+				vec3 res = p1 - p2;
+				if ((!res.x && !res.y) || (!res.y && !res.z) || (!res.x && !res.z)) {
+					vec2 a = cast(vec2(transform * vec4(p1.x, p1.y, p1.z, 1.0f)));
+					vec2 b = cast(vec2(transform * vec4(p2.x, p2.y, p2.z, 1.0f)));
+					draw_line(a, b, bounding_box_color);
+				}
 			}
 		}
+	}
+}
+
+CCGWorkView::CScene::CScene(CCGWorkView* parent) :
+	current_camera(0), renderer(parent)
+{
+	cameras.push_back(CCamera());
+}
+
+void CCGWorkView::CScene::add_model(const CModel & model)
+{
+	models.push_back(model);
+}
+
+void CCGWorkView::CScene::add_camera(const CCamera & camera)
+{
+}
+
+void CCGWorkView::CScene::draw(CDC* context)
+{
+	renderer.set_context(context);
+	renderer.draw_background();
+	for (const CModel& model : models) {
+		renderer.draw_model(cameras[current_camera], model);
+	}
 }

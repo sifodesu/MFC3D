@@ -1,27 +1,24 @@
 #pragma once
+#include <cmath>
 
 using namespace std;
 
-class vec2
+class vec4
 {
 public:
 	float x;
 	float y;
+	float z;
+	float w;
 
-	vec2(float s = 0.0f) :
-		x(s), y(s) {}
+	vec4(float s = 0.0f) :
+		x(s), y(s), z(s), w(s) {}
 
-	vec2(float x, float y) :
-		x(x), y(y) {}
+	vec4(float x, float y, float z, float w) :
+		x(x), y(y), z(z), w(w) {}
 
-	vec2(const vec2& v) :
-		x(v.x), y(v.y) {}
-
-	vec2(const vec3& v) :
-		x(v.x), y(v.y) {}
-
-	vec2(const vec4& v) :
-		x(v.x), y(v.y) {}
+	vec4(const vec4& v) :
+		x(v.x), y(v.y), z(v.z), w(v.w) {}
 
 	float& operator[] (int i) {
 		return *(&x + i);
@@ -31,27 +28,27 @@ public:
 		return *(&x + i);
 	}
 
-	vec2 operator+ (const vec2& v) const {
-		return vec2(x + v.x, y + v.y);
+	vec4 operator+ (const vec4& v) const {
+		return vec4(x + v.x, y + v.y, z + v.z, w + v.w);
 	}
 
-	vec2 operator- () const {
-		return vec2(-x, -y);
+	vec4 operator- () const {
+		return vec4(-x, -y, -z, -w);
 	}
 
-	vec2 operator- (const vec2& v) const {
-		return vec2(x - v.x, y - v.y);
+	vec4 operator- (const vec4& v) const {
+		return vec4(x - v.x, y - v.y, z - v.z, w - v.w);
 	}
 
-	vec2 operator* (float s) const {
-		return vec2(x * s, y * s);
+	vec4 operator* (float s) const {
+		return vec4(x * s, y * s, z * s, w * s);
 	}
 
-	vec2 operator* (const vec2& v) const {
-		return vec2(x * v.x, y * v.y);
+	vec4 operator* (const vec4& v) const {
+		return vec4(x * v.x, y * v.y, z * v.z, w * v.w);
 	}
 
-	vec2 operator/ (float s) const {
+	vec4 operator/ (float s) const {
 		return *this * (1.0f / s);
 	}
 };
@@ -108,22 +105,26 @@ public:
 	}
 };
 
-class vec4
+class vec2
 {
 public:
 	float x;
 	float y;
-	float z;
-	float w;
 
-	vec4(float s = 0.0f) :
-		x(s), y(s), z(s), w(s) {}
+	vec2(float s = 0.0f) :
+		x(s), y(s) {}
 
-	vec4(float x, float y, float z, float w) :
-		x(x), y(y), z(z), w(w) {}
+	vec2(float x, float y) :
+		x(x), y(y) {}
 
-	vec4(const vec4& v) :
-		x(v.x), y(v.y), z(v.z), w(v.w) {}
+	vec2(const vec2& v) :
+		x(v.x), y(v.y) {}
+
+	vec2(const vec3& v) :
+		x(v.x), y(v.y) {}
+
+	vec2(const vec4& v) :
+		x(v.x), y(v.y) {}
 
 	float& operator[] (int i) {
 		return *(&x + i);
@@ -133,52 +134,33 @@ public:
 		return *(&x + i);
 	}
 
-	vec4 operator+ (const vec4& v) const {
-		return vec4(x + v.x, y + v.y, z + v.z, w + v.w);
+	vec2 operator+ (const vec2& v) const {
+		return vec2(x + v.x, y + v.y);
 	}
 
-	vec4 operator- () const {
-		return vec4(-x, -y, -z, -w);
+	vec2 operator- () const {
+		return vec2(-x, -y);
 	}
 
-	vec4 operator- (const vec4& v) const {
-		return vec4(x - v.x, y - v.y, z - v.z, w - v.w);
+	vec2 operator- (const vec2& v) const {
+		return vec2(x - v.x, y - v.y);
 	}
 
-	vec4 operator* (float s) const {
-		return vec4(x * s, y * s, z * s, w * s);
+	vec2 operator* (float s) const {
+		return vec2(x * s, y * s);
 	}
 
-	vec4 operator* (const vec4& v) const {
-		return vec4(x * v.x, y * v.y, z * v.z, w * v.w);
+	vec2 operator* (const vec2& v) const {
+		return vec2(x * v.x, y * v.y);
 	}
 
-	vec4 operator/ (float s) const {
+	vec2 operator/ (float s) const {
 		return *this * (1.0f / s);
 	}
 };
 
-float norm(const vec3& v) {
-	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-}
-
-float norm(const vec4& v) {
-	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
-}
-
-vec3 normalized(const vec3& v) {
-	return v / norm(v);
-}
-
-vec4 normalized(const vec4& v) {
-	return v / norm(v);
-}
-
-vec3 cross(const vec3& v1, const vec3& v2)
-{
-	return vec3(
-		v1.y * v2.z - v1.z * v2.y,
-		v1.z * v2.x - v1.x * v2.z,
-		v1.x * v2.y - v1.y * v2.x
-	);
-}
+float norm(const vec3& v);
+float norm(const vec4& v);
+vec3 normalized(const vec3& v);
+vec4 normalized(const vec4& v);
+vec3 cross(const vec3& v1, const vec3& v2);

@@ -1,13 +1,18 @@
 #pragma once
 #include "Mat.h"
 
-class Camera
+class CCamera
 {
 public:
-	mat3 transform;
-	mat3 projection;
+	mat4 transform;
+	mat4 projection;
+	vec4 position;
+	float top, bottom, left, right;
+	float _near, _far;
+	bool is_ortho;
 
-	Camera();
-	~Camera();
+	CCamera();
+	void set_orthographic();
+	bool is_orthographic();
 };
 

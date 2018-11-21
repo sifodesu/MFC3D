@@ -60,6 +60,12 @@
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files\hw_files</Filter>
     </ClCompile>
+    <ClCompile Include="Vec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGWorkView.h">
@@ -181,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="StdAfx.h">
       <Filter>Header Files\hw_files</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

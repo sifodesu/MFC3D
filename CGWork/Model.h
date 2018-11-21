@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "StdAfx.h"
 #include "Polygon.h"
 #include "Mat.h"
 
@@ -9,11 +10,14 @@ class CModel
 {
 public:
 	vector<CPolygon> polygons;
-	mat3 transform;
-	mat3 position;
+	vector<vec3> bounding_box;
+	mat4 model_transform;
+	mat4 view_transform;
+	mat4 position;
+	COLORREF color;
 
-	CModel();
-	void reset();
+	CModel(COLORREF color = RGB(255, 255, 255));
+	void set_bounding_box();
 	void add_polygon(const CPolygon& polygon);
 };
 

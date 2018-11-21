@@ -15,13 +15,47 @@
 
 
 #include "Light.h"
-#include "Model.h"
 #include "Camera.h"
-#include "Mat.h"
-#include "vector"
+#include "Model.h"
 
 class CCGWorkView : public CView
 {
+public:
+	class CRenderer
+	{
+		CCGWorkView* parent;
+		CDC* context;
+		CRect screen;
+		
+		COLORREF background_color;
+		COLORREF bounding_box_color;
+
+		void draw_line(const vec2& v1, const vec2& v2, COLORREF color);
+		vec2 cast(const vec2& v);
+		bool bounding_box_toggled();
+
+	public:
+		CRenderer(CCGWorkView* parent);
+		void set_context(CDC* context);
+		void draw_background();
+		void draw_model(const CCamera& camera, const CModel& model);
+	};
+
+	class CScene
+	{
+		vector<CModel> models;
+		vector<CCamera> cameras;
+		CRenderer renderer;
+		int current_camera;
+
+	public:
+		CScene(CCGWorkView* parent);
+		void add_model(const CModel& model);
+		void add_camera(const CCamera& camera);
+
+		void draw(CDC* context);
+	};
+
 protected: // create from serialization only
 	CCGWorkView();
 	DECLARE_DYNCREATE(CCGWorkView)
@@ -86,6 +120,8 @@ protected:
 	HBITMAP m_pDbBitMap;
 	CDC* m_pDbDC;
 
+	CScene scene;
+
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CCGWorkView)
@@ -119,12 +155,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	void draw_line(int x1, int y1, int x2, int y2, COLORREF color = RGB(255, 255, 255));
-	std::vector<CModel> models;
-	Camera camera;
+	/*void draw_line(int x1, int y1, int x2, int y2, COLORREF color = RGB(255, 255, 255));
 	float SetScreenScale();
 	void setBoundingBox(vec3** box, vec3* point);
-	void DrawBoundingBox(vec3* box[2], mat3& rendering_mat);
+	void DrawBoundingBox(vec3* box[2], mat3& rendering_mat);*/
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

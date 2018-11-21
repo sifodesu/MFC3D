@@ -36,7 +36,7 @@ CModel current;
 
 void reset_current_model()
 {
-	current.reset();
+	current = CModel();
 }
 
 CModel& get_current_model()
