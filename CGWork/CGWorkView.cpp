@@ -66,6 +66,8 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_NORMAL_PLANE_TOGGLE, IdNormalPlanToggle)
 	//}}AFX_MSG_MAP
 	ON_WM_TIMER()
+	ON_COMMAND(ID_POLYGON_INCLUDED, &CCGWorkView::OnPolygonIncluded)
+	ON_COMMAND(ID_VERTEX_INCLUDED, &CCGWorkView::OnVertexIncluded)
 END_MESSAGE_MAP()
 
 
@@ -718,6 +720,7 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 					normalStart = point + normalStart;
 				}
 				normalStart = normalStart / points.size();
+
 				draw_line(normalStart, points[size] + newNormal - newOrigin, model.normalsColor);
 			}
 			else {
@@ -763,4 +766,16 @@ void CCGWorkView::CScene::draw(CDC* context)
 	for (const CModel& model : models) {
 		renderer.draw_model(cameras[current_camera], model);
 	}
+}
+
+
+void CCGWorkView::OnPolygonIncluded()
+{
+	scene.renderer.toggle_poly_included();
+}
+
+
+void CCGWorkView::OnVertexIncluded()
+{
+	scene.renderer.toggle_vertices_included();
 }

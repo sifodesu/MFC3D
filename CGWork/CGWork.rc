@@ -95,10 +95,21 @@ BEGIN
         MENUITEM "&Y",                          ID_AXIS_Y
         MENUITEM "&Z",                          ID_AXIS_Z
     END
-    POPUP "&Options"
+    POPUP "Options"
     BEGIN
         MENUITEM "Perspective Control...",      ID_OPTIONS_PERSPECTIVECONTROL
         MENUITEM "Mouse Sensitivity...",        ID_OPTIONS_MOUSESENSITIVITY
+        POPUP "Normals Source"
+        BEGIN
+            POPUP "Polygon"
+            BEGIN
+                MENUITEM "Included",                    ID_POLYGON_INCLUDED, CHECKED
+            END
+            POPUP "Vertex"
+            BEGIN
+                MENUITEM "Included",                    ID_VERTEX_INCLUDED, CHECKED
+            END
+        END
     END
     POPUP "&Light"
     BEGIN
