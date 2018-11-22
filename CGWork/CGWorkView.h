@@ -17,6 +17,7 @@
 #include "Light.h"
 #include "Camera.h"
 #include "Model.h"
+#include <bitset>
 
 class CCGWorkView : public CView
 {
@@ -32,20 +33,31 @@ public:
 
 		void draw_line(const vec2& v1, const vec2& v2, COLORREF color);
 		vec2 cast(const vec2& v);
-		bool bounding_box_toggled();
+		bool bounding_box_toggled;
+		bool poly_normals_toggled;
+		bool vertices_normals_toggled;
+		bool poly_included_normals;
+		bool vertices_included_normals;
+
 
 	public:
 		CRenderer(CCGWorkView* parent);
 		void set_context(CDC* context);
 		void draw_background();
 		void draw_model(const CCamera& camera, const CModel& model);
+
+		std::bitset<3840 * 2160> bitemap;
+		void toggle_bounding_box();
+		void toggle_poly_normals();
+		void toggle_poly_included();
+		void toggle_vertices_normals();
+		void toggle_vertices_included();
 	};
 
 	class CScene
 	{
 		vector<CModel> models;
 		vector<CCamera> cameras;
-		CRenderer renderer;
 		int current_camera;
 
 	public:
@@ -54,6 +66,8 @@ public:
 		void add_camera(const CCamera& camera);
 
 		void draw(CDC* context);
+		
+		CRenderer renderer;
 	};
 
 protected: // create from serialization only
@@ -119,8 +133,10 @@ protected:
 
 	HBITMAP m_pDbBitMap;
 	CDC* m_pDbDC;
-
+	public:
 	CScene scene;
+
+
 
 // Generated message map functions
 protected:
@@ -151,6 +167,7 @@ protected:
 	afx_msg void OnLightShadingGouraud();
 	afx_msg void OnUpdateLightShadingGouraud(CCmdUI* pCmdUI);
 	afx_msg void OnLightConstants();
+	afx_msg void IdNormalPlanToggle();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

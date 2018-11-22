@@ -1,7 +1,7 @@
 #include "Model.h"
 
-CModel::CModel(COLORREF color) :
-	color(color) {}
+CModel::CModel(COLORREF color, COLORREF normalsColor) :
+	color(color), normalsColor(normalsColor) {}
 
 void CModel::set_bounding_box()
 {
@@ -40,4 +40,9 @@ void CModel::add_polygon(const CPolygon & polygon)
 {
 	polygons.push_back(polygon);
 }
+
+//void CModel::add_included_normal(const vec3 normal)
+//{
+//	included_normals.push_back(normal);
+//}
 

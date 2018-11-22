@@ -1,12 +1,18 @@
 #pragma once
 #include <vector>
 #include "Vec.h"
+#include <map>
+
 using namespace std;
 
 class CPolygon
 {
 public:
 	vector<vec3> vertices;
+
+	//map<vec3, vec3> included_normal_vertices;
+	
+	vec3 included_normal;
 	CPolygon();
 	CPolygon(const vec3& v1, const vec3& v2, const vec3& v3);
 	CPolygon(const vec3& v1, const vec3& v2, const vec3& v3, const vec3& v4);

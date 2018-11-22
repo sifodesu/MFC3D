@@ -24,6 +24,8 @@ static char THIS_FILE[] = __FILE__;
 // For Status Bar access
 #include "MainFrm.h"
 
+#include <bitset>
+
 // Use this macro to display text messages in the status bar.
 #define STATUS_BAR_TEXT(str) (((CMainFrame*)GetParentFrame())->getStatusBar().SetWindowText(str))
 
@@ -61,6 +63,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_LIGHT_SHADING_GOURAUD, OnLightShadingGouraud)
 	ON_UPDATE_COMMAND_UI(ID_LIGHT_SHADING_GOURAUD, OnUpdateLightShadingGouraud)
 	ON_COMMAND(ID_LIGHT_CONSTANTS, OnLightConstants)
+	ON_COMMAND(ID_NORMAL_PLANE_TOGGLE, IdNormalPlanToggle)
 	//}}AFX_MSG_MAP
 	ON_WM_TIMER()
 END_MESSAGE_MAP()
@@ -237,6 +240,7 @@ BOOL CCGWorkView::OnEraseBkgnd(CDC* pDC)
 // CCGWorkView drawing
 /////////////////////////////////////////////////////////////////////////////
 
+
 void CCGWorkView::OnDraw(CDC* pDC)
 {
 	static float theta = 0.0f;
@@ -249,7 +253,16 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	GetClientRect(&r);
 	CDC *pDCToUse = /*m_pDC*/m_pDbDC;
 
+	
+	/*for (int i = 0; i < r.Width(); i++)
+		for (int j = 0; j < r.Height(); j++)
+			bitemap[i][j] = 0;
+*/
+	
 	scene.draw(pDCToUse);
+	
+
+
 	//pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
 
 	//mat3 screen_scale(SetScreenScale());	////
@@ -519,6 +532,10 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	background_color(RGB(0, 0, 0)),
 	bounding_box_color(RGB(255, 255, 0)) {}
 
+void CCGWorkView::IdNormalPlanToggle() {
+	scene.renderer.toggle_poly_normals();
+}
+
 void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color)
 {
 	int x1 = (int)v1.x, x2 = (int)v2.x, y1 = (int)v1.y, y2 = (int)v2.y;
@@ -532,7 +549,13 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 	POINT p;
 	p.x = x1;
 	p.y = y1;
-	context->SetPixel(p, color);
+
+	//context->SetPixel(p, color);
+	if (!bitemap.test(p.x+p.y*3840)) {
+		bitemap.set(p.x + p.y * 3840);
+		context->SetPixelV(p, color);
+		//BitBlt(context->m_hDC, p.x, p.y, 1, 1, context->m_hDC, p.x, p.y, color);
+	}
 
 	if (dy >= 0) {
 		if (dx >= dy) {
@@ -549,7 +572,11 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				context->SetPixel(p, color);
+				if (!bitemap.test(p.x + p.y * 3840)) {
+					bitemap.set(p.x + p.y * 3840);
+					context->SetPixelV(p, color);
+				}
+
 			}
 		}
 		else {
@@ -566,7 +593,11 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				context->SetPixel(p, color);
+				if (!bitemap.test(p.x + p.y * 3840)) {
+					bitemap.set(p.x + p.y * 3840);
+					context->SetPixelV(p, color);
+				}
+
 			}
 		}
 	}
@@ -585,7 +616,10 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				context->SetPixel(p, color);
+				if (!bitemap.test(p.x + p.y * 3840)) {
+					bitemap.set(p.x + p.y * 3840);
+					context->SetPixelV(p, color);
+				}
 			}
 		}
 		else {
@@ -602,7 +636,10 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				context->SetPixel(p, color);
+				if (!bitemap.test(p.x + p.y * 3840)) {
+					bitemap.set(p.x + p.y * 3840);
+					context->SetPixelV(p, color);
+				}
 			}
 		}
 	}
@@ -616,6 +653,31 @@ vec2 CCGWorkView::CRenderer::cast(const vec2& v)
 	return v2;
 }
 
+void CCGWorkView::CRenderer::toggle_bounding_box()
+{
+	bounding_box_toggled = !bounding_box_toggled;
+}
+
+void CCGWorkView::CRenderer::toggle_poly_normals()
+{
+	poly_normals_toggled = !poly_normals_toggled;
+}
+
+void CCGWorkView::CRenderer::toggle_poly_included()
+{
+	poly_included_normals = !poly_included_normals;
+}
+
+void CCGWorkView::CRenderer::toggle_vertices_normals()
+{
+	vertices_normals_toggled = !vertices_normals_toggled;
+}
+
+void CCGWorkView::CRenderer::toggle_vertices_included()
+{
+	vertices_included_normals = !vertices_included_normals;
+}
+
 void CCGWorkView::CRenderer::set_context(CDC* context)
 {
 	this->context = context;
@@ -627,10 +689,7 @@ void CCGWorkView::CRenderer::draw_background()
 	context->FillSolidRect(&screen, background_color);
 }
 
-bool CCGWorkView::CRenderer::bounding_box_toggled()
-{
-	return true;
-}
+
 
 void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
 {
@@ -649,8 +708,25 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 			draw_line(points[i], points[i + 1], model.color);
 		}
 		draw_line(points[size], points[0], model.color);
+
+		if (poly_normals_toggled) {
+			if (poly_included_normals) {
+				vec2 newOrigin = cast(vec2(transform * vec4(0, 0, 0, 1.0f)));
+				vec2 newNormal = cast(vec2(transform * vec4(polygon.included_normal.x, polygon.included_normal.y, polygon.included_normal.z, 1.0f)));
+				vec2 normalStart;
+				for (const vec2& point : points) {
+					normalStart = point + normalStart;
+				}
+				normalStart = normalStart / points.size();
+				draw_line(normalStart, points[size] + newNormal - newOrigin, model.normalsColor);
+			}
+			else {
+
+			}
+		}
+
 	}
-	if (bounding_box_toggled()) {
+	if (bounding_box_toggled) {
 		for (const vec3& p1 : model.bounding_box) {
 			for (const vec3& p2 : model.bounding_box) {
 				vec3 res = p1 - p2;
@@ -683,6 +759,7 @@ void CCGWorkView::CScene::draw(CDC* context)
 {
 	renderer.set_context(context);
 	renderer.draw_background();
+	renderer.bitemap.reset();
 	for (const CModel& model : models) {
 		renderer.draw_model(cameras[current_camera], model);
 	}

@@ -181,13 +181,23 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 
 		/* use if(IP_HAS_PLANE_POLY(PPolygon)) to know whether a normal is defined for the polygon
 		   access the normal by the first 3 components of PPolygon->Plane */
+
 		CPolygon polygon;
+		if (IP_HAS_PLANE_POLY(PPolygon)) {
+			polygon.included_normal = vec3(PPolygon->Plane[0], PPolygon->Plane[1], PPolygon->Plane[2]);
+		}
+
+
 		PVertex = PPolygon->PVertex;
 		do {			     /* Assume at least one edge in polygon! */
 			/* code handeling all vertex/normal/texture coords */
 			vec3 vertice(PVertex->Coord[0], PVertex->Coord[1], PVertex->Coord[2]);
 
 			polygon.add_vertice(vertice);
+			//if (IP_HAS_NORMAL_VRTX(PVertex)) {
+			//	polygon.included_normal_vertices.insert(vertice, vec3(PVertex->Normal[0], PVertex->Normal[1], PVertex->Normal[2]));
+			//}
+
 			PVertex = PVertex->Pnext;
 		} while (PVertex != PPolygon->PVertex && PVertex != NULL);
 		/* Close the polygon. */
