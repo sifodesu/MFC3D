@@ -702,9 +702,11 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 	//mat4 transform = camera.projection * camera.transform * model.view_transform * model.model_transform;
 	for (const CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
+		vector<vec3> source;
 		for (const CVertice& vertice : polygon.vertices) {
 			vec3 point = vertice.point;
 			points.push_back(cast(vec2(transform * vec4(point.x, point.y, point.z, 1.0f))));
+			source.push_back(point);
 		}
 		int size = points.size() - 1;
 		for (int i = 0; i < size; i++) {
@@ -714,15 +716,17 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 
 		if (poly_normals_toggled) {
 			if (poly_included_normals) {
-				vec2 newOrigin = cast(vec2(transform * vec4(0, 0, 0, 1.0f)));
-				vec2 newNormal = cast(vec2(transform * vec4(polygon.included_normal.x, polygon.included_normal.y, polygon.included_normal.z, 1.0f)));
-				vec2 normalStart;
-				for (const vec2& point : points) {
+				//vec2 newOrigin = cast(vec2(transform * vec4(0, 0, 0, 1.0f)));
+				//vec2 newNormal = cast(vec2(transform * vec4(polygon.included_normal.x, polygon.included_normal.y, polygon.included_normal.z, 1.0f)));
+				vec3 normalStart;
+				for (const vec3& point : source) {
 					normalStart = point + normalStart;
 				}
-				normalStart = normalStart / points.size();
-
-				draw_line(normalStart, points[size] + newNormal - newOrigin, model.normalsColor);
+				normalStart = normalStart / source.size();
+				vec3 sourceNormal = normalStart + polygon.included_normal;
+				vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
+				vec2 newStart = cast(vec2(transform *  vec4(normalStart.x, normalStart.y, normalStart.z, 1.0f)));
+				draw_line(newStart, newSource, model.normalsColor);
 			}
 			else {
 

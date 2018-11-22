@@ -185,7 +185,8 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 
 		CPolygon polygon;
 		if (IP_HAS_PLANE_POLY(PPolygon)) {
-			polygon.included_normal = vec3(PPolygon->Plane[0], PPolygon->Plane[1], PPolygon->Plane[2]);
+			float scaling = 0.2;
+			polygon.included_normal = vec3(PPolygon->Plane[0]*scaling, PPolygon->Plane[1]*scaling, PPolygon->Plane[2]*scaling);
 		}
 
 
