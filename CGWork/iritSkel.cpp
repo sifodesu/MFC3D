@@ -2,6 +2,7 @@
 #include "iritSkel.h"
 #include "Model.h"
 #include "Polygon.h"
+#include "Vertice.h"
 /*****************************************************************************
 * Skeleton for an interface to a parser to read IRIT data files.			 *
 ******************************************************************************
@@ -191,12 +192,21 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 		PVertex = PPolygon->PVertex;
 		do {			     /* Assume at least one edge in polygon! */
 			/* code handeling all vertex/normal/texture coords */
-			vec3 vertice(PVertex->Coord[0], PVertex->Coord[1], PVertex->Coord[2]);
+			vec3 normal;
+			bool has_normal = false;
+			vec3 point(PVertex->Coord[0], PVertex->Coord[1], PVertex->Coord[2]);
 
-			polygon.add_vertice(vertice);
-			//if (IP_HAS_NORMAL_VRTX(PVertex)) {
-			//	polygon.included_normal_vertices.insert(vertice, vec3(PVertex->Normal[0], PVertex->Normal[1], PVertex->Normal[2]));
-			//}
+			if (IP_HAS_NORMAL_VRTX(PVertex)) {
+				normal = vec3(PVertex->Normal[0], PVertex->Normal[1], PVertex->Normal[2]);
+				has_normal = true;
+			}
+
+			if (has_normal) {
+				polygon.add_vertice(CVertice(point, normal));
+			}
+			else {
+				polygon.add_vertice(CVertice(point));
+			}
 
 			PVertex = PVertex->Pnext;
 		} while (PVertex != PPolygon->PVertex && PVertex != NULL);

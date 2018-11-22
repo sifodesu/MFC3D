@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Vec.h"
+#include "Vertice.h"
 #include <map>
 
 using namespace std;
@@ -8,14 +9,11 @@ using namespace std;
 class CPolygon
 {
 public:
-	vector<vec3> vertices;
-
-	//map<vec3, vec3> included_normal_vertices;
-	
+	vector<CVertice> vertices;	
 	vec3 included_normal;
 	CPolygon();
-	CPolygon(const vec3& v1, const vec3& v2, const vec3& v3);
-	CPolygon(const vec3& v1, const vec3& v2, const vec3& v3, const vec3& v4);
-	void add_vertice(const vec3& vertice);
+	//CPolygon(const CVertice& v1, const CVertice& v2, const CVertice& v3);
+	//CPolygon(const CVertice& v1, const CVertice& v2, const CVertice& v3, const vec3& v4);
+	void add_vertice(const CVertice& vertice);
 };
 

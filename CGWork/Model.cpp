@@ -8,7 +8,8 @@ void CModel::set_bounding_box()
 	vector<vec3> bounds(2);
 	bool first = true;
 	for (const CPolygon& polygon : polygons) {
-		for (const vec3& point : polygon.vertices) {
+		for (const CVertice& vertice : polygon.vertices) {
+			vec3 point = vertice.point;
 			if (first) {
 				bounds[0] = point;
 				bounds[1] = point;

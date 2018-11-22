@@ -702,7 +702,8 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 	//mat4 transform = camera.projection * camera.transform * model.view_transform * model.model_transform;
 	for (const CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
-		for (const vec3& point : polygon.vertices) {
+		for (const CVertice& vertice : polygon.vertices) {
+			vec3 point = vertice.point;
 			points.push_back(cast(vec2(transform * vec4(point.x, point.y, point.z, 1.0f))));
 		}
 		int size = points.size() - 1;

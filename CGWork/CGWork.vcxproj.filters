@@ -66,6 +66,9 @@
     <ClCompile Include="Mat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vertice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGWorkView.h">
@@ -189,6 +192,9 @@
       <Filter>Header Files\hw_files</Filter>
     </ClInclude>
     <ClInclude Include="Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
