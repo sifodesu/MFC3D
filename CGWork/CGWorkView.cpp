@@ -255,14 +255,14 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	GetClientRect(&r);
 	CDC *pDCToUse = /*m_pDC*/m_pDbDC;
 
-	
+
 	/*for (int i = 0; i < r.Width(); i++)
 		for (int j = 0; j < r.Height(); j++)
 			bitemap[i][j] = 0;
 */
-	
+
 	scene.draw(pDCToUse);
-	
+
 
 
 	//pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
@@ -553,11 +553,12 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 	p.y = y1;
 
 	//context->SetPixel(p, color);
-	if (!bitemap.test(p.x+p.y*3840)) {
-		bitemap.set(p.x + p.y * 3840);
-		context->SetPixelV(p, color);
-		//BitBlt(context->m_hDC, p.x, p.y, 1, 1, context->m_hDC, p.x, p.y, color);
-	}
+	if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
+		if (!bitemap.test(p.x + p.y * 3840)) {
+			bitemap.set(p.x + p.y * 3840);
+			context->SetPixelV(p, color);
+			//BitBlt(context->m_hDC, p.x, p.y, 1, 1, context->m_hDC, p.x, p.y, color);
+		}
 
 	if (dy >= 0) {
 		if (dx >= dy) {
@@ -574,10 +575,11 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				if (!bitemap.test(p.x + p.y * 3840)) {
-					bitemap.set(p.x + p.y * 3840);
-					context->SetPixelV(p, color);
-				}
+				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
+					if (!bitemap.test(p.x + p.y * 3840)) {
+						bitemap.set(p.x + p.y * 3840);
+						context->SetPixelV(p, color);
+					}
 
 			}
 		}
@@ -595,10 +597,11 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				if (!bitemap.test(p.x + p.y * 3840)) {
-					bitemap.set(p.x + p.y * 3840);
-					context->SetPixelV(p, color);
-				}
+				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
+					if (!bitemap.test(p.x + p.y * 3840)) {
+						bitemap.set(p.x + p.y * 3840);
+						context->SetPixelV(p, color);
+					}
 
 			}
 		}
@@ -618,10 +621,11 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				if (!bitemap.test(p.x + p.y * 3840)) {
-					bitemap.set(p.x + p.y * 3840);
-					context->SetPixelV(p, color);
-				}
+				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
+					if (!bitemap.test(p.x + p.y * 3840)) {
+						bitemap.set(p.x + p.y * 3840);
+						context->SetPixelV(p, color);
+					}
 			}
 		}
 		else {
@@ -638,10 +642,11 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				if (!bitemap.test(p.x + p.y * 3840)) {
-					bitemap.set(p.x + p.y * 3840);
-					context->SetPixelV(p, color);
-				}
+				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
+					if (!bitemap.test(p.x + p.y * 3840)) {
+						bitemap.set(p.x + p.y * 3840);
+						context->SetPixelV(p, color);
+					}
 			}
 		}
 	}
@@ -715,22 +720,22 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 		draw_line(points[size], points[0], model.color);
 
 		if (poly_normals_toggled) {
-			if (poly_included_normals) {
-				//vec2 newOrigin = cast(vec2(transform * vec4(0, 0, 0, 1.0f)));
-				//vec2 newNormal = cast(vec2(transform * vec4(polygon.included_normal.x, polygon.included_normal.y, polygon.included_normal.z, 1.0f)));
-				vec3 normalStart;
-				for (const vec3& point : source) {
-					normalStart = point + normalStart;
-				}
-				normalStart = normalStart / source.size();
-				vec3 sourceNormal = normalStart + polygon.included_normal;
-				vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
-				vec2 newStart = cast(vec2(transform *  vec4(normalStart.x, normalStart.y, normalStart.z, 1.0f)));
-				draw_line(newStart, newSource, model.normalsColor);
+			vec3 normalStart;
+			for (const vec3& point : source) {
+				normalStart = point + normalStart;
 			}
-			else {
+			normalStart = normalStart / source.size();
+			vec3 sourceNormal;
+			if (poly_included_normals) {
+				sourceNormal = normalStart + polygon.included_normal;
+			}
+			else if (source.size() >= 3) {
+				sourceNormal = (normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2 + normalStart);
 
 			}
+			vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
+			vec2 newStart = cast(vec2(transform *  vec4(normalStart.x, normalStart.y, normalStart.z, 1.0f)));
+			draw_line(newStart, newSource, model.normalsColor);
 		}
 
 	}
