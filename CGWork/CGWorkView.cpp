@@ -254,46 +254,7 @@ void CCGWorkView::OnDraw(CDC* pDC)
 
 	GetClientRect(&r);
 	CDC *pDCToUse = /*m_pDC*/m_pDbDC;
-
-
-	/*for (int i = 0; i < r.Width(); i++)
-		for (int j = 0; j < r.Height(); j++)
-			bitemap[i][j] = 0;
-*/
-
 	scene.draw(pDCToUse);
-
-
-
-	//pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
-
-	//mat3 screen_scale(SetScreenScale());	////
-	//vec3* boundingBox[2] = { NULL };			////
-	//for (CModel& model : models) {
-	//	mat3 rendering_mat = screen_scale * camera.projection * model.position * model.transform;
-	//	for (CPolygon& polygon : model.polygons) {
-	//		vector<vec3> points;
-	//		for (vec3& point : polygon.vertices) {
-	//			points.push_back(rendering_mat * point);
-	//			setBoundingBox(boundingBox, &point);			////
-	//		}
-	//		int size = points.size() - 1;
-	//		for (int i = 0; i < size; i++) {
-	//			draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
-	//		}
-	//		draw_line(points[size].x, points[size].y, points[0].x, points[0].y);
-
-	//	}
-	//	DrawBoundingBox(boundingBox, rendering_mat);		////
-	//	delete boundingBox[0]; delete boundingBox[1];
-	//	boundingBox[0] = boundingBox[1] = NULL;
-	//}
-	/*auto t1 = std::chrono::high_resolution_clock::now();
-	pDCToUse->SetPixel(0, 0, RGB(255, 255, 255));
-	auto t2 = std::chrono::high_resolution_clock::now();
-	std::ostringstream ss;
-	ss << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << endl;
-	OutputDebugStringA(ss.str().c_str());*/
 
 	if (pDCToUse != m_pDC)
 	{
@@ -700,7 +661,7 @@ void CCGWorkView::CRenderer::draw_background()
 
 void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
 {
-	mat4 transform = camera.projection * camera.transform * model.view_transform * model.model_transform;
+	mat4 transform = model.model_transform * model.view_transform * camera.transform * camera.projection;
 	for (const CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
 		vector<vec3> source;
@@ -727,7 +688,6 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 			}
 			else if (source.size() >= 3) {
 				sourceNormal = (normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2 + normalStart);
-
 			}
 			vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
 			vec2 newStart = cast(vec2(transform *  vec4(normalStart.x, normalStart.y, normalStart.z, 1.0f)));
