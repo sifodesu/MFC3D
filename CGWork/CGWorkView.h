@@ -18,7 +18,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include <bitset>
-
+#include <unordered_set>
 class CCGWorkView : public CView
 {
 public:
@@ -45,6 +45,8 @@ public:
 		void set_context(CDC* context);
 		void draw_background();
 		void draw_model(const CCamera& camera, const CModel& model);
+		void draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color);
+		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
 
 		std::bitset<3840 * 2160> bitemap;
 		void toggle_bounding_box();
