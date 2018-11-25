@@ -737,7 +737,17 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 			vec2 newStart = cast(vec2(transform *  vec4(normalStart.x, normalStart.y, normalStart.z, 1.0f)));
 			draw_line(newStart, newSource, model.normalsColor);
 		}
+		if (vertices_normals_toggled) {
+			if (vertices_included_normals) {
+				for (const CVertice& point : polygon.vertices) {
+					vec2 newStart = cast(vec2(transform *  vec4(point.point.x, point.point.y, point.point.z, 1.0f)));
+					vec3 sourceNormal = normalized(point.imported_normal)*0.2 + point.point;
+					vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
 
+					draw_line(newStart, newSource, model.normalsColor);
+				}
+			}
+		}
 	}
 	if (bounding_box_toggled) {
 		for (const vec3& p1 : model.bounding_box) {
