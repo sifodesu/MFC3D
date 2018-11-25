@@ -17,6 +17,7 @@
 #include "Light.h"
 #include "Camera.h"
 #include "Model.h"
+#include "Mat.h"
 #include <bitset>
 #include <unordered_set>
 class CCGWorkView : public CView

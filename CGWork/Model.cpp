@@ -42,8 +42,12 @@ void CModel::add_polygon(const CPolygon & polygon)
 	polygons.push_back(polygon);
 }
 
-//void CModel::add_included_normal(const vec3 normal)
-//{
-//	included_normals.push_back(normal);
-//}
+void CModel::transform_model(const mat4 & m)
+{
+	model_transform = m * model_transform;
+}
 
+void CModel::transform_view(const mat4 & m)
+{
+	view_transform = m * model_transform;
+}
