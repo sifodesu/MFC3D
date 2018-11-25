@@ -700,11 +700,7 @@ void CCGWorkView::CRenderer::draw_background()
 
 void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
 {
-	mat4 transform = model.model_transform;
-	transform = model.view_transform * transform;
-	transform = camera.transform * transform;
-	transform = camera.projection * transform;
-	//mat4 transform = camera.projection * camera.transform * model.view_transform * model.model_transform;
+	mat4 transform = camera.projection * camera.transform * model.view_transform * model.model_transform;
 	for (const CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
 		vector<vec3> source;
@@ -785,6 +781,9 @@ void CCGWorkView::CScene::draw(CDC* context)
 	renderer.bitemap.reset();
 	for (const CModel& model : models) {
 		renderer.draw_model(cameras[current_camera], model);
+	}
+	for (CModel& model : models) {
+		model.transform_model(rotation_Y(5.0f));
 	}
 }
 
