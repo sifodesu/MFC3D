@@ -721,11 +721,7 @@ bool CCGWorkView::CRenderer::check_if_drawn(const vec2& startPoint, const vec2& 
 }
 void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
 {
-	mat4 transform = model.model_transform;
-	transform = model.view_transform * transform;
-	transform = camera.transform * transform;
-	transform = camera.projection * transform;
-	//mat4 transform = camera.projection * camera.transform * model.view_transform * model.model_transform;
+	mat4 transform = model.model_transform * model.view_transform * camera.transform * camera.projection;
 
 	std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap;
 	std::unordered_set<edge> edgesDone;
