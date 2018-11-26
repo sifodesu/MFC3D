@@ -45,16 +45,17 @@ public:
 		CRenderer(CCGWorkView* parent);
 		void set_context(CDC* context);
 		void draw_background();
-		void draw_model(const CCamera& camera, const CModel& model);
+		void draw_model(const CCamera& camera, CModel& model);
 		void draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color);
 		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
 
 		std::bitset<3840 * 2160> bitemap;
+		int mouse_x, mouse_y;
+		bool select_highlighted_pol;
 	};
 
 	class CScene
 	{
-		vector<CModel> models;
 		vector<CCamera> cameras;
 		int current_camera;
 
@@ -67,6 +68,7 @@ public:
 		void draw(CDC* context);
 		
 		CRenderer renderer;
+		vector<CModel> models;
 	};
 
 protected: // create from serialization only

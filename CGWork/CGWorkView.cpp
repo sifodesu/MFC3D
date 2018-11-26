@@ -550,6 +550,7 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_vertice_normals = false;
 	draw_polygon_included_normals = false;
 	draw_vertice_included_normals = false;
+	select_highlighted_pol = false;
 }
 
 void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint)
@@ -721,7 +722,7 @@ bool pointIsInside(vector<vec2> points, vec2 dot) {
 	return res;
 }
 
-void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
+void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 {
 	mat4 transform = model.model_transform * model.view_transform * camera.transform * camera.projection;
 
@@ -733,9 +734,8 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 	g.x -= screen.TopLeft().x;
 	g.y -= screen.TopLeft().y;
 	context->SetPixelV(g, model.color);
-	bool flagMousePoly = false;
 
-	for (const CPolygon& polygon : model.polygons) {
+	for (CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
 		vector<vec3> source;
 
@@ -745,22 +745,22 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 			source.push_back(point);
 		}
 		int size = points.size() - 1;
-
-
-		COLORREF ccc = model.color;
-		bool forcePrint = false;
-	
-		if (pointIsInside(points, vec2(g.x, g.y))) {
-			ccc = highlight_polygon;
-			forcePrint = true;
-			flagMousePoly++;
+		
+		if (select_highlighted_pol) {
+			if (pointIsInside(points, vec2(g.x, g.y))) {
+				polygon.highlight = true;
+			}
+			else {
+				polygon.highlight = false;
+			}
 		}
+		
 
 		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], ccc, forcePrint);
+			draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : model.color, polygon.highlight);
 		}
 
-		draw_line(points[size], points[0], ccc, forcePrint);
+		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : model.color, polygon.highlight);
 
 
 		vec3 sourceNormal;
@@ -817,6 +817,7 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 			}
 		}
 	}
+	select_highlighted_pol = false;
 }
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
@@ -882,7 +883,7 @@ void CCGWorkView::CScene::draw(CDC* context)
 	renderer.set_context(context);
 	renderer.draw_background();
 	renderer.bitemap.reset();
-	for (const CModel& model : models) {
+	for (CModel& model : models) {
 		renderer.draw_model(cameras[current_camera], model);
 	}
 	//for (CModel& model : models)
@@ -900,6 +901,9 @@ void CCGWorkView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	clicking = false;
 	CView::OnLButtonUp(nFlags, point);
+	scene.renderer.mouse_x = point.x;
+	scene.renderer.mouse_y = point.y;
+	scene.renderer.select_highlighted_pol = true;
 }
 
 void CCGWorkView::OnPolygonIncluded()

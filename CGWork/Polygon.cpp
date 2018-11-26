@@ -1,6 +1,6 @@
 #include "Polygon.h"
 
-CPolygon::CPolygon() {}
+CPolygon::CPolygon() : highlight(false) {}
 
 //CPolygon::CPolygon(const CVertice & v1, const CVertice & v2, const CVertice & v3)
 //{
