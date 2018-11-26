@@ -23,7 +23,7 @@ public:
 	COLORREF bbox_color;
 
 	CModel(COLORREF color = WHITE, COLORREF normalsColor = PINK, COLORREF bbox_color = RED);
-	void set_bounding_box();
+	void setup_model();
 	void add_polygon(const CPolygon& polygon);
 
 	void transform_model(const mat4& m);

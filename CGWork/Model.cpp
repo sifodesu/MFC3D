@@ -3,10 +3,12 @@
 CModel::CModel(COLORREF color, COLORREF normalsColor, COLORREF bbox_color) :
 	color(color), normalsColor(normalsColor), bbox_color(bbox_color) {}
 
-void CModel::set_bounding_box()
+void CModel::setup_model()
 {
 	vector<vec3> bounds(2);
 	bool first = true;
+
+	// Create bounding box
 	for (const CPolygon& polygon : polygons) {
 		for (const CVertice& vertice : polygon.vertices) {
 			vec3 point = vertice.point;
@@ -25,8 +27,6 @@ void CModel::set_bounding_box()
 			}
 		}
 	}
-
-	// Define 8 points of the box
 	bounding_box.clear();
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 2; j++) {
@@ -35,6 +35,10 @@ void CModel::set_bounding_box()
 			}
 		}
 	}
+
+	// Translate object to center of the screen
+	vec3 origin = (bounds[0] + bounds[1]) / 2;
+	view_transform = translation(-origin.x, -origin.y, -origin.z) * view_transform;
 }
 
 void CModel::add_polygon(const CPolygon & polygon)

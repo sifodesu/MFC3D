@@ -284,38 +284,6 @@ void CCGWorkView::OnDraw(CDC* pDC)
 
 	scene.draw(pDCToUse);
 
-
-
-	//pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
-
-	//mat3 screen_scale(SetScreenScale());	////
-	//vec3* boundingBox[2] = { NULL };			////
-	//for (CModel& model : models) {
-	//	mat3 rendering_mat = screen_scale * camera.projection * model.position * model.transform;
-	//	for (CPolygon& polygon : model.polygons) {
-	//		vector<vec3> points;
-	//		for (vec3& point : polygon.vertices) {
-	//			points.push_back(rendering_mat * point);
-	//			setBoundingBox(boundingBox, &point);			////
-	//		}
-	//		int size = points.size() - 1;
-	//		for (int i = 0; i < size; i++) {
-	//			draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
-	//		}
-	//		draw_line(points[size].x, points[size].y, points[0].x, points[0].y);
-
-	//	}
-	//	DrawBoundingBox(boundingBox, rendering_mat);		////
-	//	delete boundingBox[0]; delete boundingBox[1];
-	//	boundingBox[0] = boundingBox[1] = NULL;
-	//}
-	/*auto t1 = std::chrono::high_resolution_clock::now();
-	pDCToUse->SetPixel(0, 0, RGB(255, 255, 255));
-	auto t2 = std::chrono::high_resolution_clock::now();
-	std::ostringstream ss;
-	ss << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << endl;
-	OutputDebugStringA(ss.str().c_str());*/
-
 	if (pDCToUse != m_pDC)
 	{
 		m_pDC->BitBlt(r.left, r.top, r.Width(), r.Height(), pDCToUse, r.left, r.top, SRCCOPY);
@@ -364,7 +332,7 @@ void CCGWorkView::OnFileLoad()
 		PngWrapper p;
 		CGSkelProcessIritDataFiles(m_strItdFileName, 1);
 		CModel model = get_current_model();
-		model.set_bounding_box();
+		model.setup_model();
 		scene.add_model(model);
 		// Open the file and read it.
 		// Your code here...
