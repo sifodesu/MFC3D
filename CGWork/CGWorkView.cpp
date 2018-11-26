@@ -749,12 +749,12 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 
 		COLORREF ccc = model.color;
 		bool forcePrint = false;
-		if (!flagMousePoly)
-			if (pointIsInside(points, vec2(g.x, g.y))) {
-				ccc = highlight_polygon;
-				forcePrint = true;
-				flagMousePoly++;
-			}
+	
+		if (pointIsInside(points, vec2(g.x, g.y))) {
+			ccc = highlight_polygon;
+			forcePrint = true;
+			flagMousePoly++;
+		}
 
 		for (int i = 0; i < size; i++) {
 			draw_line(points[i], points[i + 1], ccc, forcePrint);
