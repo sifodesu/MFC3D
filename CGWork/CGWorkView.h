@@ -31,8 +31,9 @@ public:
 		
 		COLORREF background_color;
 		COLORREF bounding_box_color;
+		COLORREF highlight_polygon;
 
-		void draw_line(const vec2& v1, const vec2& v2, COLORREF color);
+		void draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint = false);
 		vec2 cast(const vec2& v);
 		bool bounding_box_toggled;
 		bool poly_normals_toggled;
