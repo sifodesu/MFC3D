@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 
 // For Status Bar access
 #include "MainFrm.h"
-
+#include <sstream>
 #include <bitset>
 
 // Use this macro to display text messages in the status bar.
@@ -68,6 +68,8 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_WM_TIMER()
 	ON_COMMAND(ID_POLYGON_INCLUDED, &CCGWorkView::OnPolygonIncluded)
 	ON_COMMAND(ID_VERTEX_INCLUDED, &CCGWorkView::OnVertexIncluded)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
 
@@ -90,6 +92,8 @@ CCGWorkView::CCGWorkView() :
 	m_nAction = ID_ACTION_ROTATE;
 	m_nView = ID_VIEW_ORTHOGRAPHIC;
 	m_bIsPerspective = false;
+	transform_context = TRANSFORM_MODEL;
+	clicking = false;
 
 	m_nLightShading = ID_LIGHT_SHADING_FLAT;
 
@@ -242,7 +246,6 @@ BOOL CCGWorkView::OnEraseBkgnd(CDC* pDC)
 // CCGWorkView drawing
 /////////////////////////////////////////////////////////////////////////////
 
-
 void CCGWorkView::OnDraw(CDC* pDC)
 {
 	static float theta = 0.0f;
@@ -251,9 +254,15 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 	CRect r;
-
 	GetClientRect(&r);
 	CDC *pDCToUse = /*m_pDC*/m_pDbDC;
+
+	POINT mouse;
+	if (GetCursorPos(&mouse) && clicking) {
+		scene.update(this, mouse.x - mouse_pos_x);
+	}
+	mouse_pos_x = mouse.x;
+
 	scene.draw(pDCToUse);
 
 	if (pDCToUse != m_pDC)
@@ -513,12 +522,10 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 	p.x = x1;
 	p.y = y1;
 
-	//context->SetPixel(p, color);
 	if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
 		if (!bitemap.test(p.x + p.y * 3840)) {
 			bitemap.set(p.x + p.y * 3840);
 			context->SetPixelV(p, color);
-			//BitBlt(context->m_hDC, p.x, p.y, 1, 1, context->m_hDC, p.x, p.y, color);
 		}
 
 	if (dy >= 0) {
@@ -734,6 +741,51 @@ void CCGWorkView::CScene::add_camera(const CCamera & camera)
 {
 }
 
+void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
+{
+	if (mouse_dx == 0) {
+		return;
+	}
+	std::ostringstream ss;
+	ss << mouse_dx << endl;
+	OutputDebugStringA(ss.str().c_str());
+	mat4 transformation;
+	float x = 0.0f, y = 0.0f, z = 0.0f;
+	switch (app->m_nAxis) {
+	case ID_AXIS_X:
+		x = mouse_dx * 0.1f;
+		break;
+	case ID_AXIS_Y:
+		y = mouse_dx * 0.1f;
+		break;
+	case ID_AXIS_Z:
+		z = mouse_dx * 0.1f;
+		break;
+	}
+	switch (app->m_nAction) {
+	case ID_ACTION_TRANSLATE:
+		transformation = translation(x * 0.2f, y * 0.2f, z * 0.2f);
+		break;
+	case ID_ACTION_ROTATE:
+		transformation = rotation(x, y, z);
+		break;
+	case ID_ACTION_SCALE:
+		transformation = scaling(x + 1.0f, y + 1.0f, z + 1.0f);
+		break;
+	}
+
+	for (CModel& model : models) {
+		switch (app->transform_context) {
+		case TRANSFORM_MODEL: 
+			model.transform_model(transformation);
+			break;
+		case TRANSFORM_VIEW: 
+			model.transform_view(transformation);
+			break;
+		}
+	}
+}
+
 void CCGWorkView::CScene::draw(CDC* context)
 {
 	renderer.set_context(context);
@@ -741,9 +793,6 @@ void CCGWorkView::CScene::draw(CDC* context)
 	renderer.bitemap.reset();
 	for (const CModel& model : models) {
 		renderer.draw_model(cameras[current_camera], model);
-	}
-	for (CModel& model : models) {
-		model.transform_model(rotation_Y(5.0f));
 	}
 }
 
@@ -757,4 +806,18 @@ void CCGWorkView::OnPolygonIncluded()
 void CCGWorkView::OnVertexIncluded()
 {
 	scene.renderer.toggle_vertices_included();
+}
+
+
+void CCGWorkView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	clicking = true;
+	CView::OnLButtonDown(nFlags, point);
+}
+
+
+void CCGWorkView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	clicking = false;
+	CView::OnLButtonUp(nFlags, point);
 }

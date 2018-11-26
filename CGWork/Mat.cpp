@@ -30,6 +30,11 @@ mat4 rotation_Z(float angle) {
 	);
 }
 
+mat4 rotation(float x, float y, float z)
+{
+	return rotation_X(x) * rotation_Y(y) * rotation_Z(z);
+}
+
 mat4 translation(float x, float y, float z) {
 	return mat4({
 		{1.0f, 0.0f, 0.0f, 0.0f},

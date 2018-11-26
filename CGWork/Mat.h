@@ -267,5 +267,6 @@ public:
 mat4 rotation_X(float angle);
 mat4 rotation_Y(float angle);
 mat4 rotation_Z(float angle);
+mat4 rotation(float x, float y, float z);
 mat4 translation(float x, float y, float z);
 mat4 scaling(float x, float y, float z);

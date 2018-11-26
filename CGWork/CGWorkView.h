@@ -66,6 +66,7 @@ public:
 		void add_model(const CModel& model);
 		void add_camera(const CCamera& camera);
 
+		void update(CCGWorkView* app, int mouse_dx);
 		void draw(CDC* context);
 		
 		CRenderer renderer;
@@ -81,13 +82,18 @@ public:
 
 // Operations
 public:
+	int mouse_pos_x;
+	bool clicking;
 
-private:
 	int m_nAxis;				// Axis of Action, X Y or Z
 	int m_nAction;				// Rotate, Translate, Scale
 	int m_nView;				// Orthographic, perspective
 	bool m_bIsPerspective;			// is the view perspective
-	
+
+	enum { TRANSFORM_MODEL, TRANSFORM_VIEW };
+	int transform_context;
+
+private:
 	CString m_strItdFileName;		// file name of IRIT data
 
 	int m_nLightShading;			// shading: Flat, Gouraud.
@@ -173,12 +179,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	/*void draw_line(int x1, int y1, int x2, int y2, COLORREF color = RGB(255, 255, 255));
-	float SetScreenScale();
-	void setBoundingBox(vec3** box, vec3* point);
-	void DrawBoundingBox(vec3* box[2], mat3& rendering_mat);*/
 	afx_msg void OnPolygonIncluded();
 	afx_msg void OnVertexIncluded();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

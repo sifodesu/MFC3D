@@ -61,13 +61,14 @@
 #define ID_POLYGON_CALCULATED           32808
 #define ID_VERTEX_INCLUDED              32809
 #define ID_VERTEX_CALCULATED            32810
+#define ID_BUTTON32811                  32811
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
-#define _APS_NEXT_COMMAND_VALUE         32811
+#define _APS_NEXT_COMMAND_VALUE         32812
 #define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
