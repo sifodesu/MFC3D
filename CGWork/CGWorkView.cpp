@@ -542,7 +542,8 @@ void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
 
 CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	parent(parent), context(nullptr),
-	background_color(BLACK)
+	background_color(BLACK),
+	highlight_polygon(GREEN)
 {
 	draw_bounding_box = false;
 	draw_polygon_normals = false;
@@ -551,7 +552,7 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_vertice_included_normals = false;
 }
 
-void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color)
+void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint)
 {
 	int x1 = (int)v1.x, x2 = (int)v2.x, y1 = (int)v1.y, y2 = (int)v2.y;
 	if (x2 - x1 < 0) {
@@ -566,7 +567,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 	p.y = y1;
 
 	if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-		if (!bitemap.test(p.x + p.y * 3840)) {
+		if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 			bitemap.set(p.x + p.y * 3840);
 			context->SetPixelV(p, color);
 		}
@@ -587,7 +588,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.y++;
 				}
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840)) {
+					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
 						context->SetPixelV(p, color);
 					}
@@ -609,7 +610,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.y++;
 				}
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840)) {
+					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
 						context->SetPixelV(p, color);
 					}
@@ -633,7 +634,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.y--;
 				}
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840)) {
+					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
 						context->SetPixelV(p, color);
 					}
@@ -654,7 +655,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.y--;
 				}
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840)) {
+					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
 						context->SetPixelV(p, color);
 					}
@@ -683,7 +684,7 @@ void CCGWorkView::CRenderer::draw_background()
 }
 
 void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color) {
-	vec3 sourceNormal = startPoint + normalized(givenNormal)*0.2;
+	vec3 sourceNormal = startPoint + normalized(givenNormal)*0.2f;
 
 	vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
 	vec2 newStart = cast(vec2(transform *  vec4(startPoint.x, startPoint.y, startPoint.z, 1.0f)));
@@ -702,6 +703,24 @@ bool CCGWorkView::CRenderer::check_if_drawn(const vec2& startPoint, const vec2& 
 	}
 	return true;
 }
+
+
+bool pointIsInside(vector<vec2> points, vec2 dot) {
+
+	int i, j = points.size() - 1;
+	bool res = false;
+
+	for (i = 0; i < points.size(); j = i, i++) {
+		if (points[i].y < dot.y && points[j].y >= dot.y || points[j].y < dot.y && points[i].y >= dot.y) {
+			if (points[i].x + (dot.y - points[i].y) / (points[j].y - points[i].y)*(points[j].x - points[i].x) < dot.x) {
+				res = !res;
+			}
+		}
+	}
+
+	return res;
+}
+
 void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
 {
 	mat4 transform = model.model_transform * model.view_transform * camera.transform * camera.projection;
@@ -709,38 +728,56 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 	std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap;
 	std::unordered_set<edge> edgesDone;
 
+	POINT g;
+	GetCursorPos(&g);
+	g.x -= screen.TopLeft().x;
+	g.y -= screen.TopLeft().y;
+	context->SetPixelV(g, model.color);
+	bool flagMousePoly = false;
+
 	for (const CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
 		vector<vec3> source;
+
 		for (const CVertice& vertice : polygon.vertices) {
 			vec3 point = vertice.point;
 			points.push_back(cast(vec2(transform * vec4(point.x, point.y, point.z, 1.0f))));
 			source.push_back(point);
 		}
 		int size = points.size() - 1;
+
+
+		COLORREF ccc = model.color;
+		bool forcePrint = false;
+		if (!flagMousePoly)
+			if (pointIsInside(points, vec2(g.x, g.y))) {
+				ccc = highlight_polygon;
+				forcePrint = true;
+				flagMousePoly++;
+			}
+
 		for (int i = 0; i < size; i++) {
-			if (!check_if_drawn(points[i], points[i + 1], edgesDone))
-				draw_line(points[i], points[i + 1], model.color);
+			draw_line(points[i], points[i + 1], ccc, forcePrint);
 		}
-		if (!check_if_drawn(points[size], points[0], edgesDone))
-			draw_line(points[size], points[0], model.color);
+
+		draw_line(points[size], points[0], ccc, forcePrint);
+
 
 		vec3 sourceNormal;
 		if (draw_polygon_included_normals) {
 			sourceNormal = polygon.included_normal;
 		}
 		else if (source.size() >= 3) {
-			sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2;
+			sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2f;
 		}
 		if (draw_polygon_normals) {
 			vec3 normalStart;
 			for (const vec3& point : source) {
 				normalStart = point + normalStart;
 			}
-			normalStart = normalStart / source.size();
+			normalStart = normalStart / (float)source.size();
 
-			if (!check_if_drawn(normalStart, sourceNormal, edgesDone))
-				draw_normal(normalStart, sourceNormal, transform, model.normalsColor);
+			draw_normal(normalStart, sourceNormal, transform, model.normalsColor);
 
 		}
 
@@ -751,8 +788,7 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 
 		if (draw_vertice_normals && draw_vertice_included_normals) {
 			for (const CVertice& point : polygon.vertices) {
-				if (!check_if_drawn(point.point, point.imported_normal, edgesDone))
-					draw_normal(point.point, point.imported_normal, transform, model.normalsColor);
+				draw_normal(point.point, point.imported_normal, transform, model.normalsColor);
 			}
 		}
 	}
@@ -762,10 +798,9 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 			for (const vec3& point : i->second) {
 				normalStart = point + normalStart;
 			}
-			normalStart = normalStart / i->second.size();
+			normalStart = normalStart / (float)i->second.size();
 
-			if (!check_if_drawn(i->first, normalStart, edgesDone))
-				draw_normal(i->first, normalStart, transform, model.normalsColor);
+			draw_normal(i->first, normalStart, transform, model.normalsColor);
 		}
 	}
 
@@ -850,6 +885,8 @@ void CCGWorkView::CScene::draw(CDC* context)
 	for (const CModel& model : models) {
 		renderer.draw_model(cameras[current_camera], model);
 	}
+	//for (CModel& model : models)
+	//	model.model_transform = rotation_Y(2.0f) * model.model_transform;
 }
 
 

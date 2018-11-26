@@ -30,8 +30,9 @@ public:
 		CRect screen;
 		
 		COLORREF background_color;
+		COLORREF highlight_polygon;
 
-		void draw_line(const vec2& v1, const vec2& v2, COLORREF color);
+		void draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint = false);
 		vec2 cast(const vec2& v);
 
 	public:

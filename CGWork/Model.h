@@ -11,6 +11,7 @@ class CModel
 {
 public:
 	vector<CPolygon> polygons;
+	
 	vector<vec3> bounding_box;
 
 	mat4 model_transform;
