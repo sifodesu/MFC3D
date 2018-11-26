@@ -23,7 +23,10 @@ static char THIS_FILE[] = __FILE__;
 
 // For Status Bar access
 #include "MainFrm.h"
-#include <sstream>
+
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <bitset>
 
 // Use this macro to display text messages in the status bar.
@@ -264,6 +267,38 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	mouse_pos_x = mouse.x;
 
 	scene.draw(pDCToUse);
+
+
+
+	//pDCToUse->FillSolidRect(&r, RGB(0, 0, 0));
+
+	//mat3 screen_scale(SetScreenScale());	////
+	//vec3* boundingBox[2] = { NULL };			////
+	//for (CModel& model : models) {
+	//	mat3 rendering_mat = screen_scale * camera.projection * model.position * model.transform;
+	//	for (CPolygon& polygon : model.polygons) {
+	//		vector<vec3> points;
+	//		for (vec3& point : polygon.vertices) {
+	//			points.push_back(rendering_mat * point);
+	//			setBoundingBox(boundingBox, &point);			////
+	//		}
+	//		int size = points.size() - 1;
+	//		for (int i = 0; i < size; i++) {
+	//			draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+	//		}
+	//		draw_line(points[size].x, points[size].y, points[0].x, points[0].y);
+
+	//	}
+	//	DrawBoundingBox(boundingBox, rendering_mat);		////
+	//	delete boundingBox[0]; delete boundingBox[1];
+	//	boundingBox[0] = boundingBox[1] = NULL;
+	//}
+	/*auto t1 = std::chrono::high_resolution_clock::now();
+	pDCToUse->SetPixel(0, 0, RGB(255, 255, 255));
+	auto t2 = std::chrono::high_resolution_clock::now();
+	std::ostringstream ss;
+	ss << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << endl;
+	OutputDebugStringA(ss.str().c_str());*/
 
 	if (pDCToUse != m_pDC)
 	{
@@ -664,11 +699,33 @@ void CCGWorkView::CRenderer::draw_background()
 	context->FillSolidRect(&screen, background_color);
 }
 
+void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color) {
+	vec3 sourceNormal = startPoint + normalized(givenNormal)*0.2;
 
+	vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
+	vec2 newStart = cast(vec2(transform *  vec4(startPoint.x, startPoint.y, startPoint.z, 1.0f)));
 
+	//	if(!check_if_drawn)
+	draw_line(newStart, newSource, color);
+
+}
+
+bool CCGWorkView::CRenderer::check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set) {
+	return false;
+	edge tempEdge(startPoint, endPoint);
+	if (current_set.find(tempEdge) == current_set.end()) {
+		current_set.insert(tempEdge);
+		return false;
+	}
+	return true;
+}
 void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & model)
 {
 	mat4 transform = model.model_transform * model.view_transform * camera.transform * camera.projection;
+
+	std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap;
+	std::unordered_set<edge> edgesDone;
+
 	for (const CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
 		vector<vec3> source;
@@ -679,39 +736,57 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 		}
 		int size = points.size() - 1;
 		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], model.color);
+			if (!check_if_drawn(points[i], points[i + 1], edgesDone))
+				draw_line(points[i], points[i + 1], model.color);
 		}
-		draw_line(points[size], points[0], model.color);
+		if (!check_if_drawn(points[size], points[0], edgesDone))
+			draw_line(points[size], points[0], model.color);
 
+		vec3 sourceNormal;
+		if (poly_included_normals) {
+			sourceNormal = polygon.included_normal;
+		}
+		else if (source.size() >= 3) {
+			sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2;
+		}
 		if (poly_normals_toggled) {
 			vec3 normalStart;
 			for (const vec3& point : source) {
 				normalStart = point + normalStart;
 			}
 			normalStart = normalStart / source.size();
-			vec3 sourceNormal;
-			if (poly_included_normals) {
-				sourceNormal = normalStart + polygon.included_normal;
-			}
-			else if (source.size() >= 3) {
-				sourceNormal = (normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2 + normalStart);
-			}
-			vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
-			vec2 newStart = cast(vec2(transform *  vec4(normalStart.x, normalStart.y, normalStart.z, 1.0f)));
-			draw_line(newStart, newSource, model.normalsColor);
-		}
-		if (vertices_normals_toggled) {
-			if (vertices_included_normals) {
-				for (const CVertice& point : polygon.vertices) {
-					vec2 newStart = cast(vec2(transform *  vec4(point.point.x, point.point.y, point.point.z, 1.0f)));
-					vec3 sourceNormal = normalized(point.imported_normal)*0.2 + point.point;
-					vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
 
-					draw_line(newStart, newSource, model.normalsColor);
-				}
+			if (!check_if_drawn(normalStart, sourceNormal, edgesDone))
+				draw_normal(normalStart, sourceNormal, transform, model.normalsColor);
+
+		}
+
+		if (vertices_normals_toggled && !vertices_included_normals)
+			for (const vec3& point : source) {
+				verticesMap[point].insert(sourceNormal);
+			}
+
+		if (vertices_normals_toggled && vertices_included_normals) {
+			for (const CVertice& point : polygon.vertices) {
+				if (!check_if_drawn(point.point, point.imported_normal, edgesDone))
+					draw_normal(point.point, point.imported_normal, transform, model.normalsColor);
 			}
 		}
 	}
+	if (vertices_normals_toggled && !vertices_included_normals) {
+		for (auto i = verticesMap.begin(); i != verticesMap.end(); i++) {
+			vec3 normalStart;
+			for (const vec3& point : i->second) {
+				normalStart = point + normalStart;
+			}
+			normalStart = normalStart / i->second.size();
+
+			if (!check_if_drawn(i->first, normalStart, edgesDone))
+				draw_normal(i->first, normalStart, transform, model.normalsColor);
+		}
+	}
+
+
 	if (bounding_box_toggled) {
 		for (const vec3& p1 : model.bounding_box) {
 			for (const vec3& p2 : model.bounding_box) {
