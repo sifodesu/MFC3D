@@ -722,6 +722,54 @@ bool pointIsInside(vector<vec2> points, vec2 dot) {
 	return res;
 }
 
+void CCGWorkView::CRenderer::draw_bounding_box_if_needed(CModel& model, mat4& transform) {
+	if (draw_bounding_box) {
+		for (const vec3& p1 : model.bounding_box) {
+			for (const vec3& p2 : model.bounding_box) {
+				vec3 res = p1 - p2;
+				if ((!res.x && !res.y) || (!res.y && !res.z) || (!res.x && !res.z)) {
+					vec2 a = cast(vec2(transform * vec4(p1.x, p1.y, p1.z, 1.0f)));
+					vec2 b = cast(vec2(transform * vec4(p2.x, p2.y, p2.z, 1.0f)));
+					draw_line(a, b, model.bbox_color);
+				}
+			}
+		}
+	}
+}
+
+void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
+		mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap) {
+	vec3 sourceNormal;
+	
+	if (draw_polygon_included_normals) {
+		sourceNormal = polygon.included_normal;
+	}
+	else if (source.size() >= 3) {
+		sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2f;
+	}
+	if (draw_polygon_normals) {
+		vec3 normalStart;
+		for (const vec3& point : source) {
+			normalStart = point + normalStart;
+		}
+		normalStart = normalStart / (float)source.size();
+
+		draw_normal(normalStart, sourceNormal, transform, model.normalsColor);
+	}
+
+	if (draw_vertice_normals && !draw_vertice_included_normals) {
+		for (const vec3& point : source) {
+			verticesMap[point].insert(sourceNormal);
+		}
+	}
+
+	if (draw_vertice_normals && draw_vertice_included_normals) {
+		for (const CVertice& point : polygon.vertices) {
+			draw_normal(point.point, point.imported_normal, transform, model.normalsColor);
+		}
+	}
+}
+
 void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 {
 	mat4 transform = model.model_transform * model.view_transform * camera.transform * camera.projection;
@@ -729,11 +777,6 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 	std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap;
 	std::unordered_set<edge> edgesDone;
 
-	POINT g;
-	GetCursorPos(&g);
-	g.x -= screen.TopLeft().x;
-	g.y -= screen.TopLeft().y;
-	context->SetPixelV(g, model.color);
 
 	for (CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
@@ -745,16 +788,15 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 			source.push_back(point);
 		}
 		int size = points.size() - 1;
-		
+
 		if (select_highlighted_pol) {
-			if (pointIsInside(points, vec2(g.x, g.y))) {
+			if (pointIsInside(points, vec2(mouse_x, mouse_y))) {
 				polygon.highlight = true;
 			}
 			else {
 				polygon.highlight = false;
 			}
 		}
-		
 
 		for (int i = 0; i < size; i++) {
 			draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : model.color, polygon.highlight);
@@ -762,35 +804,8 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 
 		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : model.color, polygon.highlight);
 
-
-		vec3 sourceNormal;
-		if (draw_polygon_included_normals) {
-			sourceNormal = polygon.included_normal;
-		}
-		else if (source.size() >= 3) {
-			sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2f;
-		}
-		if (draw_polygon_normals) {
-			vec3 normalStart;
-			for (const vec3& point : source) {
-				normalStart = point + normalStart;
-			}
-			normalStart = normalStart / (float)source.size();
-
-			draw_normal(normalStart, sourceNormal, transform, model.normalsColor);
-
-		}
-
-		if (draw_vertice_normals && !draw_vertice_included_normals)
-			for (const vec3& point : source) {
-				verticesMap[point].insert(sourceNormal);
-			}
-
-		if (draw_vertice_normals && draw_vertice_included_normals) {
-			for (const CVertice& point : polygon.vertices) {
-				draw_normal(point.point, point.imported_normal, transform, model.normalsColor);
-			}
-		}
+		draw_normals(model, polygon, transform, source, points, verticesMap);
+		
 	}
 	if (draw_vertice_normals && !draw_vertice_included_normals) {
 		for (auto i = verticesMap.begin(); i != verticesMap.end(); i++) {
@@ -804,19 +819,8 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 		}
 	}
 
+	draw_bounding_box_if_needed(model, transform);
 
-	if (draw_bounding_box) {
-		for (const vec3& p1 : model.bounding_box) {
-			for (const vec3& p2 : model.bounding_box) {
-				vec3 res = p1 - p2;
-				if ((!res.x && !res.y) || (!res.y && !res.z) || (!res.x && !res.z)) {
-					vec2 a = cast(vec2(transform * vec4(p1.x, p1.y, p1.z, 1.0f)));
-					vec2 b = cast(vec2(transform * vec4(p2.x, p2.y, p2.z, 1.0f)));
-					draw_line(a, b, model.bbox_color);
-				}
-			}
-		}
-	}
 	select_highlighted_pol = false;
 }
 
@@ -868,10 +872,10 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 
 	for (CModel& model : models) {
 		switch (app->transform_context) {
-		case TRANSFORM_MODEL: 
+		case TRANSFORM_MODEL:
 			model.transform_model(transformation);
 			break;
-		case TRANSFORM_VIEW: 
+		case TRANSFORM_VIEW:
 			model.transform_view(transformation);
 			break;
 		}
