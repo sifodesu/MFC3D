@@ -30,18 +30,17 @@ public:
 		CRect screen;
 		
 		COLORREF background_color;
-		COLORREF bounding_box_color;
 
 		void draw_line(const vec2& v1, const vec2& v2, COLORREF color);
 		vec2 cast(const vec2& v);
-		bool bounding_box_toggled;
-		bool poly_normals_toggled;
-		bool vertices_normals_toggled;
-		bool poly_included_normals;
-		bool vertices_included_normals;
-
 
 	public:
+		bool draw_bounding_box;
+		bool draw_polygon_normals;
+		bool draw_vertice_normals;
+		bool draw_polygon_included_normals;
+		bool draw_vertice_included_normals;
+
 		CRenderer(CCGWorkView* parent);
 		void set_context(CDC* context);
 		void draw_background();
@@ -50,11 +49,6 @@ public:
 		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
 
 		std::bitset<3840 * 2160> bitemap;
-		void toggle_bounding_box();
-		void toggle_poly_normals();
-		void toggle_poly_included();
-		void toggle_vertices_normals();
-		void toggle_vertices_included();
 	};
 
 	class CScene
@@ -176,7 +170,6 @@ protected:
 	afx_msg void OnLightShadingGouraud();
 	afx_msg void OnUpdateLightShadingGouraud(CCmdUI* pCmdUI);
 	afx_msg void OnLightConstants();
-	afx_msg void IdNormalPlanToggle();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
@@ -185,6 +178,22 @@ public:
 	afx_msg void OnVertexIncluded();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnPolygonCalculated();
+	afx_msg void OnVertexCalculated();
+	afx_msg void OnUpdatePolygonIncluded(CCmdUI *pCmdUI);
+	afx_msg void OnUpdatePolygonCalculated(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateVertexIncluded(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateVertexCalculated(CCmdUI *pCmdUI);
+	afx_msg void OnActionTransformobject();
+	afx_msg void OnUpdateActionTransformobject(CCmdUI *pCmdUI);
+	afx_msg void OnActionTransformview();
+	afx_msg void OnUpdateActionTransformview(CCmdUI *pCmdUI);
+	afx_msg void OnNormalPlaneToggle();
+	afx_msg void OnUpdateNormalPlaneToggle(CCmdUI *pCmdUI);
+	afx_msg void OnNormalVerticeToggle();
+	afx_msg void OnUpdateNormalVerticeToggle(CCmdUI *pCmdUI);
+	afx_msg void OnShowBbox();
+	afx_msg void OnUpdateShowBbox(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

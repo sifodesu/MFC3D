@@ -58,10 +58,14 @@ BEGIN
     BUTTON      ID_AXIS_X
     BUTTON      ID_AXIS_Y
     BUTTON      ID_AXIS_Z
-    BUTTON      ID_NORMAL_PLANE_TOGGLE
-    BUTTON      ID_BUTTON32802
     SEPARATOR
-    BUTTON      ID_BUTTON32811
+    BUTTON      ID_NORMAL_PLANE_TOGGLE
+    BUTTON      ID_NORMAL_VERTICE_TOGGLE
+    SEPARATOR
+    BUTTON      ID_ACTION_TRANSFORMOBJECT
+    BUTTON      ID_ACTION_TRANSFORMVIEW
+    SEPARATOR
+    BUTTON      ID_SHOW_BBOX
 END
 
 
@@ -90,6 +94,9 @@ BEGIN
         MENUITEM "&Rotate",                     ID_ACTION_ROTATE
         MENUITEM "&Translate",                  ID_ACTION_TRANSLATE
         MENUITEM "&Scale",                      ID_ACTION_SCALE
+        MENUITEM SEPARATOR
+        MENUITEM "Transform Object",            ID_ACTION_TRANSFORMOBJECT
+        MENUITEM "Transform View",              ID_ACTION_TRANSFORMVIEW
     END
     POPUP "A&xis"
     BEGIN
@@ -106,10 +113,12 @@ BEGIN
             POPUP "Polygon"
             BEGIN
                 MENUITEM "Included",                    ID_POLYGON_INCLUDED, CHECKED
+                MENUITEM "Calculated",                  ID_POLYGON_CALCULATED
             END
             POPUP "Vertex"
             BEGIN
                 MENUITEM "Included",                    ID_VERTEX_INCLUDED, CHECKED
+                MENUITEM "Calculated",                  ID_VERTEX_CALCULATED
             END
         END
     END

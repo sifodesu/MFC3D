@@ -20,6 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 #include "PngWrapper.h"
 #include "iritSkel.h"
+#include "Globals.h"
 
 // For Status Bar access
 #include "MainFrm.h"
@@ -66,13 +67,28 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_LIGHT_SHADING_GOURAUD, OnLightShadingGouraud)
 	ON_UPDATE_COMMAND_UI(ID_LIGHT_SHADING_GOURAUD, OnUpdateLightShadingGouraud)
 	ON_COMMAND(ID_LIGHT_CONSTANTS, OnLightConstants)
-	ON_COMMAND(ID_NORMAL_PLANE_TOGGLE, IdNormalPlanToggle)
 	//}}AFX_MSG_MAP
 	ON_WM_TIMER()
 	ON_COMMAND(ID_POLYGON_INCLUDED, &CCGWorkView::OnPolygonIncluded)
 	ON_COMMAND(ID_VERTEX_INCLUDED, &CCGWorkView::OnVertexIncluded)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
+	ON_COMMAND(ID_POLYGON_CALCULATED, &CCGWorkView::OnPolygonCalculated)
+	ON_COMMAND(ID_VERTEX_CALCULATED, &CCGWorkView::OnVertexCalculated)
+	ON_UPDATE_COMMAND_UI(ID_POLYGON_INCLUDED, &CCGWorkView::OnUpdatePolygonIncluded)
+	ON_UPDATE_COMMAND_UI(ID_POLYGON_CALCULATED, &CCGWorkView::OnUpdatePolygonCalculated)
+	ON_UPDATE_COMMAND_UI(ID_VERTEX_INCLUDED, &CCGWorkView::OnUpdateVertexIncluded)
+	ON_UPDATE_COMMAND_UI(ID_VERTEX_CALCULATED, &CCGWorkView::OnUpdateVertexCalculated)
+	ON_COMMAND(ID_ACTION_TRANSFORMOBJECT, &CCGWorkView::OnActionTransformobject)
+	ON_UPDATE_COMMAND_UI(ID_ACTION_TRANSFORMOBJECT, &CCGWorkView::OnUpdateActionTransformobject)
+	ON_COMMAND(ID_ACTION_TRANSFORMVIEW, &CCGWorkView::OnActionTransformview)
+	ON_UPDATE_COMMAND_UI(ID_ACTION_TRANSFORMVIEW, &CCGWorkView::OnUpdateActionTransformview)
+	ON_COMMAND(ID_NORMAL_PLANE_TOGGLE, &CCGWorkView::OnNormalPlaneToggle)
+	ON_UPDATE_COMMAND_UI(ID_NORMAL_PLANE_TOGGLE, &CCGWorkView::OnUpdateNormalPlaneToggle)
+	ON_COMMAND(ID_NORMAL_VERTICE_TOGGLE, &CCGWorkView::OnNormalVerticeToggle)
+	ON_UPDATE_COMMAND_UI(ID_NORMAL_VERTICE_TOGGLE, &CCGWorkView::OnUpdateNormalVerticeToggle)
+	ON_COMMAND(ID_SHOW_BBOX, &CCGWorkView::OnShowBbox)
+	ON_UPDATE_COMMAND_UI(ID_SHOW_BBOX, &CCGWorkView::OnUpdateShowBbox)
 END_MESSAGE_MAP()
 
 
@@ -449,7 +465,6 @@ void CCGWorkView::OnUpdateAxisX(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck(m_nAxis == ID_AXIS_X);
 }
 
-
 void CCGWorkView::OnAxisY()
 {
 	m_nAxis = ID_AXIS_Y;
@@ -470,15 +485,6 @@ void CCGWorkView::OnUpdateAxisZ(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(m_nAxis == ID_AXIS_Z);
 }
-
-
-
-
-
-// OPTIONS HANDLERS ///////////////////////////////////////////
-
-
-
 
 // LIGHT SHADING HANDLERS ///////////////////////////////////////////
 
@@ -536,11 +542,13 @@ void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
 
 CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	parent(parent), context(nullptr),
-	background_color(RGB(0, 0, 0)),
-	bounding_box_color(RGB(255, 255, 0)) {}
-
-void CCGWorkView::IdNormalPlanToggle() {
-	scene.renderer.toggle_poly_normals();
+	background_color(BLACK)
+{
+	draw_bounding_box = false;
+	draw_polygon_normals = false;
+	draw_vertice_normals = false;
+	draw_polygon_included_normals = false;
+	draw_vertice_included_normals = false;
 }
 
 void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color)
@@ -663,31 +671,6 @@ vec2 CCGWorkView::CRenderer::cast(const vec2& v)
 	return v2;
 }
 
-void CCGWorkView::CRenderer::toggle_bounding_box()
-{
-	bounding_box_toggled = !bounding_box_toggled;
-}
-
-void CCGWorkView::CRenderer::toggle_poly_normals()
-{
-	poly_normals_toggled = !poly_normals_toggled;
-}
-
-void CCGWorkView::CRenderer::toggle_poly_included()
-{
-	poly_included_normals = !poly_included_normals;
-}
-
-void CCGWorkView::CRenderer::toggle_vertices_normals()
-{
-	vertices_normals_toggled = !vertices_normals_toggled;
-}
-
-void CCGWorkView::CRenderer::toggle_vertices_included()
-{
-	vertices_included_normals = !vertices_included_normals;
-}
-
 void CCGWorkView::CRenderer::set_context(CDC* context)
 {
 	this->context = context;
@@ -743,13 +726,13 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 			draw_line(points[size], points[0], model.color);
 
 		vec3 sourceNormal;
-		if (poly_included_normals) {
+		if (draw_polygon_included_normals) {
 			sourceNormal = polygon.included_normal;
 		}
 		else if (source.size() >= 3) {
 			sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2;
 		}
-		if (poly_normals_toggled) {
+		if (draw_polygon_normals) {
 			vec3 normalStart;
 			for (const vec3& point : source) {
 				normalStart = point + normalStart;
@@ -761,19 +744,19 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 
 		}
 
-		if (vertices_normals_toggled && !vertices_included_normals)
+		if (draw_vertice_normals && !draw_vertice_included_normals)
 			for (const vec3& point : source) {
 				verticesMap[point].insert(sourceNormal);
 			}
 
-		if (vertices_normals_toggled && vertices_included_normals) {
+		if (draw_vertice_normals && draw_vertice_included_normals) {
 			for (const CVertice& point : polygon.vertices) {
 				if (!check_if_drawn(point.point, point.imported_normal, edgesDone))
 					draw_normal(point.point, point.imported_normal, transform, model.normalsColor);
 			}
 		}
 	}
-	if (vertices_normals_toggled && !vertices_included_normals) {
+	if (draw_vertice_normals && !draw_vertice_included_normals) {
 		for (auto i = verticesMap.begin(); i != verticesMap.end(); i++) {
 			vec3 normalStart;
 			for (const vec3& point : i->second) {
@@ -787,14 +770,14 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, const CModel & m
 	}
 
 
-	if (bounding_box_toggled) {
+	if (draw_bounding_box) {
 		for (const vec3& p1 : model.bounding_box) {
 			for (const vec3& p2 : model.bounding_box) {
 				vec3 res = p1 - p2;
 				if ((!res.x && !res.y) || (!res.y && !res.z) || (!res.x && !res.z)) {
 					vec2 a = cast(vec2(transform * vec4(p1.x, p1.y, p1.z, 1.0f)));
 					vec2 b = cast(vec2(transform * vec4(p2.x, p2.y, p2.z, 1.0f)));
-					draw_line(a, b, bounding_box_color);
+					draw_line(a, b, model.bbox_color);
 				}
 			}
 		}
@@ -821,31 +804,29 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 	if (mouse_dx == 0) {
 		return;
 	}
-	std::ostringstream ss;
-	ss << mouse_dx << endl;
-	OutputDebugStringA(ss.str().c_str());
+
 	mat4 transformation;
 	float x = 0.0f, y = 0.0f, z = 0.0f;
 	switch (app->m_nAxis) {
 	case ID_AXIS_X:
-		x = mouse_dx * 0.1f;
+		x = mouse_dx;
 		break;
 	case ID_AXIS_Y:
-		y = mouse_dx * 0.1f;
+		y = mouse_dx;
 		break;
 	case ID_AXIS_Z:
-		z = mouse_dx * 0.1f;
+		z = mouse_dx;
 		break;
 	}
 	switch (app->m_nAction) {
 	case ID_ACTION_TRANSLATE:
-		transformation = translation(x * 0.2f, y * 0.2f, z * 0.2f);
+		transformation = translation(x * TRANSLATION_FACTOR, y * TRANSLATION_FACTOR, z * TRANSLATION_FACTOR);
 		break;
 	case ID_ACTION_ROTATE:
-		transformation = rotation(x, y, z);
+		transformation = rotation(x * ROTATION_FACTOR, y * ROTATION_FACTOR, z * ROTATION_FACTOR);
 		break;
 	case ID_ACTION_SCALE:
-		transformation = scaling(x + 1.0f, y + 1.0f, z + 1.0f);
+		transformation = scaling(1 + x * SCALING_FACTOR, 1 + y * SCALING_FACTOR, 1 + z * SCALING_FACTOR);
 		break;
 	}
 
@@ -872,27 +853,112 @@ void CCGWorkView::CScene::draw(CDC* context)
 }
 
 
-void CCGWorkView::OnPolygonIncluded()
-{
-	scene.renderer.toggle_poly_included();
-}
-
-
-void CCGWorkView::OnVertexIncluded()
-{
-	scene.renderer.toggle_vertices_included();
-}
-
-
 void CCGWorkView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	clicking = true;
 	CView::OnLButtonDown(nFlags, point);
 }
 
-
 void CCGWorkView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	clicking = false;
 	CView::OnLButtonUp(nFlags, point);
+}
+
+void CCGWorkView::OnPolygonIncluded()
+{
+	scene.renderer.draw_polygon_included_normals = true;
+}
+
+void CCGWorkView::OnPolygonCalculated()
+{
+	scene.renderer.draw_polygon_included_normals = false;
+}
+
+void CCGWorkView::OnVertexIncluded()
+{
+	scene.renderer.draw_vertice_included_normals = true;
+}
+
+void CCGWorkView::OnVertexCalculated()
+{
+	scene.renderer.draw_vertice_included_normals = false;
+}
+
+void CCGWorkView::OnUpdatePolygonIncluded(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.draw_polygon_included_normals);
+}
+
+void CCGWorkView::OnUpdatePolygonCalculated(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(!scene.renderer.draw_polygon_included_normals);
+}
+
+void CCGWorkView::OnUpdateVertexIncluded(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.draw_vertice_included_normals);
+}
+
+void CCGWorkView::OnUpdateVertexCalculated(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(!scene.renderer.draw_vertice_included_normals);
+}
+
+void CCGWorkView::OnActionTransformobject()
+{
+	transform_context = TRANSFORM_MODEL;
+}
+
+void CCGWorkView::OnUpdateActionTransformobject(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(transform_context == TRANSFORM_MODEL);
+}
+
+
+void CCGWorkView::OnActionTransformview()
+{
+	transform_context = TRANSFORM_VIEW;
+}
+
+
+void CCGWorkView::OnUpdateActionTransformview(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(transform_context == TRANSFORM_VIEW);
+}
+
+
+void CCGWorkView::OnNormalPlaneToggle()
+{
+	scene.renderer.draw_polygon_normals = !scene.renderer.draw_polygon_normals;
+}
+
+
+void CCGWorkView::OnUpdateNormalPlaneToggle(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.draw_polygon_normals);
+}
+
+
+void CCGWorkView::OnNormalVerticeToggle()
+{
+	scene.renderer.draw_vertice_normals = !scene.renderer.draw_vertice_normals;
+}
+
+
+void CCGWorkView::OnUpdateNormalVerticeToggle(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.draw_vertice_normals);
+}
+
+
+void CCGWorkView::OnShowBbox()
+{
+	scene.renderer.draw_bounding_box = !scene.renderer.draw_bounding_box;
+}
+
+
+void CCGWorkView::OnUpdateShowBbox(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.draw_bounding_box);
 }

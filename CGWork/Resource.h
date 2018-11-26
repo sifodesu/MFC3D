@@ -53,6 +53,7 @@
 #define ID_OPTIONS_PERSPECTIVECONTROL   32798
 #define ID_OPTIONS_MOUSESENSITIVITY     32799
 #define ID_BUTTON32802                  32802
+#define ID_NORMAL_VERTICE_TOGGLE        32802
 #define ID_NORMAL_PLANE_TOGGLE          32803
 #define ID_OPTIONS_NORMALSSOURCE        32804
 #define ID_NORMALSSOURCE_POLYGON        32805
@@ -61,14 +62,23 @@
 #define ID_POLYGON_CALCULATED           32808
 #define ID_VERTEX_INCLUDED              32809
 #define ID_VERTEX_CALCULATED            32810
-#define ID_BUTTON32811                  32811
+#define ID_OBJECT_TRANSFORM             32811
+#define ID_SET_TRANSFORM_TYPE           32811
+#define ID_VIEW_TRANSFORM               32812
+#define ID_POLYGON_CALCULATED32813      32813
+#define ID_POLYGON_NONE                 32814
+#define ID_VERTEX_NONE                  32815
+#define ID_VERTEX_CALCULATED32816       32816
+#define ID_ACTION_TRANSFORMOBJECT       32817
+#define ID_ACTION_TRANSFORMVIEW         32818
+#define ID_SHOW_BBOX                    32819
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        139
-#define _APS_NEXT_COMMAND_VALUE         32812
+#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_COMMAND_VALUE         32820
 #define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

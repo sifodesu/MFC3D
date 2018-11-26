@@ -3,6 +3,7 @@
 #include "StdAfx.h"
 #include "Polygon.h"
 #include "Mat.h"
+#include "Globals.h"
 
 using namespace std;
 
@@ -15,10 +16,12 @@ public:
 	mat4 model_transform;
 	mat4 view_transform;
 	mat4 position;
+
 	COLORREF color;
 	COLORREF normalsColor;
+	COLORREF bbox_color;
 
-	CModel(COLORREF color = RGB(255, 255, 255), COLORREF normalsColor = RGB(255, 50 ,50));
+	CModel(COLORREF color = WHITE, COLORREF normalsColor = PINK, COLORREF bbox_color = RED);
 	void set_bounding_box();
 	void add_polygon(const CPolygon& polygon);
 

@@ -136,4 +136,3 @@ void CCGWorkApp::OnAppAbout()
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
 }
-

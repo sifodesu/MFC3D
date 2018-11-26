@@ -1,7 +1,7 @@
 #include "Model.h"
 
-CModel::CModel(COLORREF color, COLORREF normalsColor) :
-	color(color), normalsColor(normalsColor) {}
+CModel::CModel(COLORREF color, COLORREF normalsColor, COLORREF bbox_color) :
+	color(color), normalsColor(normalsColor), bbox_color(bbox_color) {}
 
 void CModel::set_bounding_box()
 {
