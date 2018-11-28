@@ -706,7 +706,7 @@ void CCGWorkView::CRenderer::draw_bounding_box_if_needed(CModel& model, mat4& tr
 }
 
 void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
-		mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap) {
+		mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap) {
 	vec3 sourceNormal;
 	
 	if (draw_polygon_included_normals) {
