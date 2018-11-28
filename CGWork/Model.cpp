@@ -36,9 +36,20 @@ void CModel::setup_model()
 		}
 	}
 
-	// Translate object to center of the screen
+	// Transform object to be in center of the screen
 	vec3 origin = (bounds[0] + bounds[1]) / 2;
-	view_transform = translation(-origin.x, -origin.y, -origin.z) * view_transform;
+	float scale = 0.9f * (1.0f / max(bounds[1].x - bounds[0].x, bounds[1].y - bounds[0].y));
+	mat4 transform = scaling(scale, scale, scale);
+	transform = translation(-origin.x, -origin.y, -origin.z) * transform;
+	for (CPolygon& polygon : polygons) {
+		for ( CVertice& vertice : polygon.vertices) {
+			vertice.point = transform * vec4(vertice.point.x, vertice.point.y, vertice.point.z, 1.0f);
+		}
+	}
+	for (vec3& point : bounding_box) {
+		point = transform * vec4(point.x, point.y, point.z, 1.0f);
+	}
+
 }
 
 void CModel::add_polygon(const CPolygon & polygon)

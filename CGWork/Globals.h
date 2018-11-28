@@ -3,7 +3,7 @@
 
 const float PI = 3.1415926535f;
 
-const float TRANSLATION_FACTOR = 0.01f;
+const float TRANSLATION_FACTOR = 0.0015f;
 const float ROTATION_FACTOR = 0.2f;
 const float SCALING_FACTOR = 0.002f;
 

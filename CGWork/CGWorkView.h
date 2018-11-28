@@ -29,11 +29,13 @@ public:
 		CCGWorkView* parent;
 		CDC* context;
 		CRect screen;
+		CCamera camera;
 		
 		COLORREF background_color;
 		COLORREF highlight_polygon;
 
 		void draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint = false);
+		void apply_perspective(vec4& v);
 		vec2 cast(const vec2& v);
 
 	public:
@@ -45,8 +47,9 @@ public:
 
 		CRenderer(CCGWorkView* parent);
 		void set_context(CDC* context);
+		void set_camera(const CCamera& camera);
 		void draw_background();
-		void draw_model(const CCamera& camera, CModel& model);
+		void draw_model(CModel& model);
 		void draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color);
 		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
 		void draw_bounding_box_if_needed(CModel& model, mat4& transform);
@@ -67,6 +70,7 @@ public:
 		CScene(CCGWorkView* parent);
 		void add_model(const CModel& model);
 		void add_camera(const CCamera& camera);
+		void update_projection(int projection_type);
 
 		void update(CCGWorkView* app, int mouse_dx);
 		void draw(CDC* context);

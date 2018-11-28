@@ -355,6 +355,7 @@ void CCGWorkView::OnViewOrthographic()
 {
 	m_nView = ID_VIEW_ORTHOGRAPHIC;
 	m_bIsPerspective = false;
+	scene.update_projection(m_nView);
 	Invalidate();		// redraw using the new view.
 }
 
@@ -367,6 +368,7 @@ void CCGWorkView::OnViewPerspective()
 {
 	m_nView = ID_VIEW_PERSPECTIVE;
 	m_bIsPerspective = true;
+	scene.update_projection(m_nView);
 	Invalidate();
 }
 
@@ -516,8 +518,8 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_bounding_box = false;
 	draw_polygon_normals = false;
 	draw_vertice_normals = false;
-	draw_polygon_included_normals = false;
-	draw_vertice_included_normals = false;
+	draw_polygon_included_normals = true;
+	draw_vertice_included_normals = true;
 	select_highlighted_pol = false;
 }
 
@@ -633,6 +635,12 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 	}
 }
 
+void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
+{
+	float f = 1.0f / v.w;
+	v = scaling(f, f, f) * v;
+}
+
 vec2 CCGWorkView::CRenderer::cast(const vec2& v)
 {
 	int width = screen.Width(), height = screen.Height();
@@ -647,18 +655,30 @@ void CCGWorkView::CRenderer::set_context(CDC* context)
 	parent->GetClientRect(&screen);
 }
 
+void CCGWorkView::CRenderer::set_camera(const CCamera & camera)
+{
+	this->camera = camera;
+}
+
 void CCGWorkView::CRenderer::draw_background()
 {
 	context->FillSolidRect(&screen, background_color);
 }
 
 void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color) {
-	vec3 sourceNormal = startPoint + normalized(givenNormal)*0.2f;
+	vec3 sourceNormal = startPoint + normalized(givenNormal)*0.02f;
 
-	vec2 newSource = cast(vec2(transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f)));
-	vec2 newStart = cast(vec2(transform *  vec4(startPoint.x, startPoint.y, startPoint.z, 1.0f)));
+	vec4 a = transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f);
+	vec4 b = transform *  vec4(startPoint.x, startPoint.y, startPoint.z, 1.0f);
 
-	//	if(!check_if_drawn)
+	if (!camera.is_orthographic()) {
+		apply_perspective(a);
+		apply_perspective(b);
+	}
+
+	vec2 newSource = cast(vec2(a));
+	vec2 newStart = cast(vec2(b));
+
 	draw_line(newStart, newSource, color);
 
 }
@@ -696,9 +716,15 @@ void CCGWorkView::CRenderer::draw_bounding_box_if_needed(CModel& model, mat4& tr
 			for (const vec3& p2 : model.bounding_box) {
 				vec3 res = p1 - p2;
 				if ((!res.x && !res.y) || (!res.y && !res.z) || (!res.x && !res.z)) {
-					vec2 a = cast(vec2(transform * vec4(p1.x, p1.y, p1.z, 1.0f)));
-					vec2 b = cast(vec2(transform * vec4(p2.x, p2.y, p2.z, 1.0f)));
-					draw_line(a, b, model.bbox_color);
+					vec4 a = transform * vec4(p1.x, p1.y, p1.z, 1.0f);
+					vec4 b = transform * vec4(p2.x, p2.y, p2.z, 1.0f);
+					if (!camera.is_orthographic()) {
+						apply_perspective(a);
+						apply_perspective(b);
+					}
+					vec2 p1 = cast(vec2(a));
+					vec2 p2 = cast(vec2(b));
+					draw_line(p1, p2, model.bbox_color);
 				}
 			}
 		}
@@ -713,7 +739,7 @@ void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
 		sourceNormal = polygon.included_normal;
 	}
 	else if (source.size() >= 3) {
-		sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.2f;
+		sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.02f;
 	}
 	if (draw_polygon_normals) {
 		vec3 normalStart;
@@ -738,9 +764,11 @@ void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
 	}
 }
 
-void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
+void CCGWorkView::CRenderer::draw_model(CModel & model)
 {
-	mat4 transform = model.model_transform * model.view_transform * camera.transform * camera.projection;
+	mat4 transform = model.model_transform;
+	transform = transform * model.view_transform;
+	transform = transform * camera.projection;
 
 	std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap;
 	std::unordered_set<edge> edgesDone;
@@ -752,7 +780,11 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 
 		for (const CVertice& vertice : polygon.vertices) {
 			vec3 point = vertice.point;
-			points.push_back(cast(vec2(transform * vec4(point.x, point.y, point.z, 1.0f))));
+			vec4 res = transform * vec4(point.x, point.y, point.z, 1.0f);
+			if (!camera.is_orthographic()) {
+				apply_perspective(res);
+			}
+			points.push_back(cast(vec2(res)));
 			source.push_back(point);
 		}
 		int size = points.size() - 1;
@@ -773,7 +805,6 @@ void CCGWorkView::CRenderer::draw_model(const CCamera & camera, CModel & model)
 		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : model.color, polygon.highlight);
 
 		draw_normals(model, polygon, transform, source, points, verticesMap);
-		
 	}
 	if (draw_vertice_normals && !draw_vertice_included_normals) {
 		for (auto i = verticesMap.begin(); i != verticesMap.end(); i++) {
@@ -805,6 +836,18 @@ void CCGWorkView::CScene::add_model(const CModel & model)
 
 void CCGWorkView::CScene::add_camera(const CCamera & camera)
 {
+}
+
+void CCGWorkView::CScene::update_projection(int projection_type)
+{
+	for (CCamera& camera : cameras) {
+		if (projection_type == ID_VIEW_ORTHOGRAPHIC) {
+			camera.set_orthographic();
+		}
+		else {
+			camera.set_perspective();
+		}
+	}
 }
 
 void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
@@ -853,13 +896,12 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 void CCGWorkView::CScene::draw(CDC* context)
 {
 	renderer.set_context(context);
+	renderer.set_camera(cameras[current_camera]);
 	renderer.draw_background();
 	renderer.bitemap.reset();
 	for (CModel& model : models) {
-		renderer.draw_model(cameras[current_camera], model);
+		renderer.draw_model(model);
 	}
-	//for (CModel& model : models)
-	//	model.model_transform = rotation_Y(2.0f) * model.model_transform;
 }
 
 

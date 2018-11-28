@@ -12,7 +12,9 @@ public:
 	bool is_ortho;
 
 	CCamera();
+	CCamera(const CCamera& camera);
 	void set_orthographic();
-	bool is_orthographic();
+	void set_perspective();
+	bool is_orthographic() const;
 };
 
