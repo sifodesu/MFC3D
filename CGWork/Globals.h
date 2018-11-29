@@ -7,6 +7,8 @@ const float TRANSLATION_FACTOR = 0.0015f;
 const float ROTATION_FACTOR = 0.2f;
 const float SCALING_FACTOR = 0.002f;
 
+const float DEPTH_FACTOR = 5.0f;
+
 const COLORREF BLACK = RGB(0, 0, 0);
 const COLORREF WHITE = RGB(255, 255, 255);
 const COLORREF RED = RGB(255, 0, 0);

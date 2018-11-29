@@ -1084,7 +1084,7 @@ void CCGWorkView::OnUpdateShowBbox(CCmdUI *pCmdUI)
 
 void CCGWorkView::OnOptionsPerspectivecontrol()
 {
-	PerspectiveDlg dlg;
+	PerspectiveDlg dlg(nullptr, scene.get_current_camera().d);
 	if (dlg.DoModal() == IDOK) {
 		scene.get_current_camera().set_depth(dlg.depth);
 	}

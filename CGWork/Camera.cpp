@@ -23,7 +23,7 @@ CCamera::CCamera(const CCamera & camera) :
 
 void CCamera::set_depth(float depth)
 {
-	d = depth / 5.0f;
+	d = depth / DEPTH_FACTOR;
 	if (!is_ortho) {
 		set_perspective();
 	}
