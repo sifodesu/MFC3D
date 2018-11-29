@@ -69,6 +69,9 @@
     <ClCompile Include="Vertice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PerspectiveDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGWorkView.h">
@@ -195,6 +198,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vertice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PerspectiveDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

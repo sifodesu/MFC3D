@@ -71,6 +71,7 @@ public:
 		void add_model(const CModel& model);
 		void add_camera(const CCamera& camera);
 		void update_projection(int projection_type);
+		CCamera& get_current_camera();
 
 		void update(CCGWorkView* app, int mouse_dx);
 		void draw(CDC* context);
@@ -205,6 +206,7 @@ public:
 	afx_msg void OnUpdateNormalVerticeToggle(CCmdUI *pCmdUI);
 	afx_msg void OnShowBbox();
 	afx_msg void OnUpdateShowBbox(CCmdUI *pCmdUI);
+	afx_msg void OnOptionsPerspectivecontrol();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

@@ -11,6 +11,7 @@ using std::cout;
 using std::endl;
 #include "MaterialDlg.h"
 #include "LightDialog.h"
+#include "PerspectiveDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -89,6 +90,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_NORMAL_VERTICE_TOGGLE, &CCGWorkView::OnUpdateNormalVerticeToggle)
 	ON_COMMAND(ID_SHOW_BBOX, &CCGWorkView::OnShowBbox)
 	ON_UPDATE_COMMAND_UI(ID_SHOW_BBOX, &CCGWorkView::OnUpdateShowBbox)
+	ON_COMMAND(ID_OPTIONS_PERSPECTIVECONTROL, &CCGWorkView::OnOptionsPerspectivecontrol)
 END_MESSAGE_MAP()
 
 
@@ -851,6 +853,11 @@ void CCGWorkView::CScene::update_projection(int projection_type)
 	}
 }
 
+CCamera & CCGWorkView::CScene::get_current_camera()
+{
+	return cameras[current_camera];
+}
+
 void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 {
 	if (mouse_dx == 0) {
@@ -1017,4 +1024,13 @@ void CCGWorkView::OnShowBbox()
 void CCGWorkView::OnUpdateShowBbox(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.renderer.draw_bounding_box);
+}
+
+
+void CCGWorkView::OnOptionsPerspectivecontrol()
+{
+	PerspectiveDlg dlg;
+	if (dlg.DoModal() == IDOK) {
+		scene.get_current_camera().set_depth(dlg.depth);
+	}
 }

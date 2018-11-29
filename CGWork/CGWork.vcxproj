@@ -206,6 +206,7 @@
     <ClCompile Include="Mat.cpp" />
     <ClCompile Include="MaterialDlg.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PerspectiveDlg.cpp" />
     <ClCompile Include="PngWrapper.cpp" />
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="StdAfx.cpp">
@@ -239,6 +240,7 @@
     <ClInclude Include="Mat.h" />
     <ClInclude Include="MaterialDlg.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PerspectiveDlg.h" />
     <ClInclude Include="PngWrapper.h" />
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="Resource.h" />
