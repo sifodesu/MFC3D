@@ -64,5 +64,5 @@ void CModel::transform_model(const mat4 & m)
 
 void CModel::transform_view(const mat4 & m)
 {
-	view_transform = m * model_transform;
+	view_transform = m * view_transform;
 }
