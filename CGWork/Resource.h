@@ -7,6 +7,7 @@
 #define IDR_CGWorkTYPE                  129
 #define IDD_LIGHTS_DLG                  134
 #define IDD_MATERIAL_DLG                136
+#define IDD_PERSPECTIVE_DEPTH           143
 #define IDC_LIGHT_SPACE                 1010
 #define IDC_RADIO_LIGHT1                1017
 #define IDC_RADIO_LIGHT2                1018
@@ -32,6 +33,8 @@
 #define IDC_LIGHT_TYPE                  1038
 #define IDC_MATERIAL_AMBIENT            1039
 #define IDC_MATERIAL_DIFFUSE            1040
+#define IDC_EDIT1                       1040
+#define IDC_EDIT_PERSPECTIVE_DEPTH      1040
 #define IDC_MATERIAL_SHININESS          1041
 #define IDC_MATERIAL_SPECULAR           1042
 #define ID_FILE_LOAD                    32771
@@ -63,7 +66,6 @@
 #define ID_VERTEX_INCLUDED              32809
 #define ID_VERTEX_CALCULATED            32810
 #define ID_OBJECT_TRANSFORM             32811
-#define ID_SET_TRANSFORM_TYPE           32811
 #define ID_VIEW_TRANSFORM               32812
 #define ID_POLYGON_CALCULATED32813      32813
 #define ID_POLYGON_NONE                 32814
@@ -77,9 +79,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32820
-#define _APS_NEXT_CONTROL_VALUE         1040
+#define _APS_NEXT_CONTROL_VALUE         1041
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

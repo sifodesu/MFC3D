@@ -251,6 +251,17 @@ BEGIN
     GROUPBOX        "Texture Mapping",IDC_STATIC,118,7,182,91
 END
 
+IDD_PERSPECTIVE_DEPTH DIALOGEX 0, 0, 159, 56
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Perspective Control"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,44,35,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,102,35,50,14
+    EDITTEXT        IDC_EDIT_PERSPECTIVE_DEPTH,67,15,40,14,ES_AUTOHSCROLL
+    LTEXT           "Depth",IDC_STATIC,36,18,22,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -321,6 +332,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 131
     END
+
+    IDD_PERSPECTIVE_DEPTH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 152
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 49
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -342,6 +361,17 @@ BEGIN
 0x6956, 0x7765, "\000" 
     IDC_LIGHT_SPACE, 0x403, 6, 0
 0x6f4c, 0x6163, 0x006c, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_PERSPECTIVE_DEPTH AFX_DIALOG_LAYOUT
+BEGIN
     0
 END
 

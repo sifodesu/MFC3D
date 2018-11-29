@@ -38,7 +38,7 @@ void CModel::setup_model()
 
 	// Transform object to be in center of the screen
 	vec3 origin = (bounds[0] + bounds[1]) / 2;
-	float scale = 0.9f * (1.0f / max(bounds[1].x - bounds[0].x, bounds[1].y - bounds[0].y));
+	float scale = 0.9f * (1.0f / max(max(bounds[1].x - bounds[0].x, bounds[1].y - bounds[0].y), bounds[1].z - bounds[0].z));
 	mat4 transform = scaling(scale, scale, scale);
 	transform = translation(-origin.x, -origin.y, -origin.z) * transform;
 	for (CPolygon& polygon : polygons) {

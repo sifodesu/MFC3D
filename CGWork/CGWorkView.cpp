@@ -831,6 +831,7 @@ CCGWorkView::CScene::CScene(CCGWorkView* parent) :
 
 void CCGWorkView::CScene::add_model(const CModel & model)
 {
+	models.clear();
 	models.push_back(model);
 }
 
