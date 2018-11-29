@@ -21,6 +21,8 @@
 #include <bitset>
 #include <unordered_set>
 #include <unordered_map>
+#include "CGWorkDoc.h"
+
 class CCGWorkView : public CView
 {
 public:
@@ -31,8 +33,6 @@ public:
 		CRect screen;
 		CCamera camera;
 		
-		COLORREF background_color;
-		COLORREF highlight_polygon;
 
 		void draw_pixel(POINT p, COLORREF c);
 		void draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint = false);
@@ -62,6 +62,10 @@ public:
 		std::bitset<3840 * 2160> bitemap;
 		int mouse_x, mouse_y;
 		bool select_highlighted_pol;
+		COLORREF background_color;
+		COLORREF highlight_polygon;
+		COLORREF normals_color;
+		COLORREF wireframe_color;
 	};
 
 	class CScene
@@ -213,6 +217,10 @@ public:
 	afx_msg void OnShowBbox();
 	afx_msg void OnUpdateShowBbox(CCmdUI *pCmdUI);
 	afx_msg void OnOptionsPerspectivecontrol();
+//	afx_msg void OnEnChangeEditMouseSens();
+	float mouse_sensitivity;
+	afx_msg void OnOptionsMousesensitivity();
+	afx_msg void OnOptionsColors();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

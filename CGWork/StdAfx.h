@@ -25,3 +25,5 @@
 
 #endif // !defined(AFX_STDAFX_H__58573167_EA60_11D5_9FD5_00D0B718E2CD__INCLUDED_)
 #include <afxwin.h>
+#include <afxcontrolbars.h>
+#include <afxcontrolbars.h>

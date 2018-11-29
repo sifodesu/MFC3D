@@ -32,6 +32,8 @@ static char THIS_FILE[] = __FILE__;
 #include <unordered_map>
 #include <unordered_set>
 #include <bitset>
+#include "DialMouseSens.h"
+#include "ColorsSelect.h"
 
 // Use this macro to display text messages in the status bar.
 #define STATUS_BAR_TEXT(str) (((CMainFrame*)GetParentFrame())->getStatusBar().SetWindowText(str))
@@ -93,6 +95,8 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_SHOW_BBOX, &CCGWorkView::OnShowBbox)
 	ON_UPDATE_COMMAND_UI(ID_SHOW_BBOX, &CCGWorkView::OnUpdateShowBbox)
 	ON_COMMAND(ID_OPTIONS_PERSPECTIVECONTROL, &CCGWorkView::OnOptionsPerspectivecontrol)
+	ON_COMMAND(ID_OPTIONS_MOUSESENSITIVITY, &CCGWorkView::OnOptionsMousesensitivity)
+	ON_COMMAND(ID_OPTIONS_COLORS, &CCGWorkView::OnOptionsColors)
 END_MESSAGE_MAP()
 
 
@@ -129,6 +133,7 @@ CCGWorkView::CCGWorkView() :
 	m_lights[LIGHT_ID_1].enabled = true;
 	m_pDbBitMap = NULL;
 	m_pDbDC = NULL;
+	mouse_sensitivity = 0.5f;
 }
 
 CCGWorkView::~CCGWorkView()
@@ -298,6 +303,8 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	}
 	mouse_pos_x = mouse.x;
 
+	//pDC->GetWindow()->EnableWindow();
+	//ON_UPDATE_COMMAND_UI(IDD_MOUS_SENS, OnOptionsMousesensitivity);
 	scene.draw(pDCToUse);
 	m_pDC->BitBlt(r.left, r.top, r.Width(), r.Height(), pDCToUse, r.left, r.top, SRCCOPY);
 
@@ -527,7 +534,9 @@ void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
 CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	parent(parent), bitmap(nullptr),
 	background_color(BLACK),
-	highlight_polygon(GREEN)
+	highlight_polygon(GREEN),
+	normals_color(PINK),
+	wireframe_color(WHITE)
 {
 	draw_bounding_box = false;
 	draw_polygon_normals = false;
@@ -712,8 +721,8 @@ void CCGWorkView::CRenderer::set_camera(const CCamera & camera)
 void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color) {
 	vec3 sourceNormal = startPoint + normalized(givenNormal)*0.02f;
 
-	vec4 a = transform *  vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f);
-	vec4 b = transform *  vec4(startPoint.x, startPoint.y, startPoint.z, 1.0f);
+	vec4 a = transform * vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f);
+	vec4 b = transform * vec4(startPoint.x, startPoint.y, startPoint.z, 1.0f);
 
 	if (!camera.is_orthographic()) {
 		apply_perspective(a);
@@ -776,9 +785,9 @@ void CCGWorkView::CRenderer::draw_bounding_box_if_needed(CModel& model, mat4& tr
 }
 
 void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
-		mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap) {
+	mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap) {
 	vec3 sourceNormal;
-	
+
 	if (draw_polygon_included_normals) {
 		sourceNormal = polygon.included_normal;
 	}
@@ -792,7 +801,7 @@ void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
 		}
 		normalStart = normalStart / (float)source.size();
 
-		draw_normal(normalStart, sourceNormal, transform, model.normalsColor);
+		draw_normal(normalStart, sourceNormal, transform, normals_color);
 	}
 
 	if (draw_vertice_normals && !draw_vertice_included_normals) {
@@ -803,7 +812,7 @@ void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
 
 	if (draw_vertice_normals && draw_vertice_included_normals) {
 		for (const CVertice& point : polygon.vertices) {
-			draw_normal(point.point, point.imported_normal, transform, model.normalsColor);
+			draw_normal(point.point, point.imported_normal, transform, normals_color);
 		}
 	}
 }
@@ -844,10 +853,10 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 		}
 
 		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : model.color, polygon.highlight);
+			draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
 		}
 
-		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : model.color, polygon.highlight);
+		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
 
 		draw_normals(model, polygon, transform, source, points, verticesMap);
 	}
@@ -859,7 +868,7 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 			}
 			normalStart = normalStart / (float)i->second.size();
 
-			draw_normal(i->first, normalStart, transform, model.normalsColor);
+			draw_normal(i->first, normalStart, transform, normals_color);
 		}
 	}
 
@@ -922,13 +931,16 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 	}
 	switch (app->m_nAction) {
 	case ID_ACTION_TRANSLATE:
-		transformation = translation(x * TRANSLATION_FACTOR, y * TRANSLATION_FACTOR, z * TRANSLATION_FACTOR);
+		transformation = translation(x * TRANSLATION_FACTOR * app->mouse_sensitivity,
+			y * TRANSLATION_FACTOR * app->mouse_sensitivity, z * TRANSLATION_FACTOR * app->mouse_sensitivity);
 		break;
 	case ID_ACTION_ROTATE:
-		transformation = rotation(x * ROTATION_FACTOR, y * ROTATION_FACTOR, z * ROTATION_FACTOR);
+		transformation = rotation(x * ROTATION_FACTOR * app->mouse_sensitivity,
+			y * ROTATION_FACTOR * app->mouse_sensitivity, z * ROTATION_FACTOR * app->mouse_sensitivity);
 		break;
 	case ID_ACTION_SCALE:
-		transformation = scaling(1 + x * SCALING_FACTOR, 1 + y * SCALING_FACTOR, 1 + z * SCALING_FACTOR);
+		transformation = scaling(1 + x * SCALING_FACTOR * app->mouse_sensitivity,
+			1 + y * SCALING_FACTOR * app->mouse_sensitivity, 1 + z * SCALING_FACTOR * app->mouse_sensitivity);
 		break;
 	}
 
@@ -1076,4 +1088,21 @@ void CCGWorkView::OnOptionsPerspectivecontrol()
 	if (dlg.DoModal() == IDOK) {
 		scene.get_current_camera().set_depth(dlg.depth);
 	}
+}
+
+
+
+void CCGWorkView::OnOptionsMousesensitivity()
+{
+	DialMouseSens dlg;
+	if (dlg.DoModal() == IDOK) {
+		mouse_sensitivity = dlg.mouse_sensitivity;
+	}
+}
+
+
+void CCGWorkView::OnOptionsColors()
+{
+	ColorsSelect dlg(this);
+	dlg.DoModal();
 }
