@@ -1095,7 +1095,7 @@ void CCGWorkView::OnOptionsPerspectivecontrol()
 
 void CCGWorkView::OnOptionsMousesensitivity()
 {
-	DialMouseSens dlg;
+	DialMouseSens dlg(this);
 	if (dlg.DoModal() == IDOK) {
 		mouse_sensitivity = dlg.mouse_sensitivity;
 	}
