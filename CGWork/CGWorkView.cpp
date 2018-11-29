@@ -3,6 +3,8 @@
 #include "stdafx.h"
 #include "CGWork.h"
 
+extern CCGWorkApp theApp;
+
 #include "CGWorkDoc.h"
 #include "CGWorkView.h"
 
@@ -203,6 +205,10 @@ BOOL CCGWorkView::InitializeCGWork()
 	SetTimer(1, 1, NULL);
 	m_pDbBitMap = CreateCompatibleBitmap(m_pDC->m_hDC, r.right, r.bottom);
 	m_pDbDC->SelectObject(m_pDbBitMap);
+
+	// Code
+	update_draw_bitmap();
+
 	return TRUE;
 }
 
@@ -232,6 +238,7 @@ void CCGWorkView::OnSize(UINT nType, int cx, int cy)
 	DeleteObject(m_pDbBitMap);
 	m_pDbBitMap = CreateCompatibleBitmap(m_pDC->m_hDC, r.right, r.bottom);
 	m_pDbDC->SelectObject(m_pDbBitMap);
+	update_draw_bitmap();
 }
 
 
@@ -248,9 +255,16 @@ BOOL CCGWorkView::SetupViewingOrthoConstAspect(void)
 	return TRUE;
 }
 
-
-
-
+void CCGWorkView::update_draw_bitmap()
+{
+	BMInfo = { 0 };
+	BMInfo.bmiHeader.biSize = sizeof(BMInfo.bmiHeader);
+	GetDIBits(*m_pDbDC, m_pDbBitMap, 0, 0, nullptr, &BMInfo, DIB_RGB_COLORS);
+	BMInfo.bmiHeader.biBitCount = 32;
+	BMInfo.bmiHeader.biCompression = BI_RGB;
+	BMInfo.bmiHeader.biHeight = abs(BMInfo.bmiHeader.biHeight);
+	scene.renderer.set_bitmap_dimensions(BMInfo);
+}
 
 BOOL CCGWorkView::OnEraseBkgnd(CDC* pDC)
 {
@@ -285,11 +299,9 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	mouse_pos_x = mouse.x;
 
 	scene.draw(pDCToUse);
+	m_pDC->BitBlt(r.left, r.top, r.Width(), r.Height(), pDCToUse, r.left, r.top, SRCCOPY);
 
-	if (pDCToUse != m_pDC)
-	{
-		m_pDC->BitBlt(r.left, r.top, r.Width(), r.Height(), pDCToUse, r.left, r.top, SRCCOPY);
-	}
+	theApp.OnIdle(-1);
 }
 
 
@@ -513,7 +525,7 @@ void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
 }
 
 CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
-	parent(parent), context(nullptr),
+	parent(parent), bitmap(nullptr),
 	background_color(BLACK),
 	highlight_polygon(GREEN)
 {
@@ -523,6 +535,25 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_polygon_included_normals = true;
 	draw_vertice_included_normals = true;
 	select_highlighted_pol = false;
+}
+
+CCGWorkView::CRenderer::~CRenderer()
+{
+	if (bitmap != nullptr) {
+		delete[] bitmap;
+	}
+}
+
+void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
+{
+	int offset = 4 * ((screen.Height() - p.y) * screen.Width() + p.x);
+	if (offset > parent->BMInfo.bmiHeader.biSizeImage || offset < 0 ||
+		p.x >= screen.Width() || p.x < 0) {
+		return;
+	}
+	bitmap[offset] = GetBValue(c);
+	bitmap[offset + 1] = GetGValue(c);
+	bitmap[offset + 2] = GetRValue(c);
 }
 
 void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint)
@@ -542,7 +573,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 	if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
 		if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 			bitemap.set(p.x + p.y * 3840);
-			context->SetPixelV(p, color);
+			draw_pixel(p, color);
 		}
 
 	if (dy >= 0) {
@@ -563,7 +594,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
 					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
-						context->SetPixelV(p, color);
+						draw_pixel(p, color);
 					}
 
 			}
@@ -585,7 +616,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
 					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
-						context->SetPixelV(p, color);
+						draw_pixel(p, color);
 					}
 
 			}
@@ -609,7 +640,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
 					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
-						context->SetPixelV(p, color);
+						draw_pixel(p, color);
 					}
 			}
 		}
@@ -630,7 +661,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
 					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
 						bitemap.set(p.x + p.y * 3840);
-						context->SetPixelV(p, color);
+						draw_pixel(p, color);
 					}
 			}
 		}
@@ -651,20 +682,31 @@ vec2 CCGWorkView::CRenderer::cast(const vec2& v)
 	return v2;
 }
 
-void CCGWorkView::CRenderer::set_context(CDC* context)
+void CCGWorkView::CRenderer::set_bitmap_dimensions(const BITMAPINFO& info)
 {
-	this->context = context;
+	if (bitmap != nullptr) {
+		delete[] bitmap;
+	}
+	bitmap = new BYTE[info.bmiHeader.biSizeImage];
 	parent->GetClientRect(&screen);
+}
+
+void CCGWorkView::CRenderer::get_bitmap(CDC * context)
+{
+	context->FillSolidRect(&screen, background_color);
+	int i = GetDIBits(*context, parent->m_pDbBitMap, 0, parent->BMInfo.bmiHeader.biHeight,
+		bitmap, &(parent->BMInfo), DIB_RGB_COLORS);
+}
+
+void CCGWorkView::CRenderer::draw_bitmap(CDC * context)
+{
+	int i = SetDIBits(*context, parent->m_pDbBitMap, 0, parent->BMInfo.bmiHeader.biHeight,
+		bitmap, &(parent->BMInfo), DIB_RGB_COLORS);
 }
 
 void CCGWorkView::CRenderer::set_camera(const CCamera & camera)
 {
 	this->camera = camera;
-}
-
-void CCGWorkView::CRenderer::draw_background()
-{
-	context->FillSolidRect(&screen, background_color);
 }
 
 void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color) {
@@ -786,7 +828,8 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 			if (!camera.is_orthographic()) {
 				apply_perspective(res);
 			}
-			points.push_back(cast(vec2(res)));
+			vec2 v = cast(vec2(res));
+			points.push_back(v);
 			source.push_back(point);
 		}
 		int size = points.size() - 1;
@@ -903,13 +946,13 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 
 void CCGWorkView::CScene::draw(CDC* context)
 {
-	renderer.set_context(context);
+	renderer.get_bitmap(context);
 	renderer.set_camera(cameras[current_camera]);
-	renderer.draw_background();
 	renderer.bitemap.reset();
 	for (CModel& model : models) {
 		renderer.draw_model(model);
 	}
+	renderer.draw_bitmap(context);
 }
 
 

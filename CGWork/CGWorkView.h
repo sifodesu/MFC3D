@@ -27,13 +27,14 @@ public:
 	class CRenderer
 	{
 		CCGWorkView* parent;
-		CDC* context;
+		BYTE* bitmap;
 		CRect screen;
 		CCamera camera;
 		
 		COLORREF background_color;
 		COLORREF highlight_polygon;
 
+		void draw_pixel(POINT p, COLORREF c);
 		void draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint = false);
 		void apply_perspective(vec4& v);
 		vec2 cast(const vec2& v);
@@ -46,9 +47,11 @@ public:
 		bool draw_vertice_included_normals;
 
 		CRenderer(CCGWorkView* parent);
-		void set_context(CDC* context);
+		~CRenderer();
+		void set_bitmap_dimensions(const BITMAPINFO& info);
+		void get_bitmap(CDC* context);
+		void draw_bitmap(CDC* context);
 		void set_camera(const CCamera& camera);
-		void draw_background();
 		void draw_model(CModel& model);
 		void draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color);
 		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
@@ -148,7 +151,10 @@ protected:
 
 	HBITMAP m_pDbBitMap;
 	CDC* m_pDbDC;
-	public:
+	BITMAPINFO BMInfo;
+	void update_draw_bitmap();
+
+public:
 	CScene scene;
 
 

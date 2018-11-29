@@ -1,8 +1,8 @@
 #include "Camera.h"
 
 CCamera::CCamera() :
-	d(1.0f),
-	a(0.25f),
+	d(2.0f),
+	a(0.0f),
 	is_ortho(true)
 {
 	set_orthographic();
@@ -23,24 +23,14 @@ CCamera::CCamera(const CCamera & camera) :
 
 void CCamera::set_depth(float depth)
 {
-	d = depth;
-	a = 0.25f * d;
+	d = depth / 5.0f;
+	if (!is_ortho) {
+		set_perspective();
+	}
 }
 
 void CCamera::set_orthographic()
 {
-	/*mat4 T = translation(
-		-(left + right) / 2.0f,
-		-(bottom + top) / 2.0f,
-		(_near + _far) / 2.0f
-	);
-	mat4 S = scaling(
-		2.0f / (right - left),
-		2.0f / (top - bottom),
-		2.0f / (_near - _far)
-	);
-	mat4 M = scaling(1.0f, 1.0f, 0.0f);
-	projection = T * S * M;*/
 	projection = mat4({
 		{1.0f, 0.0f, 0.0f, 0.0f},
 		{0.0f, 1.0f, 0.0f, 0.0f},
