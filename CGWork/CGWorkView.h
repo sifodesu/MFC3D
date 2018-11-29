@@ -100,7 +100,9 @@ public:
 	int mouse_pos_x;
 	bool clicking;
 
-	int m_nAxis;				// Axis of Action, X Y or Z
+	bool X;
+	bool Y;
+	bool Z;
 	int m_nAction;				// Rotate, Translate, Scale
 	int m_nView;				// Orthographic, perspective
 	bool m_bIsPerspective;			// is the view perspective

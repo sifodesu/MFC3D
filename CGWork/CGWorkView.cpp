@@ -115,7 +115,9 @@ CCGWorkView::CCGWorkView() :
 	scene(this)
 {
 	// Set default values
-	m_nAxis = ID_AXIS_X;
+	X = true;
+	Y = false;
+	Z = false;
 	m_nAction = ID_ACTION_ROTATE;
 	m_nView = ID_VIEW_ORTHOGRAPHIC;
 	m_bIsPerspective = false;
@@ -444,7 +446,7 @@ void CCGWorkView::OnUpdateActionScale(CCmdUI* pCmdUI)
 // selected axis.
 void CCGWorkView::OnAxisX()
 {
-	m_nAxis = ID_AXIS_X;
+	X = !X;
 }
 
 // Gets called when windows has to repaint either the X button or the Axis pop up menu.
@@ -453,28 +455,28 @@ void CCGWorkView::OnAxisX()
 // It sets itself Checked if the current axis is the X axis.
 void CCGWorkView::OnUpdateAxisX(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nAxis == ID_AXIS_X);
+	pCmdUI->SetCheck(X);
 }
 
 void CCGWorkView::OnAxisY()
 {
-	m_nAxis = ID_AXIS_Y;
+	Y = !Y;
 }
 
 void CCGWorkView::OnUpdateAxisY(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nAxis == ID_AXIS_Y);
+	pCmdUI->SetCheck(Y);
 }
 
 
 void CCGWorkView::OnAxisZ()
 {
-	m_nAxis = ID_AXIS_Z;
+	Z = !Z;
 }
 
 void CCGWorkView::OnUpdateAxisZ(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nAxis == ID_AXIS_Z);
+	pCmdUI->SetCheck(Z);
 }
 
 // LIGHT SHADING HANDLERS ///////////////////////////////////////////
@@ -918,17 +920,16 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 
 	mat4 transformation;
 	float x = 0.0f, y = 0.0f, z = 0.0f;
-	switch (app->m_nAxis) {
-	case ID_AXIS_X:
+	if (app->X) {
 		x = mouse_dx;
-		break;
-	case ID_AXIS_Y:
-		y = mouse_dx;
-		break;
-	case ID_AXIS_Z:
-		z = mouse_dx;
-		break;
 	}
+	if (app->Y) {
+		y = mouse_dx;
+	}
+	if (app->Z) {
+		z = mouse_dx;
+	}
+
 	switch (app->m_nAction) {
 	case ID_ACTION_TRANSLATE:
 		transformation = translation(x * TRANSLATION_FACTOR * app->mouse_sensitivity,
