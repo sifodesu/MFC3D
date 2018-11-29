@@ -34,6 +34,7 @@ static char THIS_FILE[] = __FILE__;
 #include <bitset>
 #include "DialMouseSens.h"
 #include "ColorsSelect.h"
+#include "DiaFineNess.h"
 
 // Use this macro to display text messages in the status bar.
 #define STATUS_BAR_TEXT(str) (((CMainFrame*)GetParentFrame())->getStatusBar().SetWindowText(str))
@@ -97,6 +98,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_OPTIONS_PERSPECTIVECONTROL, &CCGWorkView::OnOptionsPerspectivecontrol)
 	ON_COMMAND(ID_OPTIONS_MOUSESENSITIVITY, &CCGWorkView::OnOptionsMousesensitivity)
 	ON_COMMAND(ID_OPTIONS_COLORS, &CCGWorkView::OnOptionsColors)
+	ON_COMMAND(ID_MFINENESS, &CCGWorkView::OnMfineness)
 END_MESSAGE_MAP()
 
 
@@ -1106,4 +1108,14 @@ void CCGWorkView::OnOptionsColors()
 {
 	ColorsSelect dlg(this);
 	dlg.DoModal();
+}
+
+
+
+
+void CCGWorkView::OnMfineness()
+{
+	DiaFineNess dlg;
+	dlg.DoModal();
+	changeFineNess(dlg.fineNess);
 }

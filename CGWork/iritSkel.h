@@ -16,6 +16,7 @@
 #include "symb_lib.h"
 #include "Model.h"
 
+
 void reset_current_model();
 CModel& get_current_model();
 
@@ -27,5 +28,8 @@ const char *CGSkelGetObjectPTexture(IPObjectStruct *PObj);
 int CGSkelGetObjectTransp(IPObjectStruct *PObj, double *Transp);
 
 bool CGSkelStoreData(IPObjectStruct *PObj);
+
+void changeFineNess(int precision);
+int getFineNess();
 
 #endif // IRIT_SKEL_H

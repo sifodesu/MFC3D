@@ -35,6 +35,14 @@ IPFreeformConvStateStruct CGSkelFFCState = {
 //CGSkelProcessIritDataFiles(argv + 1, argc - 1);
 CModel current;
 
+void changeFineNess(int precision) {
+	CGSkelFFCState.FineNess = precision < 2 ? 2 : precision;
+}
+
+int getFineNess() {
+	return CGSkelFFCState.FineNess;
+}
+
 void reset_current_model()
 {
 	current = CModel();

@@ -40,7 +40,6 @@
 #define IDC_DEPTH_CONTROL               1041
 #define IDC_EDIT_MOUSE_SENS             1041
 #define IDC_MATERIAL_SPECULAR           1042
-#define IDC_BUTTON1                     1042
 #define IDC_BWWRFRMCLR                  1042
 #define IDC_BNRMLSCLR                   1043
 #define IDC_BBCKGRNDCLR                 1044
@@ -82,13 +81,16 @@
 #define ID_ACTION_TRANSFORMVIEW         32818
 #define ID_SHOW_BBOX                    32819
 #define ID_OPTIONS_COLORS               32820
+#define IDD_FINENESS                    32821
+#define IDD_DIAFINENESS                 32821
+#define ID_MFINENESS                    32822
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        151
-#define _APS_NEXT_COMMAND_VALUE         32821
+#define _APS_NEXT_RESOURCE_VALUE        153
+#define _APS_NEXT_COMMAND_VALUE         32823
 #define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

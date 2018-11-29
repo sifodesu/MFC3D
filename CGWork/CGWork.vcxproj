@@ -192,6 +192,7 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
     <ClCompile Include="ColorsSelect.cpp" />
+    <ClCompile Include="DiaFineNess.cpp" />
     <ClCompile Include="DialMouseSens.cpp" />
     <ClCompile Include="iritSkel.cpp" />
     <ClCompile Include="LightDialog.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="CGWorkDoc.h" />
     <ClInclude Include="CGWorkView.h" />
     <ClInclude Include="ColorsSelect.h" />
+    <ClInclude Include="DiaFineNess.h" />
     <ClInclude Include="DialMouseSens.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="iritSkel.h" />

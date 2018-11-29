@@ -223,6 +223,7 @@ public:
 	float mouse_sensitivity;
 	afx_msg void OnOptionsMousesensitivity();
 	afx_msg void OnOptionsColors();
+	afx_msg void OnMfineness();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp
