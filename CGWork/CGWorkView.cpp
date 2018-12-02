@@ -733,10 +733,12 @@ void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& giv
 		apply_perspective(b);
 	}
 
-	vec2 newSource = cast(vec2(a));
-	vec2 newStart = cast(vec2(b));
+	if (a.z >= 0 && b.z >= 0) {
+		vec2 newSource = cast(vec2(a));
+		vec2 newStart = cast(vec2(b));
 
-	draw_line(newStart, newSource, color);
+		draw_line(newStart, newSource, color);
+	}
 
 }
 
@@ -779,9 +781,11 @@ void CCGWorkView::CRenderer::draw_bounding_box_if_needed(CModel& model, mat4& tr
 						apply_perspective(a);
 						apply_perspective(b);
 					}
-					vec2 p1 = cast(vec2(a));
-					vec2 p2 = cast(vec2(b));
-					draw_line(p1, p2, model.bbox_color);
+					if (a.z >= 0 && b.z >= 0) {
+						vec2 p1 = cast(vec2(a));
+						vec2 p2 = cast(vec2(b));
+						draw_line(p1, p2, model.bbox_color);
+					}
 				}
 			}
 		}
@@ -796,7 +800,7 @@ void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
 		sourceNormal = polygon.included_normal;
 	}
 	else if (source.size() >= 3) {
-		sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]))*0.02f;
+		sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]));
 	}
 	if (draw_polygon_normals) {
 		vec3 normalStart;
@@ -834,13 +838,14 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 	for (CPolygon& polygon : model.polygons) {
 		vector<vec2> points;
 		vector<vec3> source;
-
+		vector<int> zForCheckFov;
 		for (const CVertice& vertice : polygon.vertices) {
 			vec3 point = vertice.point;
 			vec4 res = transform * vec4(point.x, point.y, point.z, 1.0f);
 			if (!camera.is_orthographic()) {
 				apply_perspective(res);
 			}
+			zForCheckFov.push_back(res.z);
 			vec2 v = cast(vec2(res));
 			points.push_back(v);
 			source.push_back(point);
@@ -857,10 +862,11 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 		}
 
 		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+			if (zForCheckFov[i] >= 0 && zForCheckFov[i + 1] >= 0)
+				draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
 		}
-
-		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+		if (zForCheckFov[size] >= 0 && zForCheckFov[0] >= 0)
+			draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
 
 		draw_normals(model, polygon, transform, source, points, verticesMap);
 	}
