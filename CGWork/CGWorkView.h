@@ -30,7 +30,6 @@ public:
 	{
 		CCGWorkView* parent;
 		BYTE* bitmap;
-		CRect screen;
 		CCamera camera;
 		
 
@@ -52,13 +51,14 @@ public:
 		void get_bitmap(CDC* context);
 		void draw_bitmap(CDC* context);
 		void set_camera(const CCamera& camera);
-		void draw_model(CModel& model);
+		void draw_model(CModel& model, std::vector<std::vector<float>> z_buffer);
 		void draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color);
 		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
 		void draw_bounding_box_if_needed(CModel& model, mat4& transform);
 		void draw_normals(CModel& model, CPolygon& polygon,
 			mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap);
 
+		CRect screen;
 		std::bitset<3840 * 2160> bitemap;
 		int mouse_x, mouse_y;
 		bool select_highlighted_pol;
