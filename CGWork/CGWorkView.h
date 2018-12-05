@@ -32,11 +32,12 @@ public:
 		BYTE* bitmap;
 		CCamera camera;
 		
-
+		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint);
+		void flood_fill(vector<vec3>& poly, vec2& p, COLORREF color);
 		void draw_pixel(POINT p, COLORREF c);
-		void draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint = false);
+		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void apply_perspective(vec4& v);
-		vec2 cast(const vec2& v);
+		vec3 cast(const vec3& v);
 
 	public:
 		bool draw_bounding_box;
@@ -51,15 +52,16 @@ public:
 		void get_bitmap(CDC* context);
 		void draw_bitmap(CDC* context);
 		void set_camera(const CCamera& camera);
-		void draw_model(CModel& model, std::vector<std::vector<float>> z_buffer);
+		void draw_model(CModel& model);
 		void draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color);
 		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
 		void draw_bounding_box_if_needed(CModel& model, mat4& transform);
 		void draw_normals(CModel& model, CPolygon& polygon,
-			mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap);
+			mat4& transform, vector<vec3> source, vector<vec3> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap);
 
 		CRect screen;
-		std::bitset<3840 * 2160> bitemap;
+		std::bitset<3840 * 2160> bitFlag;
+		std::vector<std::vector<float>> z_buffer;
 		int mouse_x, mouse_y;
 		bool select_highlighted_pol;
 		COLORREF background_color;

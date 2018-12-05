@@ -179,6 +179,7 @@ public:
 	}
 };
 
+float norm(const vec2& v);
 float norm(const vec3& v);
 float norm(const vec4& v);
 vec3 normalized(const vec3& v);
@@ -223,13 +224,3 @@ namespace std
 		}
 	};
 }
-//
-//struct vec3Hasher
-//{
-//	size_t operator()(const vec3& k) const
-//	{
-//		return ((std::hash<float>()(k.x)
-//			^ (std::hash<float>()(k.y) << 1)) >> 1)
-//			^ (std::hash<float>()(k.z) << 1);
-//	}
-//};

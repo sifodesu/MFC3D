@@ -26,7 +26,7 @@ CCGWorkView::CRenderer::~CRenderer()
 
 void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
 {
-	int offset = 4 * ((screen.Height() - p.y) * screen.Width() + p.x);
+	unsigned int offset = 4 * ((screen.Height() - p.y) * screen.Width() + p.x);
 	if (offset > parent->BMInfo.bmiHeader.biSizeImage || offset < 0 ||
 		p.x >= screen.Width() || p.x < 0) {
 		return;
@@ -36,7 +36,48 @@ void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
 	bitmap[offset + 2] = GetRValue(c);
 }
 
-void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF color, bool forcePrint)
+//approximate the z of a point on a line
+float get_approx_z(POINT p, const vec3& source, const vec3& dest) {
+	float normS = norm(vec2(vec3((float)p.x, (float)p.y, 0) - source));
+	float normD = norm(vec2(dest - vec3((float)p.x, (float)p.y, 0)));
+	return source.z*normS / (normS + normD) + dest.z*normD / (normS + normD);
+}
+
+//approximate the z of a point inside a polygon
+float approximate_z_in_pol(vector<vec3>& points, vec2& p) {
+	float sum = 0.0f;
+
+	for (vec3 point : points) {
+		sum += norm(p - vec2(point));
+	}
+	float res = 0.0f;
+	for (vec3 point : points) {
+		res += point.z*norm(p - vec2(point)) / sum;
+	}
+
+	return res;
+}
+
+void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint) {
+	if (p.x >= 0 && p.y >= 0 && p.x < min(3840, screen.Width()) && p.y < min(2160, screen.Height())) {
+		if (!bitFlag.test(p.x + p.y * 3840)) {
+			bitFlag.set(p.x + p.y * 3840);
+			draw_pixel(p, color);
+			z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
+		}
+		else {
+			if (z_buffer[p.y][p.x] > get_approx_z(p, v1, v2)) {
+				draw_pixel(p, color);
+				z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
+			}
+			else if (forcePrint) {
+				draw_pixel(p, color);
+			}
+		}
+	}
+}
+
+void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint)
 {
 	int x1 = (int)v1.x, x2 = (int)v2.x, y1 = (int)v1.y, y2 = (int)v2.y;
 	if (x2 - x1 < 0) {
@@ -50,11 +91,8 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 	p.x = x1;
 	p.y = y1;
 
-	if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-		if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
-			bitemap.set(p.x + p.y * 3840);
-			draw_pixel(p, color);
-		}
+	set_pixel(p, v1, v2, color, forcePrint);
+
 
 	if (dy >= 0) {
 		if (dx >= dy) {
@@ -71,11 +109,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
-						bitemap.set(p.x + p.y * 3840);
-						draw_pixel(p, color);
-					}
+				set_pixel(p, v1, v2, color, forcePrint);
 
 			}
 		}
@@ -93,11 +127,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
-						bitemap.set(p.x + p.y * 3840);
-						draw_pixel(p, color);
-					}
+				set_pixel(p, v1, v2, color, forcePrint);
 
 			}
 		}
@@ -117,11 +147,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
-						bitemap.set(p.x + p.y * 3840);
-						draw_pixel(p, color);
-					}
+				set_pixel(p, v1, v2, color, forcePrint);
 			}
 		}
 		else {
@@ -138,11 +164,7 @@ void CCGWorkView::CRenderer::draw_line(const vec2& v1, const vec2& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				if (p.x >= 0 && p.y >= 0 && p.x < 3840 && p.y < 2160)
-					if (!bitemap.test(p.x + p.y * 3840) || forcePrint) {
-						bitemap.set(p.x + p.y * 3840);
-						draw_pixel(p, color);
-					}
+				set_pixel(p, v1, v2, color, forcePrint);
 			}
 		}
 	}
@@ -154,11 +176,11 @@ void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
 	v = scaling(f, f, f) * v;
 }
 
-vec2 CCGWorkView::CRenderer::cast(const vec2& v)
+vec3 CCGWorkView::CRenderer::cast(const vec3& v)
 {
 	int width = screen.Width(), height = screen.Height();
 	int scale = min(height, width);
-	vec2 v2(v.x * scale + width / 2, -v.y * scale + height / 2);
+	vec3 v2(v.x * scale + width / 2, -v.y * scale + height / 2, v.z);
 	return v2;
 }
 
@@ -201,8 +223,8 @@ void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& giv
 	}
 
 	if (a.z >= 0 && b.z >= 0) {
-		vec2 newSource = cast(vec2(a));
-		vec2 newStart = cast(vec2(b));
+		vec3 newSource = cast(vec3(a));
+		vec3 newStart = cast(vec3(b));
 
 		draw_line(newStart, newSource, color);
 	}
@@ -219,9 +241,9 @@ bool CCGWorkView::CRenderer::check_if_drawn(const vec2& startPoint, const vec2& 
 	return true;
 }
 
-bool pointIsInside(vector<vec2> points, vec2 dot) {
+bool pointIsInside(vector<vec3> points, vec2 dot) {
 
-	int i, j = points.size() - 1;
+	unsigned int i, j = points.size() - 1;
 	bool res = false;
 
 	for (i = 0; i < points.size(); j = i, i++) {
@@ -247,19 +269,23 @@ void CCGWorkView::CRenderer::draw_bounding_box_if_needed(CModel& model, mat4& tr
 						apply_perspective(a);
 						apply_perspective(b);
 					}
-					if (a.z >= 0 && b.z >= 0) {
-						vec2 p1 = cast(vec2(a));
-						vec2 p2 = cast(vec2(b));
-						draw_line(p1, p2, model.bbox_color);
-					}
+					vec3 p1 = cast(vec3(a));
+					vec3 p2 = cast(vec3(b));
+					draw_line(p1, p2, model.bbox_color);
 				}
 			}
 		}
 	}
 }
 
+void CCGWorkView::CRenderer::flood_fill(vector<vec3>& poly, vec2& p, COLORREF color) {
+	if (pointIsInside(poly, p)) {
+		//set_pixel(POINT {p.x, p.y}, )
+	}
+}
+
 void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
-	mat4& transform, vector<vec3> source, vector<vec2> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap) {
+	mat4& transform, vector<vec3> source, vector<vec3> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap) {
 	vec3 sourceNormal;
 
 	if (draw_polygon_included_normals) {
@@ -291,7 +317,7 @@ void CCGWorkView::CRenderer::draw_normals(CModel& model, CPolygon& polygon,
 	}
 }
 
-void CCGWorkView::CRenderer::draw_model(CModel & model, std::vector<std::vector<float>> z_buffer)
+void CCGWorkView::CRenderer::draw_model(CModel & model)
 {
 	mat4 transform = model.model_transform;
 	transform = transform * model.view_transform;
@@ -302,24 +328,23 @@ void CCGWorkView::CRenderer::draw_model(CModel & model, std::vector<std::vector<
 
 
 	for (CPolygon& polygon : model.polygons) {
-		vector<vec2> points;
+		vector<vec3> points;
 		vector<vec3> source;
-		vector<int> zForCheckFov;
 		for (const CVertice& vertice : polygon.vertices) {
 			vec3 point = vertice.point;
 			vec4 res = transform * vec4(point.x, point.y, point.z, 1.0f);
 			if (!camera.is_orthographic()) {
 				apply_perspective(res);
 			}
-			zForCheckFov.push_back(res.z);
-			vec2 v = cast(vec2(res));
+
+			vec3 v = cast(vec3(res));
 			points.push_back(v);
 			source.push_back(point);
 		}
 		int size = points.size() - 1;
 
 		if (select_highlighted_pol) {
-			if (pointIsInside(points, vec2(mouse_x, mouse_y))) {
+			if (pointIsInside(points, vec2((float)mouse_x, (float)mouse_y))) {
 				polygon.highlight = true;
 			}
 			else {
@@ -328,11 +353,9 @@ void CCGWorkView::CRenderer::draw_model(CModel & model, std::vector<std::vector<
 		}
 
 		for (int i = 0; i < size; i++) {
-			if (zForCheckFov[i] >= 0 && zForCheckFov[i + 1] >= 0)
-				draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+			draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
 		}
-		if (zForCheckFov[size] >= 0 && zForCheckFov[0] >= 0)
-			draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
 
 		draw_normals(model, polygon, transform, source, points, verticesMap);
 	}

@@ -42,7 +42,7 @@ void DiaFineNess::OnEnChangeEdit1()
 	edit_fineNess.GetWindowTextW(str);
 	if (!str.IsEmpty()) {
 		try {
-			fineNess = std::stof(str.GetString());
+			fineNess = (int)std::stof(str.GetString());
 		}
 		catch (...) {
 			fineNess = getFineNess();

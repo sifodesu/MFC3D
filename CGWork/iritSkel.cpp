@@ -40,7 +40,7 @@ void changeFineNess(int precision) {
 }
 
 int getFineNess() {
-	return CGSkelFFCState.FineNess;
+	return (int)CGSkelFFCState.FineNess;
 }
 
 void reset_current_model()
@@ -193,7 +193,7 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 
 		CPolygon polygon;
 		if (IP_HAS_PLANE_POLY(PPolygon)) {
-			float scaling = 0.2;
+			float scaling = 0.2f;
 			polygon.included_normal = vec3(PPolygon->Plane[0]*scaling, PPolygon->Plane[1]*scaling, PPolygon->Plane[2]*scaling);
 		}
 

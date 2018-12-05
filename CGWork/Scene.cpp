@@ -85,15 +85,14 @@ void CCGWorkView::CScene::draw(CDC* context)
 {
 	renderer.get_bitmap(context);
 	renderer.set_camera(cameras[current_camera]);
-	renderer.bitemap.reset();
+	renderer.bitFlag.reset();
 	
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
-	std::vector<std::vector<float>> z_buffer;
-	z_buffer.resize(w, std::vector<float>(h, 0));
+	renderer.z_buffer.resize(h, std::vector<float>(w, 0));
 
 	for (CModel& model : models) {
-		renderer.draw_model(model, z_buffer);
+		renderer.draw_model(model);
 	}
 	renderer.draw_bitmap(context);
 }
