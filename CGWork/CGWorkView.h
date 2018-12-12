@@ -28,6 +28,7 @@ class CCGWorkView : public CView
 public:
 	class CRenderer
 	{
+	public:
 		CCGWorkView* parent;
 		BYTE* bitmap;
 		CCamera camera;
@@ -39,7 +40,6 @@ public:
 		void apply_perspective(vec4& v);
 		vec3 cast(const vec3& v);
 
-	public:
 		bool draw_bounding_box;
 		bool draw_polygon_normals;
 		bool draw_vertice_normals;
@@ -84,6 +84,7 @@ public:
 
 		void update(CCGWorkView* app, int mouse_dx);
 		void draw(CDC* context);
+		void drawZBuffer();
 		
 		CRenderer renderer;
 		vector<CModel> models;

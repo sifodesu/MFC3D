@@ -185,7 +185,7 @@ float norm(const vec4& v);
 vec3 normalized(const vec3& v);
 vec4 normalized(const vec4& v);
 vec3 cross(const vec3& v1, const vec3& v2);
-
+float dot(const vec3& v1, const vec3& v2);
 class edge {
 public:
 	vec3 first;

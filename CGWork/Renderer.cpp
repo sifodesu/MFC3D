@@ -216,15 +216,19 @@ void CCGWorkView::CRenderer::draw_normal(const vec3& startPoint, const vec3& giv
 
 	vec4 a = transform * vec4(sourceNormal.x, sourceNormal.y, sourceNormal.z, 1.0f);
 	vec4 b = transform * vec4(startPoint.x, startPoint.y, startPoint.z, 1.0f);
-
+	float azz = a.z; float bzz = b.z;
+	a = camera.projection * a;
+	b = camera.projection * b;
 	if (!camera.is_orthographic()) {
 		apply_perspective(a);
 		apply_perspective(b);
 	}
 
 	if (a.z >= 0 && b.z >= 0) {
-		vec3 newSource = cast(vec3(a));
-		vec3 newStart = cast(vec3(b));
+		vec3 newSource = cast(vec3(a)); 
+		newSource.z = azz;
+		vec3 newStart = cast(vec3(b));  
+		newStart.z = bzz;
 
 		draw_line(newStart, newSource, color);
 	}
@@ -321,7 +325,7 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 {
 	mat4 transform = model.model_transform;
 	transform = transform * model.view_transform;
-	transform = transform * camera.projection;
+	//transform = transform * camera.projection;
 
 	std::unordered_map<vec3, std::unordered_set<vec3>> verticesMap;
 	std::unordered_set<edge> edgesDone;
@@ -333,12 +337,18 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 		for (const CVertice& vertice : polygon.vertices) {
 			vec3 point = vertice.point;
 			vec4 res = transform * vec4(point.x, point.y, point.z, 1.0f);
+			float zz = res.z;
+			res = camera.projection * res;
+
 			if (!camera.is_orthographic()) {
 				apply_perspective(res);
 			}
 
 			vec3 v = cast(vec3(res));
+			v.z = zz;
 			points.push_back(v);
+			//points = lines ready to trace
+			//source = untouched vertices
 			source.push_back(point);
 		}
 		int size = points.size() - 1;
@@ -351,12 +361,35 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 				polygon.highlight = false;
 			}
 		}
-
-		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+		//
+		vec3 sourceNormal;
+		vec3 normalStart;
+		if (draw_polygon_included_normals) {
+			sourceNormal = polygon.included_normal;
 		}
-		draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+		else if (source.size() >= 3) {
+			sourceNormal = normalized(cross(source[2] - source[1], source[0] - source[1]));
+		}
+		if (draw_polygon_normals) {
+			
+			for (const vec3& point : source) {
+				normalStart = point + normalStart;
+			}
+			normalStart = normalStart / (float)source.size();
 
+			//draw_normal(normalStart, sourceNormal, transform, normals_color);
+		}
+
+
+		vec3 cam = cast(vec3(camera.projection * transform * vec4(0, 0, 0, 1.0f)));
+		//
+		//if (dot(points[0] - cam, sourceNormal - normalStart) < 0) {
+			for (int i = 0; i < size; i++) {
+				draw_line(points[i], points[i + 1], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+			}
+			draw_line(points[size], points[0], polygon.highlight ? highlight_polygon : wireframe_color, polygon.highlight);
+
+		//}
 		draw_normals(model, polygon, transform, source, points, verticesMap);
 	}
 	if (draw_vertice_normals && !draw_vertice_included_normals) {
