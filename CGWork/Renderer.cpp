@@ -290,8 +290,8 @@ void CCGWorkView::CRenderer::draw_model(const CModel & model)
 void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 {
 	for (const CPolygon& polygon : model.polygons) {
-		vec3 camera_view = vec4(0, 0, 1.0f, 1.0f);
-		if (dot(polygon.vertices[0].transformed - camera_view, polygon.calculated_normal - polygon.origin) < 0) {
+		vec3 camera_view(0, 0, 1.0f);
+		if (dot(camera_view, polygon.calculated_normal) > 0) {
 			continue;
 		}
 
@@ -324,8 +324,8 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 {
 	for (const CPolygon& polygon : model.polygons) {
-		vec3 camera_view = vec4(0, 0, 1.0f, 1.0f);
-		if (dot(polygon.vertices[0].transformed - camera_view, polygon.calculated_normal - polygon.origin) < 0) {
+		vec3 camera_view(0, 0, 1.0f);
+		if (dot(camera_view, polygon.calculated_normal) > 0) {
 			continue;
 		}
 
