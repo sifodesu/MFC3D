@@ -32,6 +32,8 @@ public:
 		CCGWorkView* parent;
 		BYTE* bitmap;
 		CCamera camera;
+
+
 		
 		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint);
 		void flood_fill(vector<vec3>& poly, vec2& p, COLORREF color);
@@ -40,7 +42,7 @@ public:
 		void apply_perspective(vec4& v);
 		vec3 cast(const vec3& v);
 
-		bool draw_bounding_box;
+		bool draw_bbox;
 		bool draw_polygon_normals;
 		bool draw_vertice_normals;
 		bool draw_polygon_included_normals;
@@ -52,12 +54,11 @@ public:
 		void get_bitmap(CDC* context);
 		void draw_bitmap(CDC* context);
 		void set_camera(const CCamera& camera);
-		void draw_model(CModel& model);
-		void draw_normal(const vec3& startPoint, const vec3& givenNormal, mat4 transform, COLORREF color);
-		bool check_if_drawn(const vec2& startPoint, const vec2& endPoint, std::unordered_set<edge>& current_set);
-		void draw_bounding_box_if_needed(CModel& model, mat4& transform);
-		void draw_normals(CModel& model, CPolygon& polygon,
-			mat4& transform, vector<vec3> source, vector<vec3> points, std::unordered_map<vec3, std::unordered_set<vec3>>& verticesMap);
+		void draw_model(const CModel& model);
+		void draw_edges(const CModel& model);
+		void draw_normals(const CModel& model);
+		void draw_normal(const vec3& origin, const vec3& direction, COLORREF color);
+		void draw_bounding_box(const CModel& model);
 
 		CRect screen;
 		std::bitset<3840 * 2160> bitFlag;

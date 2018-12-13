@@ -643,13 +643,13 @@ void CCGWorkView::OnUpdateNormalVerticeToggle(CCmdUI *pCmdUI)
 
 void CCGWorkView::OnShowBbox()
 {
-	scene.renderer.draw_bounding_box = !scene.renderer.draw_bounding_box;
+	scene.renderer.draw_bbox = !scene.renderer.draw_bbox;
 }
 
 
 void CCGWorkView::OnUpdateShowBbox(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck(scene.renderer.draw_bounding_box);
+	pCmdUI->SetCheck(scene.renderer.draw_bbox);
 }
 
 

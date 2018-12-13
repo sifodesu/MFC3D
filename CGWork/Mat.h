@@ -76,6 +76,10 @@ public:
 		);
 	}
 
+	vec4 operator* (const vec3& v) const {
+		return *this * vec4(v.x, v.y, v.z, 1.0f);
+	}
+
 	mat4 operator/ (float s) const {
 		return *this * (1.0f / s);
 	}

@@ -116,7 +116,7 @@ void CCGWorkView::CScene::draw(CDC* context)
 	for (CModel& model : models) {
 		renderer.draw_model(model);
 	}
-	drawZBuffer();
+	//drawZBuffer();
 
 	renderer.draw_bitmap(context);
 }

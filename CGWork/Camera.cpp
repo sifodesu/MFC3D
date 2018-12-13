@@ -2,7 +2,7 @@
 
 CCamera::CCamera() :
 	d(2.0f),
-	a(0.0f),
+	a(0.1f),
 	is_ortho(true)
 {
 	set_orthographic();

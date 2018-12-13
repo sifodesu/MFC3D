@@ -49,7 +49,32 @@ void CModel::setup_model()
 	for (vec3& point : bounding_box) {
 		point = transform * vec4(point.x, point.y, point.z, 1.0f);
 	}
+	calculate_normals();
+}
 
+void CModel::calculate_normals()
+{
+	std::unordered_map<vec3, std::unordered_set<vec3>> vertice_map;
+	for (CPolygon& polygon : polygons) {
+		if (polygon.vertices.size() >= 3) {
+			vec3 p1 = polygon.vertices[0].transformed;
+			vec3 p2 = polygon.vertices[1].transformed;
+			vec3 p3 = polygon.vertices[2].transformed;
+			polygon.calculated_normal = normalized(cross(p3 - p2, p1 - p2));
+			for (const CVertice& vertice : polygon.vertices) {
+				vertice_map[vertice.point].insert(polygon.calculated_normal);
+			}
+		}
+	}
+	for (CPolygon& polygon : polygons) {
+		for (CVertice& vertice : polygon.vertices) {
+			vec3 calculated_normal;
+			for (const vec3& normal : vertice_map[vertice.point]) {
+				calculated_normal = calculated_normal + normal;
+			}
+			vertice.calculated_normal = calculated_normal / (float)vertice_map[vertice.point].size();
+		}
+	}
 }
 
 void CModel::add_polygon(const CPolygon & polygon)
@@ -57,12 +82,26 @@ void CModel::add_polygon(const CPolygon & polygon)
 	polygons.push_back(polygon);
 }
 
+void CModel::apply_transform()
+{
+	mat4 transform = model_transform * view_transform;
+	for (CPolygon& polygon : polygons) {
+		for (CVertice& vertice : polygon.vertices) {
+			vertice.transformed = transform * vertice.point;
+		}
+		polygon.set_origin();
+	}
+	calculate_normals();
+}
+
 void CModel::transform_model(const mat4 & m)
 {
 	model_transform = m * model_transform;
+	apply_transform();
 }
 
 void CModel::transform_view(const mat4 & m)
 {
 	view_transform = m * view_transform;
+	apply_transform();
 }

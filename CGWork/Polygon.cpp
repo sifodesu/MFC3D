@@ -1,23 +1,17 @@
 #include "Polygon.h"
 
-CPolygon::CPolygon() : highlight(false) {}
-
-//CPolygon::CPolygon(const CVertice & v1, const CVertice & v2, const CVertice & v3)
-//{
-//	vertices.push_back(v1);
-//	vertices.push_back(v2);
-//	vertices.push_back(v3);
-//}
-//
-//CPolygon::CPolygon(const CVertice & v1, const CVertice & v2, const CVertice & v3, const CVertice & v4)
-//{
-//	vertices.push_back(v1);
-//	vertices.push_back(v2);
-//	vertices.push_back(v3);
-//	vertices.push_back(v4);
-//}
+CPolygon::CPolygon() {}
 
 void CPolygon::add_vertice(const CVertice& vertice)
 {
 	vertices.push_back(vertice);
+}
+
+void CPolygon::set_origin()
+{
+	vec3 new_origin;
+	for (const CVertice& vertice : vertices) {
+		new_origin = new_origin + vertice.transformed;
+	}
+	origin = new_origin / (float)vertices.size();
 }
