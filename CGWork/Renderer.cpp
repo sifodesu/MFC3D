@@ -15,6 +15,8 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_polygon_included_normals = true;
 	draw_vertice_included_normals = true;
 	select_highlighted_pol = false;
+
+	backface_culling = true;
 }
 
 CCGWorkView::CRenderer::~CRenderer()
@@ -288,6 +290,11 @@ void CCGWorkView::CRenderer::draw_model(const CModel & model)
 void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 {
 	for (const CPolygon& polygon : model.polygons) {
+		vec3 camera_view = vec4(0, 0, 1.0f, 1.0f);
+		if (dot(polygon.vertices[0].transformed - camera_view, polygon.calculated_normal - polygon.origin) < 0) {
+			continue;
+		}
+
 		vector<vec3> points;
 		for (const CVertice& vertice : polygon.vertices) {
 			vec4 projected = camera.projection * vertice.transformed;
@@ -317,6 +324,11 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 {
 	for (const CPolygon& polygon : model.polygons) {
+		vec3 camera_view = vec4(0, 0, 1.0f, 1.0f);
+		if (dot(polygon.vertices[0].transformed - camera_view, polygon.calculated_normal - polygon.origin) < 0) {
+			continue;
+		}
+
 		if (draw_polygon_normals) {
 			if (draw_polygon_included_normals) {
 				draw_normal(polygon.origin, polygon.included_normal, normals_color);

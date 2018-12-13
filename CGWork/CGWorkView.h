@@ -48,6 +48,8 @@ public:
 		bool draw_polygon_included_normals;
 		bool draw_vertice_included_normals;
 
+		bool backface_culling;
+
 		CRenderer(CCGWorkView* parent);
 		~CRenderer();
 		void set_bitmap_dimensions(const BITMAPINFO& info);
