@@ -245,6 +245,8 @@ public:
 	afx_msg void OnUpdateRenderGouraud(CCmdUI *pCmdUI);
 	afx_msg void OnRenderPhong();
 	afx_msg void OnUpdateRenderPhong(CCmdUI *pCmdUI);
+	afx_msg void OnBackfaceCulling();
+	afx_msg void OnUpdateBackfaceCulling(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

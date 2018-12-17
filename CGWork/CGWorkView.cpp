@@ -111,6 +111,8 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_RENDER_GOURAUD, &CCGWorkView::OnUpdateRenderGouraud)
 	ON_COMMAND(ID_RENDER_PHONG, &CCGWorkView::OnRenderPhong)
 	ON_UPDATE_COMMAND_UI(ID_RENDER_PHONG, &CCGWorkView::OnUpdateRenderPhong)
+	ON_COMMAND(ID_BACKFACE_CULLING, &CCGWorkView::OnBackfaceCulling)
+	ON_UPDATE_COMMAND_UI(ID_BACKFACE_CULLING, &CCGWorkView::OnUpdateBackfaceCulling)
 END_MESSAGE_MAP()
 
 
@@ -771,4 +773,16 @@ void CCGWorkView::OnRenderPhong()
 void CCGWorkView::OnUpdateRenderPhong(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.renderer.rendering_type == CRenderer::SOLID && scene.renderer.shading_type == CRenderer::PHONG);
+}
+
+
+void CCGWorkView::OnBackfaceCulling()
+{
+	scene.renderer.backface_culling = !scene.renderer.backface_culling;
+}
+
+
+void CCGWorkView::OnUpdateBackfaceCulling(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.backface_culling);
 }

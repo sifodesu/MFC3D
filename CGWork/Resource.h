@@ -93,13 +93,15 @@
 #define ID_RENDER_SQUELETON32830        32830
 #define ID_RENDER_ONSCREEN              32831
 #define ID_RENDER_TOFILE                32832
+#define ID_BUTTON32833                  32833
+#define ID_BACKFACE_CULLING             32833
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         32833
+#define _APS_NEXT_COMMAND_VALUE         32834
 #define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
