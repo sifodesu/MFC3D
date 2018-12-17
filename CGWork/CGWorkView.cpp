@@ -359,8 +359,6 @@ void CCGWorkView::OnFileLoad()
 		CModel model = get_current_model();
 		model.setup_model();
 		scene.add_model(model);
-		// Open the file and read it.
-		// Your code here...
 
 		Invalidate();	// force a WM_PAINT for drawing.
 	}

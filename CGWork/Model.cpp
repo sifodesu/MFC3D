@@ -49,7 +49,7 @@ void CModel::setup_model()
 	for (vec3& point : bounding_box) {
 		point = transform * vec4(point.x, point.y, point.z, 1.0f);
 	}
-	calculate_normals();
+	apply_transform();
 }
 
 void CModel::calculate_normals()
