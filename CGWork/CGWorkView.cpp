@@ -113,6 +113,8 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_RENDER_PHONG, &CCGWorkView::OnUpdateRenderPhong)
 	ON_COMMAND(ID_BACKFACE_CULLING, &CCGWorkView::OnBackfaceCulling)
 	ON_UPDATE_COMMAND_UI(ID_BACKFACE_CULLING, &CCGWorkView::OnUpdateBackfaceCulling)
+	ON_COMMAND(ID_Z_BUFFER, &CCGWorkView::OnZBuffer)
+	ON_UPDATE_COMMAND_UI(ID_Z_BUFFER, &CCGWorkView::OnUpdateZBuffer)
 END_MESSAGE_MAP()
 
 
@@ -785,4 +787,16 @@ void CCGWorkView::OnBackfaceCulling()
 void CCGWorkView::OnUpdateBackfaceCulling(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.renderer.backface_culling);
+}
+
+
+void CCGWorkView::OnZBuffer()
+{
+	scene.display_z_buffer = !scene.display_z_buffer;
+}
+
+
+void CCGWorkView::OnUpdateZBuffer(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.display_z_buffer);
 }

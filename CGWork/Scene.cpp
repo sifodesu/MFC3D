@@ -4,7 +4,7 @@
 
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
-	current_camera(0), renderer(parent)
+	current_camera(0), renderer(parent), display_z_buffer(false)
 {
 	cameras.push_back(CCamera());
 }
@@ -116,7 +116,9 @@ void CCGWorkView::CScene::draw(CDC* context)
 	for (CModel& model : models) {
 		renderer.draw_model(model);
 	}
-	//drawZBuffer();
+	if (display_z_buffer) {
+		drawZBuffer();
+	}
 
 	renderer.draw_bitmap(context);
 }

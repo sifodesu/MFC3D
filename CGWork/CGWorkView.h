@@ -94,6 +94,7 @@ public:
 		void drawZBuffer();
 		
 		CRenderer renderer;
+		bool display_z_buffer;
 		vector<CModel> models;
 	};
 
@@ -247,6 +248,8 @@ public:
 	afx_msg void OnUpdateRenderPhong(CCmdUI *pCmdUI);
 	afx_msg void OnBackfaceCulling();
 	afx_msg void OnUpdateBackfaceCulling(CCmdUI *pCmdUI);
+	afx_msg void OnZBuffer();
+	afx_msg void OnUpdateZBuffer(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

@@ -41,9 +41,11 @@ void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
 
 //approximate the z of a point on a line
 float get_approx_z(POINT p, const vec3& source, const vec3& dest) {
-	float normS = norm(vec2(vec3((float)p.x, (float)p.y, 0) - source));
-	float normD = norm(vec2(dest - vec3((float)p.x, (float)p.y, 0)));
-	return source.z*normS / (normS + normD) + dest.z*normD / (normS + normD);
+	//float normS = norm(vec2(vec3((float)p.x, (float)p.y, 0) - source));
+	//float normD = norm(vec2(dest - vec3((float)p.x, (float)p.y, 0)));
+	//return (source.z*normS + dest.z*normD) / (normS + normD);
+	float t = (p.x - source.x) / (dest.x - source.x);
+	return source.z + t * (dest.z - source.z);
 }
 
 void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint) {
@@ -250,9 +252,9 @@ void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
 					apply_perspective(b);
 				}
 				vec3 aa = cast(vec3(a));
-				aa.z = bz;
+				aa.z = az;
 				vec3 bb = cast(vec3(b));
-				bb.z = az;
+				bb.z = bz;
 				draw_line(aa, bb, model.bbox_color);
 			}
 		}
@@ -342,7 +344,7 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 			p1.x = get_x(points[l], points[ll], y);
 			p2.x = get_x(points[r], points[rr], y);
 			vec3 v1(p1.x, p1.y, get_approx_z(p1, points[l], points[ll]));
-			vec3 v2(p2.x, p2.y, get_approx_z(p1, points[r], points[rr]));
+			vec3 v2(p2.x, p2.y, get_approx_z(p2, points[r], points[rr]));
 			for (int x = p1.x; x < p2.x; x++) {
 				p.x = x;
 				p.y = y;
