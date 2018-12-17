@@ -56,6 +56,9 @@ public:
 		void draw_bitmap(CDC* context);
 		void set_camera(const CCamera& camera);
 		void draw_model(const CModel& model);
+
+		float get_x(vec3 v1, vec3 v2, int y);
+		void draw_faces(const CModel& model);
 		void draw_edges(const CModel& model);
 		void draw_normals(const CModel& model);
 		void draw_normal(const vec3& origin, const vec3& direction, COLORREF color);

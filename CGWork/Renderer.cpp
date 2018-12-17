@@ -44,21 +44,6 @@ float get_approx_z(POINT p, const vec3& source, const vec3& dest) {
 	return source.z*normS / (normS + normD) + dest.z*normD / (normS + normD);
 }
 
-//approximate the z of a point inside a polygon
-float approximate_z_in_pol(vector<vec3>& points, vec2& p) {
-	float sum = 0.0f;
-
-	for (vec3 point : points) {
-		sum += norm(p - vec2(point));
-	}
-	float res = 0.0f;
-	for (vec3 point : points) {
-		res += point.z*norm(p - vec2(point)) / sum;
-	}
-
-	return res;
-}
-
 void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint) {
 	if (p.x >= 0 && p.y >= 0 && p.x < min(3840, screen.Width()) && p.y < min(2160, screen.Height())) {
 		if (!bitFlag.test(p.x + p.y * 3840)) {
@@ -111,7 +96,6 @@ void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF 
 					p.y++;
 				}
 				set_pixel(p, v1, v2, color, forcePrint);
-
 			}
 		}
 		else {
@@ -270,7 +254,8 @@ void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
 
 void CCGWorkView::CRenderer::draw_model(const CModel & model)
 {
-	draw_edges(model);
+	draw_faces(model);
+	//draw_edges(model);
 	if (draw_polygon_normals || draw_vertice_normals) {
 		draw_normals(model);
 	}
@@ -279,6 +264,79 @@ void CCGWorkView::CRenderer::draw_model(const CModel & model)
 	}
 
 	select_highlighted_pol = false;
+}
+
+float CCGWorkView::CRenderer::get_x(vec3 v1, vec3 v2, int y)
+{
+	float t = (((float)y - v1.y) / (v2.y - v1.y));
+	if (t < 0.0f) {
+		return v1.x;
+	}
+	if (t > 1.0f) {
+		return v2.x;
+	}
+	return v1.x + t * (v2.x - v1.x);
+}
+
+void CCGWorkView::CRenderer::draw_faces(const CModel & model)
+{
+	for (const CPolygon& polygon : model.polygons) {
+		vector<vec3> points;
+		int first = 0, i = 0;
+		int min_y = screen.Height(), max_y = 0;
+		for (const CVertice& vertice : polygon.vertices) {
+			vec4 projected = camera.projection * vertice.transformed;
+			if (!camera.is_orthographic()) {
+				apply_perspective(projected);
+			}
+			vec3 v = cast(vec3(projected));
+			v.z = vertice.transformed.z;
+			if (v.y < min_y) {
+				first = i;
+				min_y = v.y;
+			}
+			if (v.y > max_y) {
+				max_y = v.y;
+			}
+			points.push_back(v);
+			i++;
+		}
+		int l = first, r = first;
+		POINT p1, p2, p;
+		for (int y = min_y; y <= max_y; y++) {
+			int ll = l - 1;
+			if (ll < 0) {
+				ll += i;
+			}
+			int rr = r + 1;
+			if (rr >= i) {
+				rr -= i;
+			}
+			p1.y = y;
+			p2.y = y;
+			p1.x = get_x(points[l], points[ll], y);
+			p2.x = get_x(points[r], points[rr], y);
+			vec3 v1(p1.x, p1.y, get_approx_z(p1, points[l], points[ll]));
+			vec3 v2(p2.x, p2.y, get_approx_z(p1, points[r], points[rr]));
+			for (int x = p1.x; x < p2.x; x++) {
+				p.x = x;
+				p.y = y;
+				set_pixel(p, v1, v2, BLUE, false);
+			}
+			if ((int)points[ll].y == y) {
+				l--;
+				if (l < 0) {
+					l += i;
+				}
+			}
+			if ((int)points[rr].y == y) {
+				r++;
+				if (r >= i) {
+					r -= i;
+				}
+			}
+		}
+	}
 }
 
 void CCGWorkView::CRenderer::draw_edges(const CModel & model)
@@ -309,9 +367,9 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 		}
 
 		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], polygon_color, highlight);
+			draw_line(points[i], points[i + 1], polygon_color, true);
 		}
-		draw_line(points[size], points[0], polygon_color, highlight);
+		draw_line(points[size], points[0], polygon_color, true);
 	}
 }
 
