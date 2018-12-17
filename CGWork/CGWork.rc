@@ -65,6 +65,11 @@ BEGIN
     BUTTON      ID_SHOW_BBOX
     BUTTON      ID_NORMAL_PLANE_TOGGLE
     BUTTON      ID_NORMAL_VERTICE_TOGGLE
+    SEPARATOR
+    BUTTON      ID_RENDER_SQUELETON
+    BUTTON      ID_RENDER_FLAT
+    BUTTON      ID_RENDER_GOURAUD
+    BUTTON      ID_RENDER_PHONG
 END
 
 
@@ -129,8 +134,15 @@ BEGIN
         BEGIN
             MENUITEM "&Flat",                       ID_LIGHT_SHADING_FLAT
             MENUITEM "&Gouraud",                    ID_LIGHT_SHADING_GOURAUD
+            MENUITEM "Phong",                       ID_SHADING_PHONG
         END
         MENUITEM "&Parameters...",              ID_LIGHT_CONSTANTS
+    END
+    POPUP "Render"
+    BEGIN
+        MENUITEM "Squeleton",                   ID_RENDER_SQUELETON
+        MENUITEM "On Screen",                   ID_RENDER_ONSCREEN
+        MENUITEM "To File",                     ID_RENDER_TOFILE
     END
     POPUP "&Help"
     BEGIN

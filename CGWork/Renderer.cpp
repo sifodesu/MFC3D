@@ -4,6 +4,8 @@
 
 CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	parent(parent), bitmap(nullptr),
+	rendering_type(SQUELETON),
+	shading_type(FLAT),
 	background_color(BLACK),
 	highlight_polygon(GREEN),
 	normals_color(PINK),
@@ -254,8 +256,12 @@ void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
 
 void CCGWorkView::CRenderer::draw_model(const CModel & model)
 {
-	draw_faces(model);
-	//draw_edges(model);
+	if (rendering_type == SQUELETON) {
+		draw_edges(model);
+	}
+	else {
+		draw_faces(model);
+	}
 	if (draw_polygon_normals || draw_vertice_normals) {
 		draw_normals(model);
 	}

@@ -84,13 +84,22 @@
 #define IDD_FINENESS                    32821
 #define IDD_DIAFINENESS                 32821
 #define ID_MFINENESS                    32822
+#define ID_RENDER_FLAT                  32825
+#define ID_RENDER_GOURAUD               32826
+#define ID_BUTTON32827                  32827
+#define ID_RENDER_PHONG                 32827
+#define ID_RENDER_SQUELETON             32828
+#define ID_SHADING_PHONG                32829
+#define ID_RENDER_SQUELETON32830        32830
+#define ID_RENDER_ONSCREEN              32831
+#define ID_RENDER_TOFILE                32832
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         32823
+#define _APS_NEXT_COMMAND_VALUE         32833
 #define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -32,9 +32,11 @@ public:
 		CCGWorkView* parent;
 		BYTE* bitmap;
 		CCamera camera;
+		enum { SQUELETON, SOLID };
+		int rendering_type;
+		enum { FLAT, GOURAUD, PHONG };
+		int shading_type;
 
-
-		
 		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint);
 		void draw_pixel(POINT p, COLORREF c);
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
@@ -227,11 +229,22 @@ public:
 	afx_msg void OnShowBbox();
 	afx_msg void OnUpdateShowBbox(CCmdUI *pCmdUI);
 	afx_msg void OnOptionsPerspectivecontrol();
-//	afx_msg void OnEnChangeEditMouseSens();
 	float mouse_sensitivity;
 	afx_msg void OnOptionsMousesensitivity();
 	afx_msg void OnOptionsColors();
 	afx_msg void OnMfineness();
+	afx_msg void OnRenderSqueleton();
+	afx_msg void OnUpdateRenderSqueleton(CCmdUI *pCmdUI);
+	afx_msg void OnRenderOnscreen();
+	afx_msg void OnUpdateRenderOnscreen(CCmdUI *pCmdUI);
+	afx_msg void OnRenderFlat();
+	afx_msg void OnUpdateRenderFlat(CCmdUI *pCmdUI);
+	afx_msg void OnShadingPhong();
+	afx_msg void OnUpdateShadingPhong(CCmdUI *pCmdUI);
+	afx_msg void OnRenderGouraud();
+	afx_msg void OnUpdateRenderGouraud(CCmdUI *pCmdUI);
+	afx_msg void OnRenderPhong();
+	afx_msg void OnUpdateRenderPhong(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

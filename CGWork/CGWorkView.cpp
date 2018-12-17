@@ -99,6 +99,18 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_OPTIONS_MOUSESENSITIVITY, &CCGWorkView::OnOptionsMousesensitivity)
 	ON_COMMAND(ID_OPTIONS_COLORS, &CCGWorkView::OnOptionsColors)
 	ON_COMMAND(ID_MFINENESS, &CCGWorkView::OnMfineness)
+	ON_COMMAND(ID_RENDER_SQUELETON, &CCGWorkView::OnRenderSqueleton)
+	ON_UPDATE_COMMAND_UI(ID_RENDER_SQUELETON, &CCGWorkView::OnUpdateRenderSqueleton)
+	ON_COMMAND(ID_RENDER_ONSCREEN, &CCGWorkView::OnRenderOnscreen)
+	ON_UPDATE_COMMAND_UI(ID_RENDER_ONSCREEN, &CCGWorkView::OnUpdateRenderOnscreen)
+	ON_COMMAND(ID_RENDER_FLAT, &CCGWorkView::OnRenderFlat)
+	ON_UPDATE_COMMAND_UI(ID_RENDER_FLAT, &CCGWorkView::OnUpdateRenderFlat)
+	ON_COMMAND(ID_SHADING_PHONG, &CCGWorkView::OnShadingPhong)
+	ON_UPDATE_COMMAND_UI(ID_SHADING_PHONG, &CCGWorkView::OnUpdateShadingPhong)
+	ON_COMMAND(ID_RENDER_GOURAUD, &CCGWorkView::OnRenderGouraud)
+	ON_UPDATE_COMMAND_UI(ID_RENDER_GOURAUD, &CCGWorkView::OnUpdateRenderGouraud)
+	ON_COMMAND(ID_RENDER_PHONG, &CCGWorkView::OnRenderPhong)
+	ON_UPDATE_COMMAND_UI(ID_RENDER_PHONG, &CCGWorkView::OnUpdateRenderPhong)
 END_MESSAGE_MAP()
 
 
@@ -483,23 +495,23 @@ void CCGWorkView::OnUpdateAxisZ(CCmdUI* pCmdUI)
 
 void CCGWorkView::OnLightShadingFlat()
 {
-	m_nLightShading = ID_LIGHT_SHADING_FLAT;
+	scene.renderer.shading_type = CRenderer::FLAT;
 }
 
 void CCGWorkView::OnUpdateLightShadingFlat(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nLightShading == ID_LIGHT_SHADING_FLAT);
+	pCmdUI->SetCheck(scene.renderer.shading_type == CRenderer::FLAT);
 }
 
 
 void CCGWorkView::OnLightShadingGouraud()
 {
-	m_nLightShading = ID_LIGHT_SHADING_GOURAUD;
+	scene.renderer.shading_type = CRenderer::GOURAUD;
 }
 
 void CCGWorkView::OnUpdateLightShadingGouraud(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nLightShading == ID_LIGHT_SHADING_GOURAUD);
+	pCmdUI->SetCheck(scene.renderer.shading_type == CRenderer::GOURAUD);
 }
 
 // LIGHT SETUP HANDLER ///////////////////////////////////////////
@@ -684,4 +696,79 @@ void CCGWorkView::OnMfineness()
 	DiaFineNess dlg;
 	dlg.DoModal();
 	changeFineNess(dlg.fineNess);
+}
+
+
+void CCGWorkView::OnRenderSqueleton()
+{
+	scene.renderer.rendering_type = CRenderer::SQUELETON;
+}
+
+
+void CCGWorkView::OnUpdateRenderSqueleton(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.rendering_type == CRenderer::SQUELETON);
+}
+
+
+void CCGWorkView::OnRenderOnscreen()
+{
+	scene.renderer.rendering_type = CRenderer::SOLID;
+}
+
+
+void CCGWorkView::OnUpdateRenderOnscreen(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.rendering_type == CRenderer::SOLID);
+}
+
+
+void CCGWorkView::OnRenderFlat()
+{
+	scene.renderer.shading_type = CRenderer::FLAT;
+	scene.renderer.rendering_type = CRenderer::SOLID;
+}
+
+
+void CCGWorkView::OnUpdateRenderFlat(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.rendering_type == CRenderer::SOLID && scene.renderer.shading_type == CRenderer::FLAT);
+}
+
+
+void CCGWorkView::OnShadingPhong()
+{
+	scene.renderer.shading_type = CRenderer::PHONG;
+}
+
+
+void CCGWorkView::OnUpdateShadingPhong(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.shading_type == CRenderer::PHONG);
+}
+
+
+void CCGWorkView::OnRenderGouraud()
+{
+	scene.renderer.shading_type = CRenderer::GOURAUD;
+	scene.renderer.rendering_type = CRenderer::SOLID;
+}
+
+
+void CCGWorkView::OnUpdateRenderGouraud(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.rendering_type == CRenderer::SOLID && scene.renderer.shading_type == CRenderer::GOURAUD);
+}
+
+
+void CCGWorkView::OnRenderPhong()
+{
+	scene.renderer.shading_type = CRenderer::PHONG;
+	scene.renderer.rendering_type = CRenderer::SOLID;
+}
+
+
+void CCGWorkView::OnUpdateRenderPhong(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.rendering_type == CRenderer::SOLID && scene.renderer.shading_type == CRenderer::PHONG);
 }
