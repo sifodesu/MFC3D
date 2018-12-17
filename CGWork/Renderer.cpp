@@ -18,7 +18,7 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_vertice_included_normals = true;
 	select_highlighted_pol = false;
 
-	backface_culling = true;
+	backface_culling = false;
 }
 
 CCGWorkView::CRenderer::~CRenderer()
@@ -210,9 +210,9 @@ void CCGWorkView::CRenderer::draw_normal(const vec3& origin, const vec3& directi
 
 	if (a.z >= 0 && b.z >= 0) {
 		vec3 newSource = cast(vec3(a)); 
-		newSource.z = a.z;
+		newSource.z = origin.z;
 		vec3 newStart = cast(vec3(b));  
-		newStart.z = b.z;
+		newStart.z = goal.z;
 		draw_line(newStart, newSource, color);
 	}
 
@@ -235,20 +235,25 @@ bool pointIsInside(vector<vec3> points, vec2 dot) {
 }
 
 void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
-	mat4 transform = model.model_transform * model.view_transform * camera.projection;
+	mat4 transform = model.model_transform * model.view_transform;
 	for (const vec3& p1 : model.bounding_box) {
 		for (const vec3& p2 : model.bounding_box) {
 			vec3 res = p1 - p2;
 			if ((!res.x && !res.y) || (!res.y && !res.z) || (!res.x && !res.z)) {
 				vec4 a = transform * vec4(p1.x, p1.y, p1.z, 1.0f);
 				vec4 b = transform * vec4(p2.x, p2.y, p2.z, 1.0f);
+				float az = a.z, bz = b.z;
+				a = camera.projection * a;
+				b = camera.projection * b;
 				if (!camera.is_orthographic()) {
 					apply_perspective(a);
 					apply_perspective(b);
 				}
-				vec3 p1 = cast(vec3(a));
-				vec3 p2 = cast(vec3(b));
-				draw_line(p1, p2, model.bbox_color);
+				vec3 aa = cast(vec3(a));
+				aa.z = bz;
+				vec3 bb = cast(vec3(b));
+				bb.z = az;
+				draw_line(aa, bb, model.bbox_color);
 			}
 		}
 	}
@@ -287,6 +292,11 @@ float CCGWorkView::CRenderer::get_x(vec3 v1, vec3 v2, int y)
 void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 {
 	for (const CPolygon& polygon : model.polygons) {
+		vec3 camera_view(0, 0, 1.0f);
+		bool inverted = false;
+		if (dot(camera_view, polygon.calculated_normal) > 0) {
+			inverted = true;
+		}
 		vector<vec3> points;
 		int first = 0, i = 0;
 		int min_y = screen.Height(), max_y = 0;
@@ -304,9 +314,18 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 			if (v.y > max_y) {
 				max_y = v.y;
 			}
-			points.push_back(v);
+			if (inverted) {
+				points.insert(points.begin(), v);
+			}
+			else {
+				points.push_back(v);
+			}
 			i++;
 		}
+		if (inverted) {
+			first = i - first - 1;
+		}
+
 		int l = first, r = first;
 		POINT p1, p2, p;
 		for (int y = min_y; y <= max_y; y++) {
@@ -349,7 +368,7 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 {
 	for (const CPolygon& polygon : model.polygons) {
 		vec3 camera_view(0, 0, 1.0f);
-		if (dot(camera_view, polygon.calculated_normal) > 0) {
+		if (backface_culling && dot(camera_view, polygon.calculated_normal) > 0) {
 			continue;
 		}
 
@@ -384,7 +403,7 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 	mat4 transform = model.model_transform * model.view_transform;
 	for (const CPolygon& polygon : model.polygons) {
 		vec3 camera_view(0, 0, 1.0f);
-		if (dot(camera_view, polygon.calculated_normal) > 0) {
+		if (backface_culling && dot(camera_view, polygon.calculated_normal) > 0) {
 			continue;
 		}
 
