@@ -268,12 +268,6 @@ void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
 	}
 }
 
-void CCGWorkView::CRenderer::flood_fill(vector<vec3>& poly, vec2& p, COLORREF color) {
-	if (pointIsInside(poly, p)) {
-		//set_pixel(POINT {p.x, p.y}, )
-	}
-}
-
 void CCGWorkView::CRenderer::draw_model(const CModel & model)
 {
 	draw_edges(model);
@@ -323,6 +317,7 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 
 void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 {
+	mat4 transform = model.model_transform * model.view_transform;
 	for (const CPolygon& polygon : model.polygons) {
 		vec3 camera_view(0, 0, 1.0f);
 		if (dot(camera_view, polygon.calculated_normal) > 0) {
@@ -331,16 +326,20 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 
 		if (draw_polygon_normals) {
 			if (draw_polygon_included_normals) {
-				draw_normal(polygon.origin, polygon.included_normal, normals_color);
+				vec3 dest = polygon.origin + polygon.included_normal;
+				dest = transform * dest;
+				draw_normal(polygon.origin_transformed, dest - polygon.origin, normals_color);
 			}
 			else {
-				draw_normal(polygon.origin, polygon.calculated_normal, normals_color);
+				draw_normal(polygon.origin_transformed, polygon.calculated_normal, normals_color);
 			}
 		}
 		if (draw_vertice_normals) {
 			for (const CVertice& vertice : polygon.vertices) {
 				if (draw_vertice_included_normals) {
-					draw_normal(vertice.transformed, vertice.included_normal, normals_color);
+					vec3 dest = vertice.point + vertice.included_normal;
+					dest = transform * dest;
+					draw_normal(vertice.transformed, dest - vertice.point, normals_color);
 				}
 				else {
 					draw_normal(vertice.transformed, vertice.calculated_normal, normals_color);

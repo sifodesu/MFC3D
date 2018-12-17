@@ -11,7 +11,16 @@ void CPolygon::set_origin()
 {
 	vec3 new_origin;
 	for (const CVertice& vertice : vertices) {
-		new_origin = new_origin + vertice.transformed;
+		new_origin = new_origin + vertice.point;
 	}
-	origin = new_origin / (float)vertices.size();
+	origin_transformed = new_origin / (float)vertices.size();
+}
+
+void CPolygon::set_origin_transformed()
+{
+	vec3 new_origin_transformed;
+	for (const CVertice& vertice : vertices) {
+		new_origin_transformed = new_origin_transformed + vertice.transformed;
+	}
+	origin_transformed = new_origin_transformed / (float)vertices.size();
 }

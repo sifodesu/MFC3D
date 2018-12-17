@@ -36,7 +36,6 @@ public:
 
 		
 		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint);
-		void flood_fill(vector<vec3>& poly, vec2& p, COLORREF color);
 		void draw_pixel(POINT p, COLORREF c);
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void apply_perspective(vec4& v);

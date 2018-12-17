@@ -45,6 +45,7 @@ void CModel::setup_model()
 		for ( CVertice& vertice : polygon.vertices) {
 			vertice.point = transform * vec4(vertice.point.x, vertice.point.y, vertice.point.z, 1.0f);
 		}
+		polygon.set_origin();
 	}
 	for (vec3& point : bounding_box) {
 		point = transform * vec4(point.x, point.y, point.z, 1.0f);
@@ -89,7 +90,7 @@ void CModel::apply_transform()
 		for (CVertice& vertice : polygon.vertices) {
 			vertice.transformed = transform * vertice.point;
 		}
-		polygon.set_origin();
+		polygon.set_origin_transformed();
 	}
 
 	calculate_normals();
