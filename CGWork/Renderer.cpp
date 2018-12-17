@@ -340,7 +340,7 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 		if (draw_vertice_normals) {
 			for (const CVertice& vertice : polygon.vertices) {
 				if (draw_vertice_included_normals) {
-					draw_normal(vertice.transformed, vertice.imported_normal, normals_color);
+					draw_normal(vertice.transformed, vertice.included_normal, normals_color);
 				}
 				else {
 					draw_normal(vertice.transformed, vertice.calculated_normal, normals_color);

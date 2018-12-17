@@ -91,6 +91,7 @@ void CModel::apply_transform()
 		}
 		polygon.set_origin();
 	}
+
 	calculate_normals();
 }
 

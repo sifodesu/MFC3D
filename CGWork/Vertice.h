@@ -8,7 +8,7 @@ class CVertice
 public:
 	vec3 point;
 	vec3 transformed;
-	vec3 imported_normal;
+	vec3 included_normal;
 	vec3 calculated_normal;
 
 	CVertice(const vec3& point);
