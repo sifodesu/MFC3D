@@ -87,6 +87,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cPNG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGWorkView.h">
@@ -225,6 +228,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DiaFineNess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cPNG.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
