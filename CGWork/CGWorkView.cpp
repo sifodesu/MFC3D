@@ -115,6 +115,10 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_BACKFACE_CULLING, &CCGWorkView::OnUpdateBackfaceCulling)
 	ON_COMMAND(ID_Z_BUFFER, &CCGWorkView::OnZBuffer)
 	ON_UPDATE_COMMAND_UI(ID_Z_BUFFER, &CCGWorkView::OnUpdateZBuffer)
+	ON_COMMAND(ID_POLYGON_INVERTED, &CCGWorkView::OnPolygonInverted)
+	ON_UPDATE_COMMAND_UI(ID_POLYGON_INVERTED, &CCGWorkView::OnUpdatePolygonInverted)
+	ON_COMMAND(ID_VERTEX_INVERTED, &CCGWorkView::OnVertexInverted)
+	ON_UPDATE_COMMAND_UI(ID_VERTEX_INVERTED, &CCGWorkView::OnUpdateVertexInverted)
 END_MESSAGE_MAP()
 
 
@@ -799,4 +803,28 @@ void CCGWorkView::OnZBuffer()
 void CCGWorkView::OnUpdateZBuffer(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.display_z_buffer);
+}
+
+
+void CCGWorkView::OnPolygonInverted()
+{
+	scene.renderer.invert_polygon_normals = !scene.renderer.invert_polygon_normals;
+}
+
+
+void CCGWorkView::OnUpdatePolygonInverted(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.invert_polygon_normals);
+}
+
+
+void CCGWorkView::OnVertexInverted()
+{
+	scene.renderer.invert_vertice_normals = !scene.renderer.invert_vertice_normals;
+}
+
+
+void CCGWorkView::OnUpdateVertexInverted(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.invert_vertice_normals);
 }

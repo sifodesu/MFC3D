@@ -120,11 +120,13 @@ BEGIN
             BEGIN
                 MENUITEM "Included",                    ID_POLYGON_INCLUDED, CHECKED
                 MENUITEM "Calculated",                  ID_POLYGON_CALCULATED
+                MENUITEM "Inverted",                    ID_POLYGON_INVERTED
             END
             POPUP "Vertex"
             BEGIN
                 MENUITEM "Included",                    ID_VERTEX_INCLUDED, CHECKED
                 MENUITEM "Calculated",                  ID_VERTEX_CALCULATED
+                MENUITEM "Inverted",                    ID_VERTEX_INVERTED
             END
         END
         MENUITEM "Colors...",                   ID_OPTIONS_COLORS

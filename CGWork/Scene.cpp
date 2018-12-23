@@ -123,6 +123,5 @@ void CCGWorkView::CScene::draw(CDC* context)
 	if (display_z_buffer) {
 		drawZBuffer();
 	}
-
 	renderer.draw_bitmap(context);
 }

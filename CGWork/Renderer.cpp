@@ -14,6 +14,8 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_bbox = false;
 	draw_polygon_normals = false;
 	draw_vertice_normals = false;
+	invert_polygon_normals = false;
+	invert_vertice_normals = false;
 	draw_polygon_included_normals = true;
 	draw_vertice_included_normals = true;
 	select_highlighted_pol = false;
@@ -411,6 +413,14 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 {
 	mat4 transform = model.model_transform * model.view_transform;
+	float inverted_polygon = 1.0f;
+	float inverted_vertice = 1.0f;
+	if (invert_polygon_normals) {
+		inverted_polygon = -1.0f;
+	}
+	if (invert_vertice_normals) {
+		inverted_vertice = -1.0f;
+	}
 	for (const CPolygon& polygon : model.polygons) {
 		vec3 camera_view(0, 0, 1.0f);
 		if (backface_culling && dot(camera_view, polygon.calculated_normal) > 0) {
@@ -421,10 +431,10 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 			if (draw_polygon_included_normals) {
 				vec3 dest = polygon.origin + polygon.included_normal;
 				dest = transform * dest;
-				draw_normal(polygon.origin_transformed, dest - polygon.origin, normals_color);
+				draw_normal(polygon.origin_transformed, (dest - polygon.origin) * inverted_polygon, normals_color);
 			}
 			else {
-				draw_normal(polygon.origin_transformed, polygon.calculated_normal, normals_color);
+				draw_normal(polygon.origin_transformed, polygon.calculated_normal * inverted_polygon, normals_color);
 			}
 		}
 		if (draw_vertice_normals) {
@@ -432,10 +442,10 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 				if (draw_vertice_included_normals) {
 					vec3 dest = vertice.point + vertice.included_normal;
 					dest = transform * dest;
-					draw_normal(vertice.transformed, dest - vertice.point, normals_color);
+					draw_normal(vertice.transformed, (dest - vertice.point) * inverted_vertice, normals_color);
 				}
 				else {
-					draw_normal(vertice.transformed, vertice.calculated_normal, normals_color);
+					draw_normal(vertice.transformed, vertice.calculated_normal * inverted_vertice, normals_color);
 				}
 			}
 		}
