@@ -9,7 +9,8 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	background_color(BLACK),
 	highlight_polygon(GREEN),
 	normals_color(PINK),
-	wireframe_color(WHITE)
+	wireframe_color(WHITE),
+	bbox_color(RED)
 {
 	draw_bbox = false;
 	draw_polygon_normals = false;
@@ -261,7 +262,7 @@ void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
 				aa.z = az;
 				vec3 bb = cast(vec3(b));
 				bb.z = bz;
-				draw_line(aa, bb, model.bbox_color);
+				draw_line(aa, bb, bbox_color);
 			}
 		}
 	}

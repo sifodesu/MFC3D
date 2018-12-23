@@ -21,9 +21,8 @@ public:
 
 	COLORREF color;
 	COLORREF normalsColor;
-	COLORREF bbox_color;
 
-	CModel(COLORREF color = WHITE, COLORREF normalsColor = PINK, COLORREF bbox_color = RED);
+	CModel(COLORREF color = WHITE, COLORREF normalsColor = PINK);
 	void setup_model();
 	void calculate_normals();
 

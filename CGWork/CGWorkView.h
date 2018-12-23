@@ -77,6 +77,7 @@ public:
 		COLORREF highlight_polygon;
 		COLORREF normals_color;
 		COLORREF wireframe_color;
+		COLORREF bbox_color;
 	};
 
 	class CScene

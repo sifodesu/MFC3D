@@ -58,7 +58,7 @@ BOOL DialMouseSens::OnInitDialog()
 	CDialog::OnInitDialog();
 	CString str;
 	float d = mouse_sensitivity;
-	str.Format(L"%f", d);
+	str.Format(L"%.2f", d);
 	edit_mouse_sensitivity.SetWindowText(str);
 	return TRUE;
 }

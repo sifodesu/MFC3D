@@ -1,7 +1,7 @@
 #include "Model.h"
 
-CModel::CModel(COLORREF color, COLORREF normalsColor, COLORREF bbox_color) :
-	color(color), normalsColor(normalsColor), bbox_color(bbox_color) {}
+CModel::CModel(COLORREF color, COLORREF normalsColor) :
+	color(color), normalsColor(normalsColor) {}
 
 void CModel::setup_model()
 {
