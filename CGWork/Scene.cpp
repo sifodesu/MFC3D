@@ -4,9 +4,10 @@
 
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
-	current_camera(0), renderer(parent), display_z_buffer(false)
+	current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(true), isBackgroundStretched(true)
 {
 	cameras.push_back(CCamera());
+	background_image.SetFileName("./bite.png");
 }
 
 void CCGWorkView::CScene::add_model(const CModel & model)
@@ -104,13 +105,63 @@ void CCGWorkView::CScene::drawZBuffer() {
 		}
 	}
 }
+void CCGWorkView::CScene::draw_background() {
 
+	background_image.ReadPng();
+
+
+	float hW = renderer.screen.Height();
+	float wW = renderer.screen.Width();
+	float hI = background_image.GetHeight();
+	float wI = background_image.GetWidth();
+	//if (hW < 10 || wW < 10) return;
+
+	if (!isBackgroundStretched) {
+		int ch = 0; int cw = 0;
+		while (ch < hW) {
+			for (int y = 0; y < hI; ++y) {
+				if (y + ch >= hW) break;
+				cw = 0;
+			redoX:
+				for (int x = 0; x < wI; ++x) {
+					if (x + cw >= wW) break;
+					//get the "right" order of colors
+					COLORREF col = RGB(GetRValue(background_image.GetValue(x, y)), GetBValue(background_image.GetValue(x, y)), GetGValue(background_image.GetValue(x, y)));
+					renderer.draw_pixel(POINT{ x + cw, y + ch }, col);
+				}
+				cw += wI;
+				if (cw < wW)
+					goto redoX;
+			}
+			ch += hI;
+		}
+	}
+
+	else {
+		float ratioX = wI / wW;
+		float ratioY = hI / hW;
+
+		for (int y = 0; y < hW; y++) {
+			for (int x = 0; x < wW; x++) {
+				int rawColorValue = background_image.GetValue(x*ratioX, y*ratioY);
+				COLORREF col = RGB(GetRValue(rawColorValue), GetBValue(rawColorValue), GetGValue(rawColorValue));
+				renderer.draw_pixel(POINT{ x , y }, col);
+			}
+		}
+	}
+
+}
 void CCGWorkView::CScene::draw(CDC* context)
 {
 	renderer.get_bitmap(context);
 	renderer.set_camera(cameras[current_camera]);
 	renderer.bitFlag.reset();
-	
+
+	if (isBackgroundLoaded) {
+		draw_background();
+	}
+
+
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
 

@@ -22,6 +22,8 @@
 #include <unordered_set>
 #include <unordered_map>
 #include "CGWorkDoc.h"
+#include "cPNG.h"
+#include "PngWrapper.h"
 
 class CCGWorkView : public CView
 {
@@ -42,6 +44,7 @@ public:
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void apply_perspective(vec4& v);
 		vec3 cast(const vec3& v);
+		void draw_into_file();
 
 		bool draw_bbox;
 		bool draw_polygon_normals;
@@ -91,6 +94,7 @@ public:
 		void add_camera(const CCamera& camera);
 		void update_projection(int projection_type);
 		CCamera& get_current_camera();
+		void draw_background();
 
 		void update(CCGWorkView* app, int mouse_dx);
 		void draw(CDC* context);
@@ -101,6 +105,9 @@ public:
 		vector<CModel> models;
 		LightParams lights[LIGHT_NUM];
 		AmbiantLightParams ambiant;
+		PngWrapper background_image;
+		bool isBackgroundLoaded;
+		bool isBackgroundStretched;
 	};
 
 protected: // create from serialization only

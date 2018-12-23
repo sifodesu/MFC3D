@@ -34,7 +34,7 @@ CCGWorkView::CRenderer::~CRenderer()
 void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
 {
 	unsigned int offset = 4 * ((screen.Height() - p.y) * screen.Width() + p.x);
-	if (offset > parent->BMInfo.bmiHeader.biSizeImage || offset < 0 || p.x >= screen.Width() || p.x < 0) {
+	if (offset >= parent->BMInfo.bmiHeader.biSizeImage || offset < 0 || p.x >= screen.Width() || p.x < 0) {
 		return;
 	}
 	bitmap[offset] = GetBValue(c);
@@ -182,10 +182,11 @@ vec3 CCGWorkView::CRenderer::cast(const vec3& v)
 
 void CCGWorkView::CRenderer::set_bitmap_dimensions(const BITMAPINFO& info)
 {
-	if (bitmap != nullptr) {
-		delete[] bitmap;
-	}
+	BYTE* tmp = bitmap;
 	bitmap = new BYTE[info.bmiHeader.biSizeImage];
+	if (tmp != nullptr) {		
+		delete[] tmp;
+	}
 	parent->GetClientRect(&screen);
 }
 
