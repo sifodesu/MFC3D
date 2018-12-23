@@ -99,6 +99,8 @@ public:
 		CRenderer renderer;
 		bool display_z_buffer;
 		vector<CModel> models;
+		LightParams lights[LIGHT_NUM];
+		AmbiantLightParams ambiant;
 	};
 
 protected: // create from serialization only
@@ -128,15 +130,6 @@ private:
 	CString m_strItdFileName;		// file name of IRIT data
 
 	int m_nLightShading;			// shading: Flat, Gouraud.
-
-	double m_lMaterialAmbient;		// The Ambient in the scene
-	double m_lMaterialDiffuse;		// The Diffuse in the scene
-	double m_lMaterialSpecular;		// The Specular in the scene
-	int m_nMaterialCosineFactor;		// The cosine factor for the specular
-
-	LightParams m_lights[MAX_LIGHT];	//configurable lights array
-	LightParams m_ambientLight;		//ambient light (only RGB is used)
-
 
 // Overrides
 	// ClassWizard generated virtual function overrides

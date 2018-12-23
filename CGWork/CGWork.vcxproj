@@ -195,7 +195,7 @@
     <ClCompile Include="DiaFineNess.cpp" />
     <ClCompile Include="DialMouseSens.cpp" />
     <ClCompile Include="iritSkel.cpp" />
-    <ClCompile Include="LightDialog.cpp" />
+    <ClCompile Include="LightingDlg.cpp" />
     <ClCompile Include="MainFrm.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -207,7 +207,6 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BrowseInformation>
     </ClCompile>
     <ClCompile Include="Mat.cpp" />
-    <ClCompile Include="MaterialDlg.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PerspectiveDlg.cpp" />
     <ClCompile Include="PngWrapper.cpp" />
@@ -243,10 +242,9 @@
     <ClInclude Include="Globals.h" />
     <ClInclude Include="iritSkel.h" />
     <ClInclude Include="Light.h" />
-    <ClInclude Include="LightDialog.h" />
+    <ClInclude Include="LightingDlg.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Mat.h" />
-    <ClInclude Include="MaterialDlg.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="PerspectiveDlg.h" />
     <ClInclude Include="PngWrapper.h" />

@@ -45,13 +45,7 @@
     <ClCompile Include="CGWorkDoc.cpp">
       <Filter>Source Files\hw_files</Filter>
     </ClCompile>
-    <ClCompile Include="LightDialog.cpp">
-      <Filter>Source Files\hw_files</Filter>
-    </ClCompile>
     <ClCompile Include="MainFrm.cpp">
-      <Filter>Source Files\hw_files</Filter>
-    </ClCompile>
-    <ClCompile Include="MaterialDlg.cpp">
       <Filter>Source Files\hw_files</Filter>
     </ClCompile>
     <ClCompile Include="PngWrapper.cpp">
@@ -85,6 +79,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LightingDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -191,13 +188,7 @@
     <ClInclude Include="Light.h">
       <Filter>Header Files\hw_files</Filter>
     </ClInclude>
-    <ClInclude Include="LightDialog.h">
-      <Filter>Header Files\hw_files</Filter>
-    </ClInclude>
     <ClInclude Include="MainFrm.h">
-      <Filter>Header Files\hw_files</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialDlg.h">
       <Filter>Header Files\hw_files</Filter>
     </ClInclude>
     <ClInclude Include="PngWrapper.h">
@@ -225,6 +216,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DiaFineNess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightingDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,9 +11,8 @@ extern CCGWorkApp theApp;
 #include <iostream>
 using std::cout;
 using std::endl;
-#include "MaterialDlg.h"
-#include "LightDialog.h"
 #include "PerspectiveDlg.h"
+#include "LightingDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -148,13 +147,6 @@ CCGWorkView::CCGWorkView() :
 
 	m_nLightShading = ID_LIGHT_SHADING_FLAT;
 
-	m_lMaterialAmbient = 0.2;
-	m_lMaterialDiffuse = 0.8;
-	m_lMaterialSpecular = 1.0;
-	m_nMaterialCosineFactor = 32;
-
-	//init the first light to be enabled
-	m_lights[LIGHT_ID_1].enabled = true;
 	m_pDbBitMap = NULL;
 	m_pDbDC = NULL;
 	mouse_sensitivity = 0.5f;
@@ -526,23 +518,14 @@ void CCGWorkView::OnUpdateLightShadingGouraud(CCmdUI* pCmdUI)
 
 void CCGWorkView::OnLightConstants()
 {
-	CLightDialog dlg;
-
-	for (int id = LIGHT_ID_1; id < MAX_LIGHT; id++)
-	{
-		dlg.SetDialogData((LightID)id, m_lights[id]);
-	}
-	dlg.SetDialogData(LIGHT_ID_AMBIENT, m_ambientLight);
-
-	if (dlg.DoModal() == IDOK)
-	{
-		for (int id = LIGHT_ID_1; id < MAX_LIGHT; id++)
-		{
-			m_lights[id] = dlg.GetDialogData((LightID)id);
+	LightingDlg dlg(this);
+	if (dlg.DoModal() == IDOK) {
+		for (int i = 0; i < LIGHT_NUM; i++) {
+			scene.lights[i] = dlg.lights[i];
 		}
-		m_ambientLight = dlg.GetDialogData(LIGHT_ID_AMBIENT);
+		scene.ambiant = dlg.ambiant;
+		Invalidate();
 	}
-	Invalidate();
 }
 
 void CCGWorkView::OnTimer(UINT_PTR nIDEvent)
