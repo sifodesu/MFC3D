@@ -41,10 +41,14 @@ void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
 
 //approximate the z of a point on a line
 float get_approx_z(POINT p, const vec3& source, const vec3& dest) {
-	//float normS = norm(vec2(vec3((float)p.x, (float)p.y, 0) - source));
-	//float normD = norm(vec2(dest - vec3((float)p.x, (float)p.y, 0)));
-	//return (source.z*normS + dest.z*normD) / (normS + normD);
-	float t = (p.x - source.x) / (dest.x - source.x);
+	float dx = dest.x - source.x;
+	float dy = dest.y - source.y;
+	if (dx < 1.0f && dx > -1.0f) {
+		if (dy < 1.0f && dy > -1.0f) {
+			return source.z;
+		}
+	}
+	float t = (std::abs(dx) > std::abs(dy)) ? (p.x - source.x) / dx: (p.y - source.y) / dy;
 	return source.z + t * (dest.z - source.z);
 }
 
@@ -52,13 +56,13 @@ void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, 
 	if (p.x >= 0 && p.y >= 0 && p.x < min(3840, screen.Width()) && p.y < min(2160, screen.Height())) {
 		if (!bitFlag.test(p.x + p.y * 3840)) {
 			bitFlag.set(p.x + p.y * 3840);
-			draw_pixel(p, color);
 			z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
+			draw_pixel(p, color);
 		}
 		else {
 			if (z_buffer[p.y][p.x] > get_approx_z(p, v1, v2)) {
-				draw_pixel(p, color);
 				z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
+				draw_pixel(p, color);
 			}
 			else if (forcePrint) {
 				draw_pixel(p, color);
@@ -281,7 +285,11 @@ void CCGWorkView::CRenderer::draw_model(const CModel & model)
 
 float CCGWorkView::CRenderer::get_x(vec3 v1, vec3 v2, int y)
 {
-	float t = (((float)y - v1.y) / (v2.y - v1.y));
+	float d = v2.y - v1.y;
+	if (d < 1.0f && d > -1.0f) {
+		return v2.x;
+	}
+	float t = ((float)y - v1.y) / d;
 	if (t < 0.0f) {
 		return v1.x;
 	}
