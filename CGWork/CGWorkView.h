@@ -49,6 +49,8 @@ public:
 		bool draw_bbox;
 		bool draw_polygon_normals;
 		bool draw_vertice_normals;
+		bool invert_polygon_normals;
+		bool invert_vertice_normals;
 		bool draw_polygon_included_normals;
 		bool draw_vertice_included_normals;
 
@@ -78,7 +80,7 @@ public:
 		COLORREF highlight_polygon;
 		COLORREF normals_color;
 		COLORREF wireframe_color;
-		
+		COLORREF bbox_color;
 	};
 
 	class CScene
@@ -258,6 +260,10 @@ public:
 	afx_msg void OnUpdateBackfaceCulling(CCmdUI *pCmdUI);
 	afx_msg void OnZBuffer();
 	afx_msg void OnUpdateZBuffer(CCmdUI *pCmdUI);
+	afx_msg void OnPolygonInverted();
+	afx_msg void OnUpdatePolygonInverted(CCmdUI *pCmdUI);
+	afx_msg void OnVertexInverted();
+	afx_msg void OnUpdateVertexInverted(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

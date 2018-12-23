@@ -86,17 +86,21 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 void CCGWorkView::CScene::drawZBuffer() {
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
-
-	float maxx = 0; float minn = 500;
+	float maxx = renderer.z_buffer[0][0];
+	float minn = renderer.z_buffer[0][0];
 	for (auto y = 0; y < h; y++) {
 		for (auto x = 0; x < w; x++) {
-			maxx = max(maxx, renderer.z_buffer[y][x]);
-			minn = min(minn, renderer.z_buffer[y][x]);
+			if (maxx < renderer.z_buffer[y][x]) {
+				maxx = renderer.z_buffer[y][x];
+			}
+			if (minn > renderer.z_buffer[y][x]) {
+				minn = renderer.z_buffer[y][x];
+			}
 		}
 	}
 	for (auto y = 0; y < h; y++) {
 		for (auto x = 0; x < w; x++) {
-			float pp = 255 - ((renderer.z_buffer[y][x] - minn) * 255 / (maxx - minn));
+			float pp = 255.0f - ((renderer.z_buffer[y][x] - minn) * 255.0f / (maxx - minn));
 			renderer.draw_pixel(POINT{ x,y }, RGB(pp, pp, pp));
 		}
 	}
@@ -170,6 +174,5 @@ void CCGWorkView::CScene::draw(CDC* context)
 	if (display_z_buffer) {
 		drawZBuffer();
 	}
-
 	renderer.draw_bitmap(context);
 }

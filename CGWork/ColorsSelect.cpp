@@ -12,12 +12,7 @@
 IMPLEMENT_DYNAMIC(ColorsSelect, CDialogEx)
 
 ColorsSelect::ColorsSelect(CCGWorkView* parent, CWnd* pParent)
-	: CDialogEx(IDD_COLORS, pParent), pview(parent)
-{
-	bckgrndClr = pview->scene.renderer.background_color;
-	wrfrmClr = pview->scene.renderer.wireframe_color;
-	nrmlsClr = pview->scene.renderer.normals_color;
-}
+	: CDialogEx(IDD_COLORS, pParent), pview(parent) {}
 
 ColorsSelect::~ColorsSelect()
 {
@@ -26,48 +21,33 @@ ColorsSelect::~ColorsSelect()
 void ColorsSelect::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BG_COLOR, bg_picker);
+	DDX_Control(pDX, IDC_WIREFRAME_COLOR, wireframe_picker);
+	DDX_Control(pDX, IDC_BBOX_COLOR, bbox_picker);
+	DDX_Control(pDX, IDC_NORMAL_COLOR, normal_picker);
 }
 
 
 BEGIN_MESSAGE_MAP(ColorsSelect, CDialogEx)
 	ON_BN_CLICKED(IDOK, &ColorsSelect::OnBnClickedOk)
-	ON_BN_CLICKED(IDC_BWWRFRMCLR, &ColorsSelect::OnBnClickedBwwrfrmclr)
-	ON_BN_CLICKED(IDC_BNRMLSCLR, &ColorsSelect::OnBnClickedBnrmlsclr)
-	ON_BN_CLICKED(IDC_BBCKGRNDCLR, &ColorsSelect::OnBnClickedBbckgrndclr)
 END_MESSAGE_MAP()
 
 
-// ColorsSelect message handlers
-
+BOOL ColorsSelect::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+	bg_picker.SetColor(pview->scene.renderer.background_color);
+	wireframe_picker.SetColor(pview->scene.renderer.wireframe_color);
+	bbox_picker.SetColor(pview->scene.renderer.bbox_color);
+	normal_picker.SetColor(pview->scene.renderer.normals_color);
+	return TRUE;
+}
 
 void ColorsSelect::OnBnClickedOk()
 {
-	pview->scene.renderer.background_color = bckgrndClr;
-	pview->scene.renderer.wireframe_color = wrfrmClr;
-	pview->scene.renderer.normals_color = nrmlsClr;
+	pview->scene.renderer.background_color = bg_picker.GetColor();
+	pview->scene.renderer.wireframe_color = wireframe_picker.GetColor();
+	pview->scene.renderer.normals_color = normal_picker.GetColor();
+	pview->scene.renderer.bbox_color = bbox_picker.GetColor();
 	CDialogEx::OnOK();
-}
-
-
-void ColorsSelect::OnBnClickedBwwrfrmclr()
-{
-	CColorDialog dlg(wrfrmClr);
-	dlg.DoModal();
-	wrfrmClr = dlg.GetColor();
-}
-
-
-void ColorsSelect::OnBnClickedBnrmlsclr()
-{
-	CColorDialog dlg(nrmlsClr);
-	dlg.DoModal();
-	nrmlsClr = dlg.GetColor();
-}
-
-
-void ColorsSelect::OnBnClickedBbckgrndclr()
-{
-	CColorDialog dlg(bckgrndClr);
-	dlg.DoModal();
-	bckgrndClr = dlg.GetColor();
 }

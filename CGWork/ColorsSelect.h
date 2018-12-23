@@ -22,11 +22,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedOk();
-	COLORREF wrfrmClr;
-	COLORREF nrmlsClr;
-	COLORREF bckgrndClr;
 	CCGWorkView* pview;
-	afx_msg void OnBnClickedBwwrfrmclr();
-	afx_msg void OnBnClickedBnrmlsclr();
-	afx_msg void OnBnClickedBbckgrndclr();
+	virtual BOOL OnInitDialog();
+	CMFCColorButton bg_picker;
+	CMFCColorButton wireframe_picker;
+	CMFCColorButton bbox_picker;
+	CMFCColorButton normal_picker;
 };

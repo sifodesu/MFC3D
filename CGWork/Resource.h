@@ -43,6 +43,11 @@
 #define IDC_BWWRFRMCLR                  1042
 #define IDC_BNRMLSCLR                   1043
 #define IDC_BBCKGRNDCLR                 1044
+#define IDC_WIREFRAME_COLOR             1045
+#define IDC_NORMAL_COLOR                1046
+#define IDC_BG_COLOR                    1047
+#define IDC_MFCCOLORBUTTON4             1048
+#define IDC_BBOX_COLOR                  1048
 #define ID_FILE_LOAD                    32771
 #define ID_VIEW_ORTHOGRAPHIC            32772
 #define ID_VIEW_PERSPECTIVE             32773
@@ -95,14 +100,16 @@
 #define ID_RENDER_TOFILE                32832
 #define ID_BACKFACE_CULLING             32833
 #define ID_Z_BUFFER                     32834
+#define ID_POLYGON_INVERTED             32835
+#define ID_VERTEX_INVERTED              32836
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        153
-#define _APS_NEXT_COMMAND_VALUE         32835
-#define _APS_NEXT_CONTROL_VALUE         1045
+#define _APS_NEXT_RESOURCE_VALUE        154
+#define _APS_NEXT_COMMAND_VALUE         32837
+#define _APS_NEXT_CONTROL_VALUE         1049
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
