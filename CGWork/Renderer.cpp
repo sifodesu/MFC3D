@@ -166,6 +166,195 @@ void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF 
 	}
 }
 
+void CCGWorkView::CRenderer::calculate_left(const vec3 & v1, const vec3 & v2, vector<pair<int, float>>& points, int min_y)
+{
+	int x1 = (int)v1.x, x2 = (int)v2.x, y1 = (int)v1.y, y2 = (int)v2.y;
+	if (x2 - x1 < 0) {
+		std::swap(x1, x2);
+		std::swap(y1, y2);
+	}
+
+	int dx = x2 - x1, dy = y2 - y1, d, delta_e, delta_ne;
+	int x = x1, y = y1;
+
+	points[y - min_y].first = x;
+	points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+
+	if (dy >= 0) {
+		if (dx >= dy) {
+			d = 2 * dy - dx;
+			delta_e = 2 * dy;
+			delta_ne = 2 * (dy - dx);
+			while (x < x2) {
+				if (d < 0) {
+					d += delta_e;
+					x++;
+				}
+				else {
+					d += delta_ne;
+					x++;
+					y++;
+					points[y - min_y].first = x;
+					points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+				}
+			}
+		}
+		else {
+			d = 2 * dx - dy;
+			delta_e = 2 * dx;
+			delta_ne = 2 * (dx - dy);
+			while (y < y2) {
+				if (d < 0) {
+					d += delta_e;
+					y++;
+				}
+				else {
+					d += delta_ne;
+					x++;
+					y++;
+				}
+				points[y - min_y].first = x;
+				points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+			}
+		}
+	}
+	else {
+		if (dx >= -dy) {
+			d = 2 * dy + dx;
+			delta_e = 2 * dy;
+			delta_ne = 2 * (dy + dx);
+			while (x < x2) {
+				if (d > 0) {
+					d += delta_e;
+					x++;
+				}
+				else {
+					d += delta_ne;
+					x++;
+					y--;
+					points[y - min_y].first = x;
+					points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+				}
+			}
+		}
+		else {
+			d = 2 * dx + dy;
+			delta_e = 2 * dx;
+			delta_ne = 2 * (dx + dy);
+			while (y > y2) {
+				if (d < 0) {
+					d += delta_e;
+					y--;
+				}
+				else {
+					d += delta_ne;
+					x++;
+					y--;
+				}
+				points[y - min_y].first = x;
+				points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+			}
+		}
+	}
+}
+
+void CCGWorkView::CRenderer::calculate_right(const vec3 & v1, const vec3 & v2, vector<pair<int, float>>& points, int min_y)
+{
+	int x1 = (int)v1.x, x2 = (int)v2.x, y1 = (int)v1.y, y2 = (int)v2.y;
+	if (x2 - x1 < 0) {
+		std::swap(x1, x2);
+		std::swap(y1, y2);
+	}
+
+	int dx = x2 - x1, dy = y2 - y1, d, delta_e, delta_ne;
+	int x = x1, y = y1;
+
+	if (dy >= 0) {
+		if (dx >= dy) {
+			d = 2 * dy - dx;
+			delta_e = 2 * dy;
+			delta_ne = 2 * (dy - dx);
+			while (x < x2) {
+				if (d < 0) {
+					d += delta_e;
+					x++;
+				}
+				else {
+					d += delta_ne;
+					points[y - min_y].first = x;
+					points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+					x++;
+					y++;
+				}
+			}
+			points[y - min_y].first = x;
+			points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+		}
+		else {
+			points[y - min_y].first = x;
+			points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+			d = 2 * dx - dy;
+			delta_e = 2 * dx;
+			delta_ne = 2 * (dx - dy);
+			while (y < y2) {
+				if (d < 0) {
+					d += delta_e;
+					y++;
+				}
+				else {
+					d += delta_ne;
+					x++;
+					y++;
+				}
+				points[y - min_y].first = x;
+				points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+			}
+		}
+	}
+	else {
+		if (dx >= -dy) {
+			d = 2 * dy + dx;
+			delta_e = 2 * dy;
+			delta_ne = 2 * (dy + dx);
+			while (x < x2) {
+				if (d > 0) {
+					d += delta_e;
+					x++;
+				}
+				else {
+					d += delta_ne;
+					points[y - min_y].first = x;
+					points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+					x++;
+					y--;
+				}
+			}
+			points[y - min_y].first = x;
+			points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+		}
+		else {
+			points[y - min_y].first = x;
+			points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+			d = 2 * dx + dy;
+			delta_e = 2 * dx;
+			delta_ne = 2 * (dx + dy);
+			while (y > y2) {
+				if (d < 0) {
+					d += delta_e;
+					y--;
+				}
+				else {
+					d += delta_ne;
+					x++;
+					y--;
+				}
+				points[y - min_y].first = x;
+				points[y - min_y].second = get_approx_z(POINT{ x, y }, v1, v2);
+			}
+		}
+	}
+}
+
 void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
 {
 	float f = 1.0f / v.w;
@@ -312,7 +501,7 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 			inverted = true;
 		}
 		vector<vec3> points;
-		int first = 0, i = 0;
+		int first = 0, last = 0, i = 0;
 		int min_y = screen.Height(), max_y = 0;
 		for (const CVertice& vertice : polygon.vertices) {
 			vec4 projected = camera.projection * vertice.transformed;
@@ -326,6 +515,7 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 				min_y = v.y;
 			}
 			if (v.y > max_y) {
+				last = i;
 				max_y = v.y;
 			}
 			if (inverted) {
@@ -338,41 +528,53 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 		}
 		if (inverted) {
 			first = i - first - 1;
+			last = i - last - 1;
 		}
 
 		int l = first, r = first;
-		POINT p1, p2, p;
-		for (int y = min_y; y <= max_y; y++) {
-			int ll = l - 1;
+		int ll = l - 1;
+		if (ll < 0) {
+			ll += i;
+		}
+		int rr = r + 1;
+		if (rr >= i) {
+			rr -= i;
+		}
+		vector<pair<int, float>> left(max_y - min_y + 1), right(max_y - min_y + 1);
+		while (true) {
+			calculate_left(points[l], points[ll], left, min_y);
+			if (ll == last) {
+				break;
+			}
+			l--;
+			ll--;
+			if (l < 0) {
+				l += i;
+			}
 			if (ll < 0) {
 				ll += i;
 			}
-			int rr = r + 1;
+		} 
+		while (true) {
+			calculate_right(points[r], points[rr], right, min_y);
+			if (rr == last) {
+				break;
+			}
+			r++;
+			rr++;
+			if (r >= i) {
+				r -= i;
+			}
 			if (rr >= i) {
 				rr -= i;
 			}
-			p1.y = y;
-			p2.y = y;
-			p1.x = get_x(points[l], points[ll], y);
-			p2.x = get_x(points[r], points[rr], y);
-			vec3 v1(p1.x, p1.y, get_approx_z(p1, points[l], points[ll]));
-			vec3 v2(p2.x, p2.y, get_approx_z(p2, points[r], points[rr]));
-			for (int x = p1.x; x < p2.x; x++) {
-				p.x = x;
-				p.y = y;
-				set_pixel(p, v1, v2, BLUE, false);
-			}
-			if ((int)points[ll].y == y) {
-				l--;
-				if (l < 0) {
-					l += i;
-				}
-			}
-			if ((int)points[rr].y == y) {
-				r++;
-				if (r >= i) {
-					r -= i;
-				}
+		}
+
+		for (int y = min_y; y <= max_y; y++) {
+			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
+			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
+			for (int x = v1.x; x <= v2.x; x++) {
+				set_pixel(POINT{ x, y }, v1, v2, wireframe_color);
 			}
 		}
 	}
@@ -413,16 +615,9 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 
 
 		for (int i = 0; i < size; i++) {
-			if (toDraw)
-				draw_line(points[i], points[i + 1], polygon_color, true);
-			edges.push_back(edge(points[i], points[i + 1]));
+			draw_line(points[i], points[i + 1], polygon_color, true);
 		}
-		if (toDraw)
-			draw_line(points[size], points[0], polygon_color, true);
-		edges.push_back(edge(points[size], points[0]));
-
-		edges_all.push_back(edges);
-		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
+		draw_line(points[size], points[0], polygon_color, true);
 	}
 
 	for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
@@ -483,3 +678,13 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 		}
 	}
 }
+
+			if (toDraw)
+				draw_line(points[i], points[i + 1], polygon_color, true);
+			edges.push_back(edge(points[i], points[i + 1]));
+		if (toDraw)
+			draw_line(points[size], points[0], polygon_color, true);
+		edges.push_back(edge(points[size], points[0]));
+
+		edges_all.push_back(edges);
+		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
