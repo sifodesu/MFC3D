@@ -39,9 +39,11 @@ public:
 		enum { FLAT, GOURAUD, PHONG };
 		int shading_type;
 
-		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint);
+		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void draw_pixel(POINT p, COLORREF c);
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
+		void calculate_left(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
+		void calculate_right(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
 		void apply_perspective(vec4& v);
 		vec3 cast(const vec3& v);
 		void draw_into_file();
