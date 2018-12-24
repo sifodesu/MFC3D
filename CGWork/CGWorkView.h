@@ -99,6 +99,7 @@ public:
 		void update(CCGWorkView* app, int mouse_dx);
 		void draw(CDC* context);
 		void drawZBuffer();
+		void screenshot(float width, float height);
 		
 		CRenderer renderer;
 		bool display_z_buffer;
@@ -257,6 +258,7 @@ public:
 	afx_msg void OnUpdatePolygonInverted(CCmdUI *pCmdUI);
 	afx_msg void OnVertexInverted();
 	afx_msg void OnUpdateVertexInverted(CCmdUI *pCmdUI);
+	afx_msg void OnRenderTofile();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

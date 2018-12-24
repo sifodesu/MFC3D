@@ -118,6 +118,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_POLYGON_INVERTED, &CCGWorkView::OnUpdatePolygonInverted)
 	ON_COMMAND(ID_VERTEX_INVERTED, &CCGWorkView::OnVertexInverted)
 	ON_UPDATE_COMMAND_UI(ID_VERTEX_INVERTED, &CCGWorkView::OnUpdateVertexInverted)
+	ON_COMMAND(ID_RENDER_TOFILE, &CCGWorkView::OnRenderTofile)
 END_MESSAGE_MAP()
 
 
@@ -810,4 +811,10 @@ void CCGWorkView::OnVertexInverted()
 void CCGWorkView::OnUpdateVertexInverted(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.renderer.invert_vertice_normals);
+}
+
+
+void CCGWorkView::OnRenderTofile()
+{
+	scene.screenshot(1000, 1000);
 }
