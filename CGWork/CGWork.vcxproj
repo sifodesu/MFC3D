@@ -195,6 +195,7 @@
     <ClCompile Include="cPNG.cpp" />
     <ClCompile Include="DiaFineNess.cpp" />
     <ClCompile Include="DialMouseSens.cpp" />
+    <ClCompile Include="DiaScreenshot.cpp" />
     <ClCompile Include="iritSkel.cpp" />
     <ClCompile Include="LightingDlg.cpp" />
     <ClCompile Include="MainFrm.cpp">
@@ -241,6 +242,7 @@
     <ClInclude Include="cPNG.h" />
     <ClInclude Include="DiaFineNess.h" />
     <ClInclude Include="DialMouseSens.h" />
+    <ClInclude Include="DiaScreenshot.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="iritSkel.h" />
     <ClInclude Include="Light.h" />
