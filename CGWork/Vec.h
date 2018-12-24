@@ -182,6 +182,20 @@ vec4 normalized(const vec4& v);
 vec3 cross(const vec3& v1, const vec3& v2);
 float dot(const vec3& v1, const vec3& v2);
 
+
+class edge {
+public:
+	vec3 first;
+	vec3 second;
+	edge(vec3 first, vec3 second): first(first), second(second) {
+		//this->first = first.x < second.x ? vec3(first.x, first.y, 0) : vec3(second.x, second.y, 0);
+		//this->second = this->first == vec3(first.x, first.y, 0) ? vec3(second.x, second.y, 0) : vec3(first.x, first.y, 0);
+	}
+	bool operator==(const edge& e) const {
+		return (this->first == e.first && this->second == e.second) || (this->first == e.second && this->second == e.first);
+	}
+};
+
 namespace std
 {
 	template <>
@@ -192,6 +206,16 @@ namespace std
 			return ((hash<int>()((int)(k.x*p))
 				^ (hash<int>()((int)(k.y*p)) << 1)) >> 1)
 				^ (hash<int>()((int)(k.z*p)) << 1);
+		}
+	};
+
+	template <>
+	struct hash<edge>
+	{
+		size_t operator()(const edge& k) const
+		{
+			return ((hash<vec3>()(k.first)
+				^ (hash<vec3>()(k.second) << 1)));
 		}
 	};
 }
