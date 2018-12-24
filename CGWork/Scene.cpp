@@ -8,6 +8,7 @@ CCGWorkView::CScene::CScene(CCGWorkView* parent) :
 {
 	cameras.push_back(CCamera());
 	background_image.SetFileName("./bite.png");
+	background_image.ReadPng();
 }
 
 void CCGWorkView::CScene::add_model(const CModel & model)
@@ -107,7 +108,7 @@ void CCGWorkView::CScene::drawZBuffer() {
 }
 void CCGWorkView::CScene::draw_background() {
 
-	background_image.ReadPng();
+	
 
 
 	float hW = renderer.screen.Height();
