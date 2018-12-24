@@ -34,6 +34,7 @@ static char THIS_FILE[] = __FILE__;
 #include "DialMouseSens.h"
 #include "ColorsSelect.h"
 #include "DiaFineNess.h"
+#include "DiaScreenshot.h"
 
 // Use this macro to display text messages in the status bar.
 #define STATUS_BAR_TEXT(str) (((CMainFrame*)GetParentFrame())->getStatusBar().SetWindowText(str))
@@ -118,6 +119,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_POLYGON_INVERTED, &CCGWorkView::OnUpdatePolygonInverted)
 	ON_COMMAND(ID_VERTEX_INVERTED, &CCGWorkView::OnVertexInverted)
 	ON_UPDATE_COMMAND_UI(ID_VERTEX_INVERTED, &CCGWorkView::OnUpdateVertexInverted)
+	ON_COMMAND(ID_RENDER_TOFILE, &CCGWorkView::OnRenderTofile)
 END_MESSAGE_MAP()
 
 
@@ -810,4 +812,11 @@ void CCGWorkView::OnVertexInverted()
 void CCGWorkView::OnUpdateVertexInverted(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.renderer.invert_vertice_normals);
+}
+
+
+void CCGWorkView::OnRenderTofile()
+{
+	DiaScreenshot dlg(this);
+	dlg.DoModal();
 }

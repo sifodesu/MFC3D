@@ -9,6 +9,7 @@
 #define IDD_MOUS_SENS                   147
 #define IDD_COLORS                      149
 #define IDD_LIGHTING_DLG                155
+#define IDD_SCREENSHOT                  156
 #define IDC_LIGHT_SPACE                 1010
 #define IDC_RADIO_LIGHT1                1017
 #define IDC_RADIO_LIGHT2                1018
@@ -36,6 +37,7 @@
 #define IDC_DEPTH_CONTROL               1041
 #define IDC_EDIT_MOUSE_SENS             1041
 #define IDC_BWWRFRMCLR                  1042
+#define IDC_EDITHSCRN                   1042
 #define IDC_BNRMLSCLR                   1043
 #define IDC_BBCKGRNDCLR                 1044
 #define IDC_WIREFRAME_COLOR             1045
@@ -49,6 +51,7 @@
 #define IDC_AMBIANT_INTENSITY           1055
 #define IDC_AMBIANT_EXPONENT            1056
 #define IDC_LIGHT_N                     1060
+#define IDC_EDITWSCRN                   1060
 #define ID_FILE_LOAD                    32771
 #define ID_VIEW_ORTHOGRAPHIC            32772
 #define ID_VIEW_PERSPECTIVE             32773
@@ -110,7 +113,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
 #define _APS_NEXT_COMMAND_VALUE         32837
-#define _APS_NEXT_CONTROL_VALUE         1060
+#define _APS_NEXT_CONTROL_VALUE         1061
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

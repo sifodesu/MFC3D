@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "CGWork.h"
 #include "CGWorkView.h"
-
+#include "PngWrapper.h"
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
-	current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(true), isBackgroundStretched(true)
+current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(true), isBackgroundStretched(true)
 {
 	cameras.push_back(CCamera());
 	background_image.SetFileName("./bite.png");
@@ -102,20 +102,21 @@ void CCGWorkView::CScene::drawZBuffer() {
 	for (auto y = 0; y < h; y++) {
 		for (auto x = 0; x < w; x++) {
 			float pp = 255.0f - ((renderer.z_buffer[y][x] - minn) * 255.0f / (maxx - minn));
-			renderer.draw_pixel(POINT{ x,y }, RGB(pp, pp, pp));
+			renderer.draw_pixel(POINT{ x, y }, RGB(pp, pp, pp));
 		}
 	}
 }
+
+COLORREF fromRGBtoBitmapFormat(COLORREF col){
+	return RGB(GetRValue(col), GetBValue(col), GetGValue(col));
+}
+
 void CCGWorkView::CScene::draw_background() {
-
-	
-
-
 	float hW = renderer.screen.Height();
 	float wW = renderer.screen.Width();
 	float hI = background_image.GetHeight();
 	float wI = background_image.GetWidth();
-	//if (hW < 10 || wW < 10) return;
+	int numChannels = background_image.GetNumChannels();
 
 	if (!isBackgroundStretched) {
 		int ch = 0; int cw = 0;
@@ -126,8 +127,8 @@ void CCGWorkView::CScene::draw_background() {
 			redoX:
 				for (int x = 0; x < wI; ++x) {
 					if (x + cw >= wW) break;
-					//get the "right" order of colors
-					COLORREF col = RGB(GetRValue(background_image.GetValue(x, y)), GetBValue(background_image.GetValue(x, y)), GetGValue(background_image.GetValue(x, y)));
+					
+					COLORREF col = RGB(GET_R(background_image.GetValue(x, y)), GET_G(background_image.GetValue(x, y)), GET_B(background_image.GetValue(x, y)));
 					renderer.draw_pixel(POINT{ x + cw, y + ch }, col);
 				}
 				cw += wI;
@@ -145,13 +146,38 @@ void CCGWorkView::CScene::draw_background() {
 		for (int y = 0; y < hW; y++) {
 			for (int x = 0; x < wW; x++) {
 				int rawColorValue = background_image.GetValue(x*ratioX, y*ratioY);
-				COLORREF col = RGB(GetRValue(rawColorValue), GetBValue(rawColorValue), GetGValue(rawColorValue));
-				renderer.draw_pixel(POINT{ x , y }, col);
+				COLORREF col = RGB(GET_R(rawColorValue), GET_G(rawColorValue), GET_B(rawColorValue));
+				renderer.draw_pixel(POINT{ x, y }, col);
 			}
 		}
 	}
 
 }
+void CCGWorkView::CScene::screenshot(float width, float height) {
+	float h = renderer.screen.Height();
+	float w = renderer.screen.Width();
+	PngWrapper res("./res.png", width, height);
+	float ratioX = w / width;
+	float ratioY = h / height;
+	
+	res.InitWritePng();
+	 
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			unsigned int offset = 4 * ((h - (int)(y*ratioY)) * w + (int)(x*ratioX));
+			if (offset >= renderer.parent->BMInfo.bmiHeader.biSizeImage || offset < 0 || (int)(x*ratioX) >= w || (int)(x*ratioX) < 0 || (int)(y*ratioY) >= h || (int)(y*ratioY) < 0) {
+				continue;
+			}
+			int B = renderer.bitmap[offset];
+			int G = renderer.bitmap[offset + 1];
+			int R = renderer.bitmap[offset + 2];
+
+			res.SetValue(x, y, SET_RGB(R, G, B));
+		}
+	}
+	res.WritePng();
+}
+
 void CCGWorkView::CScene::draw(CDC* context)
 {
 	renderer.get_bitmap(context);
