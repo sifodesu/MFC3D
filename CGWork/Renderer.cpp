@@ -554,7 +554,7 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 			if (ll < 0) {
 				ll += i;
 			}
-		} 
+		}
 		while (true) {
 			calculate_right(points[r], points[rr], right, min_y);
 			if (rr == last) {
@@ -615,9 +615,16 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 
 
 		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], polygon_color, true);
+			if (toDraw)
+				draw_line(points[i], points[i + 1], polygon_color, true);
+			edges.push_back(edge(points[i], points[i + 1]));
 		}
-		draw_line(points[size], points[0], polygon_color, true);
+		if (toDraw)
+			draw_line(points[size], points[0], polygon_color, true);
+		edges.push_back(edge(points[size], points[0]));
+
+		edges_all.push_back(edges);
+		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
 	}
 
 	for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
@@ -679,12 +686,3 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 	}
 }
 
-			if (toDraw)
-				draw_line(points[i], points[i + 1], polygon_color, true);
-			edges.push_back(edge(points[i], points[i + 1]));
-		if (toDraw)
-			draw_line(points[size], points[0], polygon_color, true);
-		edges.push_back(edge(points[size], points[0]));
-
-		edges_all.push_back(edges);
-		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
