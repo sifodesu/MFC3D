@@ -523,9 +523,9 @@ void CCGWorkView::OnLightConstants()
 	LightingDlg dlg(this);
 	if (dlg.DoModal() == IDOK) {
 		for (int i = 0; i < LIGHT_NUM; i++) {
-			scene.lights[i] = dlg.lights[i];
+			scene.renderer.lights[i] = dlg.lights[i];
 		}
-		scene.ambiant = dlg.ambiant;
+		scene.renderer.ambiant = dlg.ambiant;
 		Invalidate();
 	}
 }

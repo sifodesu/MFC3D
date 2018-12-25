@@ -20,8 +20,16 @@ CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
 	draw_polygon_included_normals = true;
 	draw_vertice_included_normals = true;
 	select_highlighted_pol = false;
-
 	backface_culling = false;
+
+	// Init light default
+	ambiant.intensity = 0.2;
+	ambiant.exponent = 100;
+	lights[0].enabled = true;
+	lights[0].type = LIGHT_POINT;
+	lights[0].data = vec3(1.0f, 1.0f, -1.0f);
+	lights[0].diffuse = 0.5;
+	lights[0].specular = 0.5;
 }
 
 CCGWorkView::CRenderer::~CRenderer()
@@ -355,11 +363,27 @@ void CCGWorkView::CRenderer::calculate_right(const vec3 & v1, const vec3 & v2, v
 	}
 }
 
+COLORREF CCGWorkView::CRenderer::multiply(COLORREF color, float k)
+{
+	int R = max(0, min(255, (float)(GetRValue(color)) * k));
+	int G = max(0, min(255, (float)(GetGValue(color)) * k));
+	int B = max(0, min(255, (float)(GetBValue(color)) * k));
+	return RGB(R, G, B);
+}
+
+COLORREF CCGWorkView::CRenderer::add(COLORREF c1, COLORREF c2)
+{
+	int R = min(255, GetRValue(c1) + GetRValue(c2));
+	int G = min(255, GetGValue(c1) + GetGValue(c2));
+	int B = min(255, GetBValue(c1) + GetBValue(c2));
+	return RGB(R, G, B);
+}
+
 void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
 {
 	float f = 1.0f / v.w;
 	v = scaling(f, f, f) * v;
-}
+} 
 
 vec3 CCGWorkView::CRenderer::cast(const vec3& v)
 {
@@ -570,12 +594,41 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 			}
 		}
 
-		for (int y = min_y; y <= max_y; y++) {
-			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
-			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
-			for (int x = v1.x; x <= v2.x; x++) {
-				set_pixel(POINT{ x, y }, v1, v2, wireframe_color);
+		switch (shading_type) {
+		case FLAT:
+			COLORREF color = multiply(ambiant.color, ambiant.intensity);
+			for (const LightParams& light : lights) {
+				if (!light.enabled) {
+					continue;
+				}
+
+				// Diffuse calculation
+				vec3 N = polygon.calculated_normal;
+				vec3 L;
+				if (light.type == LIGHT_POINT) {
+					L = normalized(light.data - polygon.origin_transformed);					
+				}
+				else {
+					L = normalized(light.data);
+				}
+				float diffuse = light.diffuse * dot(L, N);
+				color = add(color, multiply(light.color, diffuse));
+
+				// Specular calculation
+				vec3 V = normalized(-polygon.origin_transformed);
+				vec3 R = N * 2 * dot(L, N) - L;
+				float specular = light.specular * std::pow(dot(R, V), ambiant.exponent);
+				color = add(color, multiply(light.color, specular));
 			}
+
+			for (int y = min_y; y <= max_y; y++) {
+				vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
+				vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
+				for (int x = v1.x; x <= v2.x; x++) {
+					set_pixel(POINT{ x, y }, v1, v2, color);
+				}
+			}
+			break;
 		}
 	}
 }

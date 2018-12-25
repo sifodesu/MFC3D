@@ -44,6 +44,8 @@ public:
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void calculate_left(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
 		void calculate_right(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
+		COLORREF multiply(COLORREF color, float k);
+		COLORREF add(COLORREF c1, COLORREF c2);
 		void apply_perspective(vec4& v);
 		vec3 cast(const vec3& v);
 		void draw_into_file();
@@ -83,6 +85,9 @@ public:
 		COLORREF normals_color;
 		COLORREF wireframe_color;
 		COLORREF bbox_color;
+
+		LightParams lights[LIGHT_NUM];
+		AmbiantLightParams ambiant;
 	};
 
 	class CScene
@@ -106,8 +111,6 @@ public:
 		CRenderer renderer;
 		bool display_z_buffer;
 		vector<CModel> models;
-		LightParams lights[LIGHT_NUM];
-		AmbiantLightParams ambiant;
 		PngWrapper background_image;
 		bool isBackgroundLoaded;
 		bool isBackgroundStretched;
