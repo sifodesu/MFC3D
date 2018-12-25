@@ -3,14 +3,14 @@
 #include "CGWorkView.h"
 
 CCGWorkView::CRenderer::CRenderer(CCGWorkView* parent) :
-	parent(parent), bitmap(nullptr),
-	rendering_type(SQUELETON),
-	shading_type(FLAT),
-	background_color(BLACK),
-	highlight_polygon(GREEN),
-	normals_color(PINK),
-	wireframe_color(WHITE),
-	bbox_color(RED)
+parent(parent), bitmap(nullptr),
+rendering_type(SQUELETON),
+shading_type(FLAT),
+background_color(BLACK),
+highlight_polygon(GREEN),
+normals_color(PINK),
+wireframe_color(WHITE),
+bbox_color(RED)
 {
 	draw_bbox = false;
 	draw_polygon_normals = false;
@@ -59,7 +59,7 @@ float get_approx_z(POINT p, const vec3& source, const vec3& dest) {
 			return source.z;
 		}
 	}
-	float t = (std::abs(dx) > std::abs(dy)) ? (p.x - source.x) / dx: (p.y - source.y) / dy;
+	float t = (std::abs(dx) > std::abs(dy)) ? (p.x - source.x) / dx : (p.y - source.y) / dy;
 	return source.z + t * (dest.z - source.z);
 }
 
@@ -363,22 +363,6 @@ void CCGWorkView::CRenderer::calculate_right(const vec3 & v1, const vec3 & v2, v
 	}
 }
 
-COLORREF CCGWorkView::CRenderer::multiply(COLORREF color, float k)
-{
-	int R = max(0, min(255, (float)(GetRValue(color)) * k));
-	int G = max(0, min(255, (float)(GetGValue(color)) * k));
-	int B = max(0, min(255, (float)(GetBValue(color)) * k));
-	return RGB(R, G, B);
-}
-
-COLORREF CCGWorkView::CRenderer::add(COLORREF c1, COLORREF c2)
-{
-	int R = min(255, GetRValue(c1) + GetRValue(c2));
-	int G = min(255, GetGValue(c1) + GetGValue(c2));
-	int B = min(255, GetBValue(c1) + GetBValue(c2));
-	return RGB(R, G, B);
-}
-
 void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
 {
 	float f = 1.0f / v.w;
@@ -397,7 +381,7 @@ void CCGWorkView::CRenderer::set_bitmap_dimensions(const BITMAPINFO& info)
 {
 	BYTE* tmp = bitmap;
 	bitmap = new BYTE[info.bmiHeader.biSizeImage];
-	if (tmp != nullptr) {		
+	if (tmp != nullptr) {
 		delete[] tmp;
 	}
 	parent->GetClientRect(&screen);
@@ -432,9 +416,9 @@ void CCGWorkView::CRenderer::draw_normal(const vec3& origin, const vec3& directi
 	}
 
 	if (a.z >= 0 && b.z >= 0) {
-		vec3 newSource = cast(vec3(a)); 
+		vec3 newSource = cast(vec3(a));
 		newSource.z = origin.z;
-		vec3 newStart = cast(vec3(b));  
+		vec3 newStart = cast(vec3(b));
 		newStart.z = goal.z;
 		draw_line(newStart, newSource, color);
 	}
@@ -578,7 +562,7 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 			if (ll < 0) {
 				ll += i;
 			}
-		} 
+		}
 		while (true) {
 			calculate_right(points[r], points[rr], right, min_y);
 			if (rr == last) {
@@ -635,13 +619,19 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 
 void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 {
+	vector<vector<edge>> edges_all;
+	vector<bool> isItHidden;
+	bool toDraw = true;
 	for (const CPolygon& polygon : model.polygons) {
+		toDraw = true;
 		vec3 camera_view(0, 0, 1.0f);
 		if (backface_culling && dot(camera_view, polygon.calculated_normal) > 0) {
-			continue;
+			toDraw = false;
+			//continue;
 		}
 
 		vector<vec3> points;
+		vector<edge> edges;
 		for (const CVertice& vertice : polygon.vertices) {
 			vec4 projected = camera.projection * vertice.transformed;
 			if (!camera.is_orthographic()) {
@@ -660,10 +650,34 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 			polygon_color = highlight_polygon;
 		}
 
+
 		for (int i = 0; i < size; i++) {
-			draw_line(points[i], points[i + 1], polygon_color, highlight);
+			if (toDraw)
+				draw_line(points[i], points[i + 1], polygon_color, true);
+			edges.push_back(edge(points[i], points[i + 1]));
 		}
-		draw_line(points[size], points[0], polygon_color, highlight);
+		if (toDraw)
+			draw_line(points[size], points[0], polygon_color, true);
+		edges.push_back(edge(points[size], points[0]));
+
+		edges_all.push_back(edges);
+		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
+	}
+
+	for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
+		for (int a = 0; a < edges_all[i].size(); a++) {	//pour chaque edge du polygon
+			for (int j = 0; j < edges_all.size(); j++) {	//check si dans un des polygones
+				if (i == j) continue;
+				for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
+					if (edges_all[i][a] == edges_all[j][b]) {
+						if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
+							draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
+						}
+					}
+				}
+			}
+		}
+
 	}
 }
 
@@ -708,3 +722,20 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 		}
 	}
 }
+
+
+COLORREF CCGWorkView::CRenderer::multiply(COLORREF color, float k)
+{
+	int R = max(0, min(255, (float)(GetRValue(color)) * k));
+	int G = max(0, min(255, (float)(GetGValue(color)) * k));
+	int B = max(0, min(255, (float)(GetBValue(color)) * k));
+	return RGB(R, G, B);
+}
+
+COLORREF CCGWorkView::CRenderer::add(COLORREF c1, COLORREF c2)
+{
+	int R = min(255, GetRValue(c1) + GetRValue(c2));
+	int G = min(255, GetGValue(c1) + GetGValue(c2));
+	int B = min(255, GetBValue(c1) + GetBValue(c2));
+	return RGB(R, G, B);
+	}

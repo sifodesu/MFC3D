@@ -83,7 +83,6 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 	}
 }
 
-
 void CCGWorkView::CScene::drawZBuffer() {
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
@@ -105,10 +104,6 @@ void CCGWorkView::CScene::drawZBuffer() {
 			renderer.draw_pixel(POINT{ x, y }, RGB(pp, pp, pp));
 		}
 	}
-}
-
-COLORREF fromRGBtoBitmapFormat(COLORREF col){
-	return RGB(GetRValue(col), GetBValue(col), GetGValue(col));
 }
 
 void CCGWorkView::CScene::draw_background() {
@@ -153,6 +148,7 @@ void CCGWorkView::CScene::draw_background() {
 	}
 
 }
+
 void CCGWorkView::CScene::screenshot(float width, float height) {
 	float h = renderer.screen.Height();
 	float w = renderer.screen.Width();
