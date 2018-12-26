@@ -24,10 +24,10 @@ bbox_color(RED)
 
 	// Init light default
 	ambiant.intensity = 0.2;
-	ambiant.exponent = 100;
+	ambiant.exponent = 10.0f;
 	lights[0].enabled = true;
 	lights[0].type = LIGHT_POINT;
-	lights[0].data = vec3(1.0f, 1.0f, -1.0f);
+	lights[0].data = vec3(10.0f, 10.0f, -10.0f);
 	lights[0].diffuse = 0.5;
 	lights[0].specular = 0.5;
 }
@@ -363,6 +363,35 @@ void CCGWorkView::CRenderer::calculate_right(const vec3 & v1, const vec3 & v2, v
 	}
 }
 
+COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& normal)
+{
+	COLORREF color = multiply(ambiant.color, ambiant.intensity);
+	for (const LightParams& light : lights) {
+		if (!light.enabled) {
+			continue;
+		}
+
+		// Diffuse calculation
+		vec3 N = normal;
+		vec3 L;
+		if (light.type == LIGHT_POINT) {
+			L = normalized(light.data - point);
+		}
+		else {
+			L = normalized(light.data);
+		}
+		float diffuse = light.diffuse * dot(L, N);
+		color = add(color, multiply(light.color, diffuse));
+
+		// Specular calculation
+		vec3 V = normalized(-point);
+		vec3 R = N * 2 * dot(L, N) - L;
+		float specular = light.specular * std::pow(dot(R, V), ambiant.exponent);
+		color = add(color, multiply(light.color, specular));
+	}
+	return color;
+}
+
 void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
 {
 	float f = 1.0f / v.w;
@@ -472,7 +501,16 @@ void CCGWorkView::CRenderer::draw_model(const CModel & model)
 		draw_edges(model);
 	}
 	else {
-		draw_faces(model);
+		switch (shading_type) {
+		case FLAT:
+			draw_flat(model);
+			break;
+		case GOURAUD:
+			draw_gouraud(model);
+			break;
+		case PHONG:
+			break;
+		}
 	}
 	if (draw_polygon_normals || draw_vertice_normals) {
 		draw_normals(model);
@@ -500,7 +538,7 @@ float CCGWorkView::CRenderer::get_x(vec3 v1, vec3 v2, int y)
 	return v1.x + t * (v2.x - v1.x);
 }
 
-void CCGWorkView::CRenderer::draw_faces(const CModel & model)
+void CCGWorkView::CRenderer::draw_flat(const CModel & model)
 {
 	for (const CPolygon& polygon : model.polygons) {
 		vec3 camera_view(0, 0, 1.0f);
@@ -577,44 +615,171 @@ void CCGWorkView::CRenderer::draw_faces(const CModel & model)
 				rr -= i;
 			}
 		}
-
-		switch (shading_type) {
-		case FLAT:
-			COLORREF color = multiply(ambiant.color, ambiant.intensity);
-			for (const LightParams& light : lights) {
-				if (!light.enabled) {
-					continue;
-				}
-
-				// Diffuse calculation
-				vec3 N = polygon.calculated_normal;
-				vec3 L;
-				if (light.type == LIGHT_POINT) {
-					L = normalized(light.data - polygon.origin_transformed);					
-				}
-				else {
-					L = normalized(light.data);
-				}
-				float diffuse = light.diffuse * dot(L, N);
-				color = add(color, multiply(light.color, diffuse));
-
-				// Specular calculation
-				vec3 V = normalized(-polygon.origin_transformed);
-				vec3 R = N * 2 * dot(L, N) - L;
-				float specular = light.specular * std::pow(dot(R, V), ambiant.exponent);
-				color = add(color, multiply(light.color, specular));
+		COLORREF color = calculate_light(polygon.origin_transformed, polygon.calculated_normal);
+		for (int y = min_y; y <= max_y; y++) {
+			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
+			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
+			for (int x = v1.x; x <= v2.x; x++) {
+				set_pixel(POINT{ x, y }, v1, v2, color);
 			}
-
-			for (int y = min_y; y <= max_y; y++) {
-				vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
-				vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
-				for (int x = v1.x; x <= v2.x; x++) {
-					set_pixel(POINT{ x, y }, v1, v2, color);
-				}
-			}
-			break;
 		}
 	}
+}
+
+void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
+{
+	for (const CPolygon& polygon : model.polygons) {
+		vec3 camera_view(0, 0, 1.0f);
+		bool inverted = false;
+		if (dot(camera_view, polygon.calculated_normal) > 0) {
+			inverted = true;
+		}
+
+		bool draw = false;
+
+		vector<vec3> points;
+		vector<COLORREF> colors;
+		int first = 0, last = 0, i = 0;
+		int min_y = screen.Height(), max_y = 0;
+		for (const CVertice& vertice : polygon.vertices) {
+			vec4 projected = camera.projection * vertice.transformed;
+			if (!camera.is_orthographic()) {
+				apply_perspective(projected);
+			}
+			vec3 v = cast(vec3(projected));
+			v.z = vertice.transformed.z;
+			if (v.x >= 0 && v.x < screen.Width() && v.y >= 0 && v.y < screen.Height()) {
+				draw = true;
+			}
+			if (v.y < min_y) {
+				first = i;
+				min_y = v.y;
+			}
+			if (v.y > max_y) {
+				last = i;
+				max_y = v.y;
+			}
+			if (inverted) {
+				points.insert(points.begin(), v);
+				colors.insert(colors.begin(), calculate_light(vertice.transformed, vertice.calculated_normal));
+			}
+			else {
+				points.push_back(v);
+				colors.push_back(calculate_light(vertice.transformed, vertice.calculated_normal));
+			}
+			i++;
+		}
+		if (!draw) {
+			continue;
+		}
+		if (inverted) {
+			first = i - first - 1;
+			last = i - last - 1;
+		}
+
+		int l = first, r = first;
+		int ll = l - 1;
+		if (ll < 0) {
+			ll += i;
+		}
+		int rr = r + 1;
+		if (rr >= i) {
+			rr -= i;
+		}
+		vector<pair<int, float>> left(max_y - min_y + 1), right(max_y - min_y + 1);
+		vector<COLORREF> color_left(max_y - min_y + 1), color_right(max_y - min_y + 1);
+		while (true) {
+			calculate_left(points[l], points[ll], left, min_y);
+			int start = (int)(points[l].y) - min_y, stop = (int)(points[ll].y) - min_y;
+			COLORREF c1 = colors[l], c2 = colors[ll];
+			for (int i = start; i <= stop; i++) {
+				float t;
+				if (start == stop) {
+					if (points[r].x < points[rr].x) {
+						t = 0.0f;
+					}
+					else {
+						t = 1.0f;
+					}
+				}
+				else if (std::abs(points[ll].x - points[l].x) > stop - start) {
+					t = (float)(left[i].first - (int)(points[l].x)) / (points[ll].x - points[l].x);
+				}
+				else {
+					t = (float)(i - start) / (float)(stop - start);
+				}
+
+
+				color_left[i] = add(multiply(c1, (1.0f - t)), multiply(c2, t));
+			}
+
+			if (ll == last) {
+				break;
+			}
+			l--;
+			ll--;
+			if (l < 0) {
+				l += i;
+			}
+			if (ll < 0) {
+				ll += i;
+			}
+		}
+		while (true) {
+			calculate_right(points[r], points[rr], right, min_y);
+			int start = (int)(points[r].y) - min_y, stop = (int)(points[rr].y) - min_y;
+			for (int i = start; i <= stop; i++) {
+				float t;
+				if (start == stop) {
+					if (points[r].x < points[rr].x) {
+						t = 1.0f;
+					}
+					else {
+						t = 0.0f;
+					}
+				}
+				else if (std::abs(points[rr].x - points[r].x) > stop - start) {
+					t = (float)(right[i].first - (int)(points[r].x)) / (points[rr].x - points[r].x);
+				}
+				else {
+					t = (float)(i - start) / (float)(stop - start);
+				}
+				color_right[i] = add(multiply(colors[r], (1.0f - t)), multiply(colors[rr], t));
+			}
+
+			if (rr == last) {
+				break;
+			}
+			r++;
+			rr++;
+			if (r >= i) {
+				r -= i;
+			}
+			if (rr >= i) {
+				rr -= i;
+			}
+		}
+		for (int y = min_y; y <= max_y; y++) {
+			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
+			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
+			for (int x = v1.x; x <= v2.x; x++) {
+				float t;
+				if (v2.x - v1.x < 1.0f && v2.x - v1.x > -1.0f) {
+					t = 0.5f;
+				}
+				else {
+					t = ((float)(x)-v1.x) / (v2.x - v1.x);
+				}
+				COLORREF color = add(multiply(color_left[y - min_y], (1.0f - t)), multiply(color_right[y - min_y], t));
+				set_pixel(POINT{ x, y }, v1, v2, color);
+			}
+		}
+	}
+}
+
+void CCGWorkView::CRenderer::draw_phong(const CModel & model)
+{
+
 }
 
 void CCGWorkView::CRenderer::draw_edges(const CModel & model)

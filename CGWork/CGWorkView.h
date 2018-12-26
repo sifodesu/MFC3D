@@ -44,6 +44,7 @@ public:
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void calculate_left(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
 		void calculate_right(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
+		COLORREF calculate_light(const vec3& point, const vec3& normal);
 		COLORREF multiply(COLORREF color, float k);
 		COLORREF add(COLORREF c1, COLORREF c2);
 		void apply_perspective(vec4& v);
@@ -69,7 +70,9 @@ public:
 		void draw_model(const CModel& model);
 
 		float get_x(vec3 v1, vec3 v2, int y);
-		void draw_faces(const CModel& model);
+		void draw_flat(const CModel& model);
+		void draw_gouraud(const CModel& model);
+		void draw_phong(const CModel& model);
 		void draw_edges(const CModel& model);
 		void draw_normals(const CModel& model);
 		void draw_normal(const vec3& origin, const vec3& direction, COLORREF color);
