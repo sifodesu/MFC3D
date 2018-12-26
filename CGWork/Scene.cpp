@@ -181,7 +181,7 @@ void CCGWorkView::CScene::draw(CDC* context)
 	renderer.bitFlag.reset();
 
 	if (isBackgroundLoaded) {
-		draw_background();
+		//draw_background();
 	}
 
 

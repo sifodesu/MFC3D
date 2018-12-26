@@ -14,6 +14,7 @@ public:
 	vec3 origin;
 	vec3 included_normal;
 	vec3 calculated_normal;
+	bool highlight;
 
 	CPolygon();
 	void add_vertice(const CVertice& vertice);

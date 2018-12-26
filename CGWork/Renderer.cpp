@@ -71,11 +71,11 @@ void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, 
 			draw_pixel(p, color);
 		}
 		else {
-			if (z_buffer[p.y][p.x] > get_approx_z(p, v1, v2)) {
-				z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
+			if (forcePrint) {
 				draw_pixel(p, color);
 			}
-			else if (forcePrint) {
+			else if (z_buffer[p.y][p.x] > get_approx_z(p, v1, v2)) {
+				z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
 				draw_pixel(p, color);
 			}
 		}
@@ -380,16 +380,10 @@ COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& 
 		else {
 			L = normalized(-light.data);
 		}
-		// float diffuse = light.diffuse * dot(L, N);
-		// color = add(color, multiply(light.color, diffuse));
 
 		// Specular calculation
 		vec3 V = normalized(-point);
 		vec3 R = N * 2 * dot(L, N) - L;
-		// float val = dot(R, V);
-		// float power = (val > 0) ? std::pow(dot(R, V), ambiant.exponent) : 0;
-		// float specular = light.specular * power;
-		// color = add(color, multiply(light.color, specular));
 		float theta = dot(L, N);
 		float cos = dot(R, V);
 		float pow = std::pow(cos, ambiant.exponent);
@@ -505,7 +499,7 @@ void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
 	}
 }
 
-void CCGWorkView::CRenderer::draw_model(const CModel & model)
+void CCGWorkView::CRenderer::draw_model(CModel & model)
 {
 	if (rendering_type == SQUELETON) {
 		draw_edges(model);
@@ -551,8 +545,15 @@ float CCGWorkView::CRenderer::get_x(vec3 v1, vec3 v2, int y)
 
 void CCGWorkView::CRenderer::draw_flat(const CModel & model)
 {
+	float inverted_polygon = 1.0f;
+	if (invert_polygon_normals) {
+		inverted_polygon = -1.0f;
+	}
 	for (const CPolygon& polygon : model.polygons) {
-		vec3 camera_view(0, 0, 1.0f);
+		vec3 camera_view(0.0f, 0.0f, 1.0f);
+		if (!camera.is_orthographic()) {
+			camera_view = normalized(polygon.origin_transformed - vec3(0.0f, 0.0f, -2.0f));
+		}
 		bool inverted = false;
 		if (dot(camera_view, polygon.calculated_normal) > 0) {
 			inverted = true;
@@ -626,7 +627,7 @@ void CCGWorkView::CRenderer::draw_flat(const CModel & model)
 				rr -= i;
 			}
 		}
-		COLORREF color = calculate_light(polygon.origin_transformed, polygon.calculated_normal);
+		COLORREF color = calculate_light(polygon.origin_transformed, polygon.calculated_normal * inverted_polygon);
 		for (int y = min_y; y <= max_y; y++) {
 			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
 			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
@@ -639,8 +640,15 @@ void CCGWorkView::CRenderer::draw_flat(const CModel & model)
 
 void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 {
+	float inverted_polygon = 1.0f;
+	if (invert_polygon_normals) {
+		inverted_polygon = -1.0f;
+	}
 	for (const CPolygon& polygon : model.polygons) {
-		vec3 camera_view(0, 0, 1.0f);
+		vec3 camera_view(0.0f, 0.0f, 1.0f);
+		if (!camera.is_orthographic()) {
+			camera_view = normalized(polygon.origin_transformed - vec3(0.0f, 0.0f, -2.0f));
+		}
 		bool inverted = false;
 		if (dot(camera_view, polygon.calculated_normal) > 0) {
 			inverted = true;
@@ -666,11 +674,11 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 			}
 			if (inverted) {
 				points.insert(points.begin(), v);
-				colors.insert(colors.begin(), calculate_light(vertice.transformed, vertice.calculated_normal));
+				colors.insert(colors.begin(), calculate_light(vertice.transformed, vertice.calculated_normal * inverted_polygon));
 			}
 			else {
 				points.push_back(v);
-				colors.push_back(calculate_light(vertice.transformed, vertice.calculated_normal));
+				colors.push_back(calculate_light(vertice.transformed, vertice.calculated_normal * inverted_polygon));
 			}
 			i++;
 		}
@@ -781,8 +789,15 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 
 void CCGWorkView::CRenderer::draw_phong(const CModel & model)
 {
+	float inverted_polygon = 1.0f;
+	if (invert_polygon_normals) {
+		inverted_polygon = -1.0f;
+	}
 	for (const CPolygon& polygon : model.polygons) {
-		vec3 camera_view(0, 0, 1.0f);
+		vec3 camera_view(0.0f, 0.0f, 1.0f);
+		if (!camera.is_orthographic()) {
+			camera_view = normalized(polygon.origin_transformed - vec3(0.0f, 0.0f, -2.0f));
+		}
 		bool inverted = false;
 		if (dot(camera_view, polygon.calculated_normal) > 0) {
 			inverted = true;
@@ -836,7 +851,7 @@ void CCGWorkView::CRenderer::draw_phong(const CModel & model)
 			calculate_left(points[l], points[ll], left, min_y);
 			int start = (int)(points[l].y) - min_y, stop = (int)(points[ll].y) - min_y;
 			vec3 p1 = points_3D[l].transformed, p2 = points_3D[ll].transformed;
-			vec3 n1 = points_3D[l].calculated_normal, n2 = points_3D[ll].calculated_normal;
+			vec3 n1 = points_3D[l].calculated_normal * inverted_polygon, n2 = points_3D[ll].calculated_normal * inverted_polygon;
 			for (int i = start; i <= stop; i++) {
 				float t;
 				if (start == stop) {
@@ -873,7 +888,7 @@ void CCGWorkView::CRenderer::draw_phong(const CModel & model)
 			calculate_right(points[r], points[rr], right, min_y);
 			int start = (int)(points[r].y) - min_y, stop = (int)(points[rr].y) - min_y;
 			vec3 p1 = points_3D[r].transformed, p2 = points_3D[rr].transformed;
-			vec3 n1 = points_3D[r].calculated_normal, n2 = points_3D[rr].calculated_normal;
+			vec3 n1 = points_3D[r].calculated_normal * inverted_polygon, n2 = points_3D[rr].calculated_normal * inverted_polygon;
 			for (int i = start; i <= stop; i++) {
 				float t;
 				if (start == stop) {
@@ -926,17 +941,20 @@ void CCGWorkView::CRenderer::draw_phong(const CModel & model)
 	}
 }
 
-void CCGWorkView::CRenderer::draw_edges(const CModel & model)
+void CCGWorkView::CRenderer::draw_edges(CModel & model)
 {
 	vector<vector<edge>> edges_all;
 	vector<bool> isItHidden;
 	bool toDraw = true;
-	for (const CPolygon& polygon : model.polygons) {
+	for (CPolygon& polygon : model.polygons) {
 		toDraw = true;
-		vec3 camera_view(0, 0, 1.0f);
-		if (backface_culling && dot(camera_view, polygon.calculated_normal) > 0) {
+		vec3 camera_view(0.0f, 0.0f, 1.0f);
+		if (!camera.is_orthographic()) {
+			camera_view = normalized(polygon.origin_transformed - vec3(0.0f, 0.0f, -2.0f));
+		}
+		float inverted_polygon = (invert_polygon_normals) ? -1.0f : 1.0f;
+		if (backface_culling && dot(camera_view, polygon.calculated_normal * inverted_polygon) > 0) {
 			toDraw = false;
-			//continue;
 		}
 
 		vector<vec3> points;
@@ -954,39 +972,47 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 
 		COLORREF polygon_color = wireframe_color;
 		bool highlight = false;
-		if (select_highlighted_pol && pointIsInside(points, vec2((float)mouse_x, (float)mouse_y))) {
+		if (select_highlighted_pol) {
+			if (pointIsInside(points, vec2((float)mouse_x, (float)mouse_y))) {
+				polygon.highlight = true;
+			}
+			else {
+				polygon.highlight = false;
+			}
+		}
+
+		if (polygon.highlight) {
 			highlight = true;
 			polygon_color = highlight_polygon;
 		}
 
-
 		for (int i = 0; i < size; i++) {
 			if (toDraw)
-				draw_line(points[i], points[i + 1], polygon_color, true);
+				draw_line(points[i], points[i + 1], polygon_color, highlight);
 			edges.push_back(edge(points[i], points[i + 1]));
 		}
 		if (toDraw)
-			draw_line(points[size], points[0], polygon_color, true);
+			draw_line(points[size], points[0], polygon_color, highlight);
 		edges.push_back(edge(points[size], points[0]));
 
 		edges_all.push_back(edges);
 		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
 	}
 
-	//for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
-	//	for (int a = 0; a < edges_all[i].size(); a++) {	//pour chaque edge du polygon
-	//		for (int j = 0; j < edges_all.size(); j++) {	//check si dans un des polygones
-	//			if (i == j) continue;
-	//			for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
-	//				if (edges_all[i][a] == edges_all[j][b]) {
-	//					if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
-	//						draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+	for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
+		for (int a = 0; a < edges_all[i].size(); a++) {	//pour chaque edge du polygon
+			for (int j = 0; j < edges_all.size(); j++) {	//check si dans un des polygones
+				if (i == j) continue;
+				for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
+					if (edges_all[i][a] == edges_all[j][b]) {
+						if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
+							draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void CCGWorkView::CRenderer::draw_normals(const CModel & model)
@@ -1001,8 +1027,11 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 		inverted_vertice = -1.0f;
 	}
 	for (const CPolygon& polygon : model.polygons) {
-		vec3 camera_view(0, 0, 1.0f);
-		if (backface_culling && dot(camera_view, polygon.calculated_normal) > 0) {
+		vec3 camera_view(0.0f, 0.0f, 1.0f);
+		if (!camera.is_orthographic()) {
+			camera_view = normalized(polygon.origin_transformed - vec3(0.0f, 0.0f, -2.0f));
+		}
+		if (backface_culling && dot(camera_view, polygon.calculated_normal * inverted_polygon) > 0) {
 			continue;
 		}
 

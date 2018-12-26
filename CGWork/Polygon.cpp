@@ -1,6 +1,6 @@
 #include "Polygon.h"
 
-CPolygon::CPolygon() {}
+CPolygon::CPolygon() : highlight(false) {}
 
 void CPolygon::add_vertice(const CVertice& vertice)
 {
