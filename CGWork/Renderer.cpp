@@ -13,6 +13,7 @@ wireframe_color(WHITE),
 bbox_color(RED)
 {
 	draw_bbox = false;
+	draw_silouhette = false;
 	draw_polygon_normals = false;
 	draw_vertice_normals = false;
 	invert_polygon_normals = false;
@@ -999,14 +1000,16 @@ void CCGWorkView::CRenderer::draw_edges(CModel & model)
 		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
 	}
 
-	for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
-		for (int a = 0; a < edges_all[i].size(); a++) {	//pour chaque edge du polygon
-			for (int j = 0; j < edges_all.size(); j++) {	//check si dans un des polygones
-				if (i == j) continue;
-				for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
-					if (edges_all[i][a] == edges_all[j][b]) {
-						if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
-							draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
+	if (draw_silouhette) {
+		for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
+			for (int a = 0; a < edges_all[i].size(); a++) {	//pour chaque edge du polygon
+				for (int j = 0; j < edges_all.size(); j++) {	//check si dans un des polygones
+					if (i == j) continue;
+					for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
+						if (edges_all[i][a] == edges_all[j][b]) {
+							if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
+								draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
+							}
 						}
 					}
 				}

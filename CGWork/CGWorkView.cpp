@@ -121,6 +121,12 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_VERTEX_INVERTED, &CCGWorkView::OnUpdateVertexInverted)
 	ON_COMMAND(ID_RENDER_TOFILE, &CCGWorkView::OnRenderTofile)
 	ON_COMMAND(ID_FILE_LOADBACKGROUND, &CCGWorkView::OnFileLoadbackground)
+	ON_COMMAND(ID_BG_REPEAT, &CCGWorkView::OnBgRepeat)
+	ON_UPDATE_COMMAND_UI(ID_BG_REPEAT, &CCGWorkView::OnUpdateBgRepeat)
+	ON_COMMAND(ID_BG_STRETCH, &CCGWorkView::OnBgStretch)
+	ON_UPDATE_COMMAND_UI(ID_BG_STRETCH, &CCGWorkView::OnUpdateBgStretch)
+	ON_COMMAND(ID_SILOUHETTE, &CCGWorkView::OnSilouhette)
+	ON_UPDATE_COMMAND_UI(ID_SILOUHETTE, &CCGWorkView::OnUpdateSilouhette)
 END_MESSAGE_MAP()
 
 
@@ -838,4 +844,40 @@ void CCGWorkView::OnFileLoadbackground()
 
 		Invalidate();	// force a WM_PAINT for drawing.
 	}
+}
+
+
+void CCGWorkView::OnBgRepeat()
+{
+	scene.isBackgroundStretched = false;
+}
+
+
+void CCGWorkView::OnUpdateBgRepeat(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.isBackgroundLoaded && !scene.isBackgroundStretched);
+}
+
+
+void CCGWorkView::OnBgStretch()
+{
+	scene.isBackgroundStretched = true;
+}
+
+
+void CCGWorkView::OnUpdateBgStretch(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.isBackgroundLoaded && scene.isBackgroundStretched);
+}
+
+
+void CCGWorkView::OnSilouhette()
+{
+	scene.renderer.draw_silouhette = !scene.renderer.draw_silouhette;
+}
+
+
+void CCGWorkView::OnUpdateSilouhette(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.draw_silouhette);
 }

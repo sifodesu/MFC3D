@@ -182,7 +182,6 @@ void CCGWorkView::CScene::draw(CDC* context)
 		draw_background();
 	}
 
-
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
 

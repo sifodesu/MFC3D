@@ -52,6 +52,7 @@ public:
 		void draw_into_file();
 
 		bool draw_bbox;
+		bool draw_silouhette;
 		bool draw_polygon_normals;
 		bool draw_vertice_normals;
 		bool invert_polygon_normals;
@@ -268,6 +269,12 @@ public:
 	afx_msg void OnUpdateVertexInverted(CCmdUI *pCmdUI);
 	afx_msg void OnRenderTofile();
 	afx_msg void OnFileLoadbackground();
+	afx_msg void OnBgRepeat();
+	afx_msg void OnUpdateBgRepeat(CCmdUI *pCmdUI);
+	afx_msg void OnBgStretch();
+	afx_msg void OnUpdateBgStretch(CCmdUI *pCmdUI);
+	afx_msg void OnSilouhette();
+	afx_msg void OnUpdateSilouhette(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp
