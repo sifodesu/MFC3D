@@ -4,11 +4,9 @@
 #include "PngWrapper.h"
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
-current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(true), isBackgroundStretched(true)
+current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(false), isBackgroundStretched(true)
 {
 	cameras.push_back(CCamera());
-	background_image.SetFileName("./bite.png");
-	background_image.ReadPng();
 }
 
 void CCGWorkView::CScene::add_model(const CModel & model)
@@ -181,7 +179,7 @@ void CCGWorkView::CScene::draw(CDC* context)
 	renderer.bitFlag.reset();
 
 	if (isBackgroundLoaded) {
-		//draw_background();
+		draw_background();
 	}
 
 

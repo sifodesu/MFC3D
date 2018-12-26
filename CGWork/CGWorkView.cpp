@@ -120,6 +120,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_VERTEX_INVERTED, &CCGWorkView::OnVertexInverted)
 	ON_UPDATE_COMMAND_UI(ID_VERTEX_INVERTED, &CCGWorkView::OnUpdateVertexInverted)
 	ON_COMMAND(ID_RENDER_TOFILE, &CCGWorkView::OnRenderTofile)
+	ON_COMMAND(ID_FILE_LOADBACKGROUND, &CCGWorkView::OnFileLoadbackground)
 END_MESSAGE_MAP()
 
 
@@ -819,4 +820,22 @@ void CCGWorkView::OnRenderTofile()
 {
 	DiaScreenshot dlg(this);
 	dlg.DoModal();
+}
+
+
+void CCGWorkView::OnFileLoadbackground()
+{
+	TCHAR szFilters[] = _T("PNG Data Files (*.png)|*.png|All Files (*.*)|*.*||");
+
+	CFileDialog dlg(TRUE, _T("png"), _T("*.png"), OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters);
+
+	if (dlg.DoModal() == IDOK) {
+		CString path = dlg.GetPathName();
+		CT2A ascii(path);
+		scene.background_image.SetFileName(ascii.m_psz);
+		scene.background_image.ReadPng();
+		scene.isBackgroundLoaded = true;
+
+		Invalidate();	// force a WM_PAINT for drawing.
+	}
 }

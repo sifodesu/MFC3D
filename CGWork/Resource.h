@@ -106,13 +106,14 @@
 #define ID_Z_BUFFER                     32834
 #define ID_POLYGON_INVERTED             32835
 #define ID_VERTEX_INVERTED              32836
+#define ID_FILE_LOADBACKGROUND          32837
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         32837
+#define _APS_NEXT_COMMAND_VALUE         32838
 #define _APS_NEXT_CONTROL_VALUE         1061
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

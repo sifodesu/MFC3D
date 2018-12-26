@@ -267,6 +267,7 @@ public:
 	afx_msg void OnVertexInverted();
 	afx_msg void OnUpdateVertexInverted(CCmdUI *pCmdUI);
 	afx_msg void OnRenderTofile();
+	afx_msg void OnFileLoadbackground();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp
