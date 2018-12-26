@@ -378,16 +378,26 @@ COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& 
 			L = normalized(light.data - point);
 		}
 		else {
-			L = normalized(light.data);
+			L = normalized(-light.data);
 		}
-		float diffuse = light.diffuse * dot(L, N);
-		color = add(color, multiply(light.color, diffuse));
+		// float diffuse = light.diffuse * dot(L, N);
+		// color = add(color, multiply(light.color, diffuse));
 
 		// Specular calculation
 		vec3 V = normalized(-point);
 		vec3 R = N * 2 * dot(L, N) - L;
-		float specular = light.specular * std::pow(dot(R, V), ambiant.exponent);
-		color = add(color, multiply(light.color, specular));
+		// float val = dot(R, V);
+		// float power = (val > 0) ? std::pow(dot(R, V), ambiant.exponent) : 0;
+		// float specular = light.specular * power;
+		// color = add(color, multiply(light.color, specular));
+		float theta = dot(L, N);
+		float cos = dot(R, V);
+		float pow = std::pow(cos, ambiant.exponent);
+
+		if (theta > 0) {
+			color = add(color, multiply(light.color, theta * light.diffuse));
+			color = add(color, multiply(light.color, theta * light.specular * pow));
+		}
 	}
 	return color;
 }
@@ -509,6 +519,7 @@ void CCGWorkView::CRenderer::draw_model(const CModel & model)
 			draw_gouraud(model);
 			break;
 		case PHONG:
+			draw_phong(model);
 			break;
 		}
 	}
@@ -634,9 +645,6 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 		if (dot(camera_view, polygon.calculated_normal) > 0) {
 			inverted = true;
 		}
-
-		bool draw = false;
-
 		vector<vec3> points;
 		vector<COLORREF> colors;
 		int first = 0, last = 0, i = 0;
@@ -648,9 +656,6 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 			}
 			vec3 v = cast(vec3(projected));
 			v.z = vertice.transformed.z;
-			if (v.x >= 0 && v.x < screen.Width() && v.y >= 0 && v.y < screen.Height()) {
-				draw = true;
-			}
 			if (v.y < min_y) {
 				first = i;
 				min_y = v.y;
@@ -668,9 +673,6 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 				colors.push_back(calculate_light(vertice.transformed, vertice.calculated_normal));
 			}
 			i++;
-		}
-		if (!draw) {
-			continue;
 		}
 		if (inverted) {
 			first = i - first - 1;
@@ -779,7 +781,149 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 
 void CCGWorkView::CRenderer::draw_phong(const CModel & model)
 {
+	for (const CPolygon& polygon : model.polygons) {
+		vec3 camera_view(0, 0, 1.0f);
+		bool inverted = false;
+		if (dot(camera_view, polygon.calculated_normal) > 0) {
+			inverted = true;
+		}
+		vector<vec3> points;
+		vector<CVertice> points_3D;
+		int first = 0, last = 0, i = 0;
+		int min_y = screen.Height(), max_y = 0;
+		for (const CVertice& vertice : polygon.vertices) {
+			vec4 projected = camera.projection * vertice.transformed;
+			if (!camera.is_orthographic()) {
+				apply_perspective(projected);
+			}
+			vec3 v = cast(vec3(projected));
+			v.z = vertice.transformed.z;
+			if (v.y < min_y) {
+				first = i;
+				min_y = v.y;
+			}
+			if (v.y > max_y) {
+				last = i;
+				max_y = v.y;
+			}
+			if (inverted) {
+				points.insert(points.begin(), v);
+				points_3D.insert(points_3D.begin(), vertice);
+			}
+			else {
+				points.push_back(v);
+				points_3D.push_back(vertice);
+			}
+			i++;
+		}
+		if (inverted) {
+			first = i - first - 1;
+			last = i - last - 1;
+		}
 
+		int l = first, r = first;
+		int ll = l - 1;
+		if (ll < 0) {
+			ll += i;
+		}
+		int rr = r + 1;
+		if (rr >= i) {
+			rr -= i;
+		}
+		vector<pair<int, float>> left(max_y - min_y + 1), right(max_y - min_y + 1);
+		vector<pair<vec3, vec3>> points_left(max_y - min_y + 1), points_right(max_y - min_y + 1);
+		while (true) {
+			calculate_left(points[l], points[ll], left, min_y);
+			int start = (int)(points[l].y) - min_y, stop = (int)(points[ll].y) - min_y;
+			vec3 p1 = points_3D[l].transformed, p2 = points_3D[ll].transformed;
+			vec3 n1 = points_3D[l].calculated_normal, n2 = points_3D[ll].calculated_normal;
+			for (int i = start; i <= stop; i++) {
+				float t;
+				if (start == stop) {
+					if (points[r].x < points[rr].x) {
+						t = 0.0f;
+					}
+					else {
+						t = 1.0f;
+					}
+				}
+				else if (std::abs(points[ll].x - points[l].x) > stop - start) {
+					t = (float)(left[i].first - (int)(points[l].x)) / (points[ll].x - points[l].x);
+				}
+				else {
+					t = (float)(i - start) / (float)(stop - start);
+				}
+				points_left[i].first = p1 * (1.0f - t) + p2 * t;
+				points_left[i].second = normalized(n1 * (1.0f - t) + n2 * t);
+			}
+
+			if (ll == last) {
+				break;
+			}
+			l--;
+			ll--;
+			if (l < 0) {
+				l += i;
+			}
+			if (ll < 0) {
+				ll += i;
+			}
+		}
+		while (true) {
+			calculate_right(points[r], points[rr], right, min_y);
+			int start = (int)(points[r].y) - min_y, stop = (int)(points[rr].y) - min_y;
+			vec3 p1 = points_3D[r].transformed, p2 = points_3D[rr].transformed;
+			vec3 n1 = points_3D[r].calculated_normal, n2 = points_3D[rr].calculated_normal;
+			for (int i = start; i <= stop; i++) {
+				float t;
+				if (start == stop) {
+					if (points[r].x < points[rr].x) {
+						t = 1.0f;
+					}
+					else {
+						t = 0.0f;
+					}
+				}
+				else if (std::abs(points[rr].x - points[r].x) > stop - start) {
+					t = (float)(right[i].first - (int)(points[r].x)) / (points[rr].x - points[r].x);
+				}
+				else {
+					t = (float)(i - start) / (float)(stop - start);
+				}
+				points_right[i].first = p1 * (1.0f - t) + p2 * t;
+				points_right[i].second = normalized(n1 * (1.0f - t) + n2 * t);
+			}
+
+			if (rr == last) {
+				break;
+			}
+			r++;
+			rr++;
+			if (r >= i) {
+				r -= i;
+			}
+			if (rr >= i) {
+				rr -= i;
+			}
+		}
+		for (int y = min_y; y <= max_y; y++) {
+			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
+			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
+			for (int x = v1.x; x <= v2.x; x++) {
+				float t;
+				if (v2.x - v1.x < 1.0f && v2.x - v1.x > -1.0f) {
+					t = 0.5f;
+				}
+				else {
+					t = ((float)(x)-v1.x) / (v2.x - v1.x);
+				}
+				vec3 p = points_left[y - min_y].first * (1.0f - t) + points_right[y - min_y].first * t;
+				vec3 n = normalized(points_left[y - min_y].second * (1.0f - t) + points_right[y - min_y].second * t);
+				COLORREF color = calculate_light(p, n);
+				set_pixel(POINT{ x, y }, v1, v2, color);
+			}
+		}
+	}
 }
 
 void CCGWorkView::CRenderer::draw_edges(const CModel & model)
@@ -829,21 +973,20 @@ void CCGWorkView::CRenderer::draw_edges(const CModel & model)
 		isItHidden.push_back(dot(camera_view, polygon.calculated_normal) > 0);
 	}
 
-	for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
-		for (int a = 0; a < edges_all[i].size(); a++) {	//pour chaque edge du polygon
-			for (int j = 0; j < edges_all.size(); j++) {	//check si dans un des polygones
-				if (i == j) continue;
-				for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
-					if (edges_all[i][a] == edges_all[j][b]) {
-						if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
-							draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
-						}
-					}
-				}
-			}
-		}
-
-	}
+	//for (int i = 0; i < edges_all.size(); i++) {	//pour chaque polygone
+	//	for (int a = 0; a < edges_all[i].size(); a++) {	//pour chaque edge du polygon
+	//		for (int j = 0; j < edges_all.size(); j++) {	//check si dans un des polygones
+	//			if (i == j) continue;
+	//			for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
+	//				if (edges_all[i][a] == edges_all[j][b]) {
+	//					if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
+	//						draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void CCGWorkView::CRenderer::draw_normals(const CModel & model)
@@ -899,8 +1042,8 @@ COLORREF CCGWorkView::CRenderer::multiply(COLORREF color, float k)
 
 COLORREF CCGWorkView::CRenderer::add(COLORREF c1, COLORREF c2)
 {
-	int R = min(255, GetRValue(c1) + GetRValue(c2));
-	int G = min(255, GetGValue(c1) + GetGValue(c2));
-	int B = min(255, GetBValue(c1) + GetBValue(c2));
+	int R = max(0, min(255, GetRValue(c1) + GetRValue(c2)));
+	int G = max(0, min(255, GetGValue(c1) + GetGValue(c2)));
+	int B = max(0, min(255, GetBValue(c1) + GetBValue(c2)));
 	return RGB(R, G, B);
 	}
