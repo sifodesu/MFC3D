@@ -8,7 +8,7 @@ const float ROTATION_FACTOR = 0.2f;
 const float SCALING_FACTOR = 0.002f;
 
 const float DEPTH_FACTOR = 5.0f;
-const float NORMAL_SIZE_FACTOR = 0.02f;
+const float NORMAL_SIZE_FACTOR = 0.06f;
 
 const COLORREF BLACK = RGB(0, 0, 0);
 const COLORREF WHITE = RGB(255, 255, 255);

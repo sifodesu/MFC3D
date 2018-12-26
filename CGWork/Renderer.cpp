@@ -867,7 +867,7 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 			if (draw_polygon_included_normals) {
 				vec3 dest = polygon.origin + polygon.included_normal;
 				dest = transform * dest;
-				draw_normal(polygon.origin_transformed, (dest - polygon.origin) * inverted_polygon, normals_color);
+				draw_normal(polygon.origin_transformed, (dest - polygon.origin_transformed) * inverted_polygon, normals_color);
 			}
 			else {
 				draw_normal(polygon.origin_transformed, polygon.calculated_normal * inverted_polygon, normals_color);
@@ -878,7 +878,7 @@ void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 				if (draw_vertice_included_normals) {
 					vec3 dest = vertice.point + vertice.included_normal;
 					dest = transform * dest;
-					draw_normal(vertice.transformed, (dest - vertice.point) * inverted_vertice, normals_color);
+					draw_normal(vertice.transformed, (dest - vertice.transformed) * inverted_vertice, normals_color);
 				}
 				else {
 					draw_normal(vertice.transformed, vertice.calculated_normal * inverted_vertice, normals_color);
