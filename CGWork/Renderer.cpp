@@ -10,7 +10,8 @@ background_color(BLACK),
 highlight_polygon(GREEN),
 normals_color(PINK),
 wireframe_color(WHITE),
-bbox_color(RED)
+bbox_color(RED),
+silouhette_color(YELLOW)
 {
 	draw_bbox = false;
 	draw_silouhette = false;
@@ -43,7 +44,7 @@ CCGWorkView::CRenderer::~CRenderer()
 void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
 {
 	unsigned int offset = 4 * ((screen.Height() - p.y) * screen.Width() + p.x);
-	if (offset >= parent->BMInfo.bmiHeader.biSizeImage || offset < 0 || p.x >= screen.Width() || p.x < 0) {
+	if (offset >= screen.Height() * screen.Width() * sizeof(DWORD) || offset < 0 || p.x >= screen.Width() || p.x < 0) {
 		return;
 	}
 	bitmap[offset] = GetBValue(c);
@@ -419,6 +420,13 @@ void CCGWorkView::CRenderer::set_bitmap_dimensions(const BITMAPINFO& info)
 		delete[] tmp;
 	}
 	parent->GetClientRect(&screen);
+}
+
+void CCGWorkView::CRenderer::set_bitmap_dimensions(int width, int height)
+{
+	int size = width * height * sizeof(DWORD);
+	bitmap = new BYTE[size];
+	screen = CRect(POINT{ 0, 0 }, POINT{ height, width });
 }
 
 void CCGWorkView::CRenderer::get_bitmap(CDC * context)
@@ -1008,7 +1016,7 @@ void CCGWorkView::CRenderer::draw_edges(CModel & model)
 					for (int b = 0; b < edges_all[j].size(); b++) {	//il existe un edge egal
 						if (edges_all[i][a] == edges_all[j][b]) {
 							if (isItHidden[i] != isItHidden[j]) {	//et que les 2 polygones soient shown + hidden
-								draw_line(edges_all[i][a].first, edges_all[i][a].second, RGB(255, 0, 140), true);
+								draw_line(edges_all[i][a].first, edges_all[i][a].second, silouhette_color, true);
 							}
 						}
 					}

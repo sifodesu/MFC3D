@@ -88,6 +88,6 @@ BOOL DiaScreenshot::OnInitDialog()
 
 void DiaScreenshot::OnBnClickedOk()
 {
-	parent->scene.screenshot(width, height);
+	parent->scene.screenshot(parent, width, height);
 	CDialogEx::OnOK();
 }

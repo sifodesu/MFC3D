@@ -327,10 +327,11 @@ void CCGWorkView::OnDraw(CDC* pDC)
 		scene.update(this, mouse.x - mouse_pos_x);
 	}
 	mouse_pos_x = mouse.x;
-
-	//pDC->GetWindow()->EnableWindow();
-	//ON_UPDATE_COMMAND_UI(IDD_MOUS_SENS, OnOptionsMousesensitivity);
-	scene.draw(pDCToUse);
+	
+	scene.renderer.get_bitmap(pDCToUse);
+	scene.renderer.set_camera(scene.cameras[scene.current_camera]);
+	scene.draw();
+	scene.renderer.draw_bitmap(pDCToUse);
 	m_pDC->BitBlt(r.left, r.top, r.Width(), r.Height(), pDCToUse, r.left, r.top, SRCCOPY);
 
 	theApp.OnIdle(-1);

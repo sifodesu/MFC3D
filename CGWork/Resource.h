@@ -44,6 +44,8 @@
 #define IDC_NORMAL_COLOR                1046
 #define IDC_BG_COLOR                    1047
 #define IDC_BBOX_COLOR                  1048
+#define IDC_NORMAL_COLOR2               1049
+#define IDC_SILOUHETTE_COLOR            1049
 #define IDC_LIGHT_DIFFUSE               1051
 #define IDC_LIGHT_SPECULAR              1052
 #define IDC_LIGHT_COLOR                 1053
@@ -109,7 +111,6 @@
 #define ID_FILE_LOADBACKGROUND          32837
 #define ID_BG_REPEAT                    32839
 #define ID_BG_STRETCH                   32840
-#define ID_BUTTON32841                  32841
 #define ID_SILOUHETTE                   32841
 
 // Next default values for new objects

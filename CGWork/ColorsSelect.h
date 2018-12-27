@@ -28,4 +28,5 @@ public:
 	CMFCColorButton wireframe_picker;
 	CMFCColorButton bbox_picker;
 	CMFCColorButton normal_picker;
+	CMFCColorButton silouhette_color;
 };

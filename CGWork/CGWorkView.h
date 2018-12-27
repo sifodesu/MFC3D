@@ -65,6 +65,7 @@ public:
 		CRenderer(CCGWorkView* parent);
 		~CRenderer();
 		void set_bitmap_dimensions(const BITMAPINFO& info);
+		void set_bitmap_dimensions(int width, int height);
 		void get_bitmap(CDC* context);
 		void draw_bitmap(CDC* context);
 		void set_camera(const CCamera& camera);
@@ -89,6 +90,7 @@ public:
 		COLORREF normals_color;
 		COLORREF wireframe_color;
 		COLORREF bbox_color;
+		COLORREF silouhette_color;
 
 		LightParams lights[LIGHT_NUM];
 		AmbiantLightParams ambiant;
@@ -96,10 +98,10 @@ public:
 
 	class CScene
 	{
+	public:
 		vector<CCamera> cameras;
 		int current_camera;
-
-	public:
+		
 		CScene(CCGWorkView* parent);
 		void add_model(const CModel& model);
 		void add_camera(const CCamera& camera);
@@ -108,9 +110,9 @@ public:
 		void draw_background();
 
 		void update(CCGWorkView* app, int mouse_dx);
-		void draw(CDC* context);
+		void draw();
 		void drawZBuffer();
-		void screenshot(float width, float height);
+		void screenshot(CCGWorkView* parent, float width, float height);
 		
 		CRenderer renderer;
 		bool display_z_buffer;

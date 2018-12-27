@@ -147,38 +147,56 @@ void CCGWorkView::CScene::draw_background() {
 
 }
 
-void CCGWorkView::CScene::screenshot(float width, float height) {
-	float h = renderer.screen.Height();
-	float w = renderer.screen.Width();
-	PngWrapper res("./res.png", width, height);
-	float ratioX = w / width;
-	float ratioY = h / height;
+void CCGWorkView::CScene::screenshot(CCGWorkView* parent, float width, float height) {
+
+	TCHAR szFilters[] = _T("PNG Files (*.png)|*.png|All Files (*.*)|*.*||");
+
+	CFileDialog dlg(FALSE, _T("png"), _T("file.png"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilters);
+
+	if (dlg.DoModal() != IDOK) {
+		return;
+	}
+
+	CString path = dlg.GetPathName();
+	CT2A ascii(path);
 	
+	BYTE* old_buffer = renderer.bitmap;
+
+	renderer.set_bitmap_dimensions(height, width);
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			unsigned int offset = 4 * (y * width + x);
+			renderer.bitmap[offset] = GetBValue(renderer.background_color);
+			renderer.bitmap[offset + 1] = GetGValue(renderer.background_color);
+			renderer.bitmap[offset + 2] = GetRValue(renderer.background_color);
+		}
+	}
+	draw();
+
+	PngWrapper res(ascii.m_psz, width, height);
 	res.InitWritePng();
+
 	 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			unsigned int offset = 4 * ((h - (int)(y*ratioY)) * w + (int)(x*ratioX));
-			if (offset >= renderer.parent->BMInfo.bmiHeader.biSizeImage || offset < 0 || (int)(x*ratioX) >= w || (int)(x*ratioX) < 0 || (int)(y*ratioY) >= h || (int)(y*ratioY) < 0) {
-				continue;
-			}
+			unsigned int offset = 4 * (y * width + x);
 			int B = renderer.bitmap[offset];
 			int G = renderer.bitmap[offset + 1];
 			int R = renderer.bitmap[offset + 2];
 
-			res.SetValue(x, y, SET_RGB(R, G, B));
+			res.SetValue(x, height - y - 1, SET_RGB(R, G, B));
 		}
 	}
 	res.WritePng();
+	parent->update_draw_bitmap(); // Reset the bitmap to screen size
+	parent->Invalidate();
 }
 
-void CCGWorkView::CScene::draw(CDC* context)
+void CCGWorkView::CScene::draw()
 {
-	renderer.get_bitmap(context);
-	renderer.set_camera(cameras[current_camera]);
 	renderer.bitFlag.reset();
 
-	if (isBackgroundLoaded) {
+	if (renderer.rendering_type != CRenderer::SQUELETON && isBackgroundLoaded) {
 		draw_background();
 	}
 
@@ -194,5 +212,5 @@ void CCGWorkView::CScene::draw(CDC* context)
 	if (display_z_buffer) {
 		drawZBuffer();
 	}
-	renderer.draw_bitmap(context);
+	
 }

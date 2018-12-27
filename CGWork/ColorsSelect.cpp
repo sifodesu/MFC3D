@@ -25,6 +25,7 @@ void ColorsSelect::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_WIREFRAME_COLOR, wireframe_picker);
 	DDX_Control(pDX, IDC_BBOX_COLOR, bbox_picker);
 	DDX_Control(pDX, IDC_NORMAL_COLOR, normal_picker);
+	DDX_Control(pDX, IDC_SILOUHETTE_COLOR, silouhette_color);
 }
 
 
@@ -40,6 +41,7 @@ BOOL ColorsSelect::OnInitDialog()
 	wireframe_picker.SetColor(pview->scene.renderer.wireframe_color);
 	bbox_picker.SetColor(pview->scene.renderer.bbox_color);
 	normal_picker.SetColor(pview->scene.renderer.normals_color);
+	silouhette_color.SetColor(pview->scene.renderer.silouhette_color);
 	return TRUE;
 }
 
@@ -49,5 +51,6 @@ void ColorsSelect::OnBnClickedOk()
 	pview->scene.renderer.wireframe_color = wireframe_picker.GetColor();
 	pview->scene.renderer.normals_color = normal_picker.GetColor();
 	pview->scene.renderer.bbox_color = bbox_picker.GetColor();
+	pview->scene.renderer.silouhette_color = silouhette_color.GetColor();
 	CDialogEx::OnOK();
 }
