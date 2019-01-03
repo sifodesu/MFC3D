@@ -4,7 +4,7 @@
 #include "PngWrapper.h"
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
-current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(false), isBackgroundStretched(true)
+current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(false), isBackgroundStretched(true), lastFrame(nullptr), sizeLastFrame(0)
 {
 	cameras.push_back(CCamera());
 }
@@ -152,6 +152,56 @@ void CCGWorkView::CScene::draw_background() {
 
 }
 
+BYTE* bitmapBackup(BYTE* bitmap, int w, int h) {
+	BYTE* res = new BYTE[w*h*sizeof(DWORD)];
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++){
+			unsigned int offset = 4 * ((h - y) * w + x);
+			if (offset >= h * w * sizeof(DWORD) || offset < 0 || x >= w || x < 0) {
+				continue;
+			}
+			res[offset] = bitmap[offset];
+			res[offset + 1] = bitmap[offset + 1];
+			res[offset + 2] = bitmap[offset + 2];
+		}
+	}
+	return res;
+}
+
+void CCGWorkView::CScene::drawMotionBlur() {
+	int h = renderer.screen.Height();
+	int w = renderer.screen.Width();
+	if (lastFrame != nullptr && sizeLastFrame == w * h * sizeof(DWORD)) {
+		double t = 0.25;
+		for (int y = 0; y < h; y++){
+			for (int x = 0; x < w; x++){
+				unsigned int offset = 4 * ((h - y) * w + x);
+				if (offset >= h * w * sizeof(DWORD) || offset < 0 || x >= w || x < 0) {
+					continue;
+				}
+				int B = renderer.bitmap[offset];
+				int G = renderer.bitmap[offset + 1];
+				int R = renderer.bitmap[offset + 2];
+				COLORREF pCur = RGB(R, G, B);
+				B = lastFrame[offset];
+				G = lastFrame[offset + 1];
+				R = lastFrame[offset + 2];
+				COLORREF pLF = RGB(R, G, B);
+
+				COLORREF newCol = renderer.add(renderer.multiply(pCur, 1 - t), renderer.multiply(pLF, t));
+				renderer.draw_pixel(POINT{ x, y }, newCol);
+
+			}
+		}
+	}
+
+	if (lastFrame != nullptr)
+		delete[] lastFrame;
+	//save the frame
+	lastFrame = bitmapBackup(renderer.bitmap, w, h);
+	sizeLastFrame = w*h*sizeof(DWORD);
+}
+
 void CCGWorkView::CScene::screenshot(CCGWorkView* parent, float width, float height) {
 
 	TCHAR szFilters[] = _T("PNG Files (*.png)|*.png|All Files (*.*)|*.*||");
@@ -229,7 +279,6 @@ void CCGWorkView::CScene::draw_fog() {
 
 void CCGWorkView::CScene::draw()
 {
-	//renderer.bitFlag.reset();
 	if (renderer.rendering_type != CRenderer::SQUELETON && isBackgroundLoaded) {
 		draw_background();
 	}
@@ -248,11 +297,12 @@ void CCGWorkView::CScene::draw()
 		renderer.draw_model(model);
 	}
 
-
 	draw_fog();
 
 	if (display_z_buffer) {
 		drawZBuffer();
 	}
+
+	drawMotionBlur();
 
 }

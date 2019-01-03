@@ -115,11 +115,13 @@ public:
 		void draw();
 		void drawZBuffer();
 		void screenshot(CCGWorkView* parent, float width, float height);
-		
+		void drawMotionBlur();
+
 		CRenderer renderer;
 		bool display_z_buffer;
 		vector<CModel> models;
-
+		BYTE* lastFrame;
+		int sizeLastFrame;
 
 		PngWrapper background_image;
 		bool isBackgroundLoaded;
