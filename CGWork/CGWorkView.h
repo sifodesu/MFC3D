@@ -81,7 +81,8 @@ public:
 		void draw_bounding_box(const CModel& model);
 
 		CRect screen;
-		std::bitset<3840 * 2160> bitFlag;
+		//std::bitset<3840 * 2160> bitFlag;
+		vector<bool> bitFlag;
 		std::vector<std::vector<float>> z_buffer;
 		int mouse_x, mouse_y;
 		bool select_highlighted_pol;
@@ -108,6 +109,7 @@ public:
 		void update_projection(int projection_type);
 		CCamera& get_current_camera();
 		void draw_background();
+		void draw_fog();
 
 		void update(CCGWorkView* app, int mouse_dx);
 		void draw();
@@ -117,6 +119,8 @@ public:
 		CRenderer renderer;
 		bool display_z_buffer;
 		vector<CModel> models;
+
+
 		PngWrapper background_image;
 		bool isBackgroundLoaded;
 		bool isBackgroundStretched;
