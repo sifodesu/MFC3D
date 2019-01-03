@@ -66,9 +66,9 @@ float get_approx_z(POINT p, const vec3& source, const vec3& dest) {
 }
 
 void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint) {
-	if (p.x >= 0 && p.y >= 0 && p.x < min(3840, screen.Width()) && p.y < min(2160, screen.Height())) {
-		if (!bitFlag.test(p.x + p.y * 3840)) {
-			bitFlag.set(p.x + p.y * 3840);
+	if (p.x >= 0 && p.y >= 0 && p.x < screen.Width() && p.y < screen.Height()) {
+		if (!bitFlag[p.x + p.y * screen.Width()]) {
+			bitFlag[p.x + p.y * screen.Width()] = 1;
 			z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
 			draw_pixel(p, color);
 		}

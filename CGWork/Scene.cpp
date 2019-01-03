@@ -98,8 +98,13 @@ void CCGWorkView::CScene::drawZBuffer() {
 	}
 	for (auto y = 0; y < h; y++) {
 		for (auto x = 0; x < w; x++) {
-			float pp = 255.0f - ((renderer.z_buffer[y][x] - minn) * 255.0f / (maxx - minn));
-			renderer.draw_pixel(POINT{ x, y }, RGB(pp, pp, pp));
+			if (renderer.bitFlag[x + y * w]) {
+				float pp = 255.0f - ((renderer.z_buffer[y][x] - minn) * 255.0f / (maxx - minn));
+				renderer.draw_pixel(POINT{ x, y }, RGB(pp, pp, pp));
+			}
+			else{
+				renderer.draw_pixel(POINT{ x, y }, RGB(100, 100, 100));
+			}
 		}
 	}
 }
@@ -120,7 +125,7 @@ void CCGWorkView::CScene::draw_background() {
 			redoX:
 				for (int x = 0; x < wI; ++x) {
 					if (x + cw >= wW) break;
-					
+
 					COLORREF col = RGB(GET_R(background_image.GetValue(x, y)), GET_G(background_image.GetValue(x, y)), GET_B(background_image.GetValue(x, y)));
 					renderer.draw_pixel(POINT{ x + cw, y + ch }, col);
 				}
@@ -159,7 +164,7 @@ void CCGWorkView::CScene::screenshot(CCGWorkView* parent, float width, float hei
 
 	CString path = dlg.GetPathName();
 	CT2A ascii(path);
-	
+
 	BYTE* old_buffer = renderer.bitmap;
 
 	renderer.set_bitmap_dimensions(height, width);
@@ -176,7 +181,7 @@ void CCGWorkView::CScene::screenshot(CCGWorkView* parent, float width, float hei
 	PngWrapper res(ascii.m_psz, width, height);
 	res.InitWritePng();
 
-	 
+
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			unsigned int offset = 4 * (y * width + x);
@@ -192,10 +197,39 @@ void CCGWorkView::CScene::screenshot(CCGWorkView* parent, float width, float hei
 	parent->Invalidate();
 }
 
+void CCGWorkView::CScene::draw_fog() {
+	int h = renderer.screen.Height();
+	int w = renderer.screen.Width();
+
+	COLORREF fogColor = RGB(255, 0, 255);
+	double minBoundFog = -0.5;
+	double maxBoundFog = 0.5;
+	double fogIntensity = 0.5;
+	for (int y = 0; y < h; y++){
+		for (int x = 0; x < w; x++){
+			if (renderer.bitFlag[x + y * w]) {
+				unsigned int offset = 4 * ((h - y) * w + x);
+				if (offset >= h * w * sizeof(DWORD) || offset < 0 || x >= w || x < 0) {
+					return;
+				}
+				int B = renderer.bitmap[offset];
+				int G = renderer.bitmap[offset + 1];
+				int R = renderer.bitmap[offset + 2];
+				COLORREF col = RGB(R, G, B);
+				double f = abs(max(0, min(1, (renderer.z_buffer[y][x] - minBoundFog) / (maxBoundFog - minBoundFog))));
+				f *= fogIntensity;
+				col = renderer.add(renderer.multiply(col, (1 - f)), renderer.multiply(fogColor, f));
+
+				renderer.draw_pixel(POINT{ x, y }, col);
+
+			}
+		}
+	}
+}
+
 void CCGWorkView::CScene::draw()
 {
-	renderer.bitFlag.reset();
-
+	//renderer.bitFlag.reset();
 	if (renderer.rendering_type != CRenderer::SQUELETON && isBackgroundLoaded) {
 		draw_background();
 	}
@@ -203,14 +237,22 @@ void CCGWorkView::CScene::draw()
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
 
+
 	renderer.z_buffer.clear();
 	renderer.z_buffer.resize(h, std::vector<float>(w, 0));
+
+	renderer.bitFlag.clear();
+	renderer.bitFlag.resize(w*h, 0);
 
 	for (CModel& model : models) {
 		renderer.draw_model(model);
 	}
+
+
+	draw_fog();
+
 	if (display_z_buffer) {
 		drawZBuffer();
 	}
-	
+
 }
