@@ -150,14 +150,14 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 
 	/* You can use IP_IS_POLYGON_OBJ(PObj) and IP_IS_POINTLIST_OBJ(PObj)
 	   to identify the type of the object*/
-
+	float transparency = 1.0f;
 	if (CGSkelGetObjectColor(PObj, RGB))
 	{
 		/* color code */
 	}
 	if (CGSkelGetObjectTransp(PObj, &Transp))
 	{
-		/* transparency code */
+		transparency = (float)Transp;
 	}
 	if ((Str = CGSkelGetObjectTexture(PObj)) != NULL)
 	{
@@ -191,7 +191,7 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 		/* use if(IP_HAS_PLANE_POLY(PPolygon)) to know whether a normal is defined for the polygon
 		   access the normal by the first 3 components of PPolygon->Plane */
 
-		CPolygon polygon;
+		CPolygon polygon(0.5);
 		if (IP_HAS_PLANE_POLY(PPolygon)) {
 			polygon.included_normal = vec3(PPolygon->Plane[0], PPolygon->Plane[1], PPolygon->Plane[2]);
 		}

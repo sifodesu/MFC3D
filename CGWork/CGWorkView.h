@@ -28,6 +28,12 @@
 class CCGWorkView : public CView
 {
 public:
+	struct buffer_data {
+		float z;
+		float transparency;
+		COLORREF color;
+	};
+
 	class CRenderer
 	{
 	public:
@@ -39,7 +45,7 @@ public:
 		enum { FLAT, GOURAUD, PHONG };
 		int shading_type;
 
-		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
+		void set_pixel(POINT P, const vec3& v1, const vec3& v2, COLORREF color, float transparency, bool forcePrint);
 		void draw_pixel(POINT p, COLORREF c);
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void calculate_left(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
@@ -49,7 +55,6 @@ public:
 		COLORREF add(COLORREF c1, COLORREF c2);
 		void apply_perspective(vec4& v);
 		vec3 cast(const vec3& v);
-		void draw_into_file();
 
 		bool draw_bbox;
 		bool draw_silouhette;
@@ -79,11 +84,11 @@ public:
 		void draw_normals(const CModel& model);
 		void draw_normal(const vec3& origin, const vec3& direction, COLORREF color);
 		void draw_bounding_box(const CModel& model);
+		void copy_to_bitmap();
 
 		CRect screen;
-		//std::bitset<3840 * 2160> bitFlag;
 		vector<bool> bitFlag;
-		std::vector<std::vector<float>> z_buffer;
+		std::vector<std::vector<buffer_data>> z_buffer;
 		int mouse_x, mouse_y;
 		bool select_highlighted_pol;
 		COLORREF background_color;

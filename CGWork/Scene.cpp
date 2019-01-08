@@ -84,22 +84,25 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 void CCGWorkView::CScene::drawZBuffer() {
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
-	float maxx = renderer.z_buffer[0][0];
-	float minn = renderer.z_buffer[0][0];
+	float maxx = renderer.z_buffer[0][0].z;
+	float minn = renderer.z_buffer[0][0].z;
 	for (auto y = 0; y < h; y++) {
 		for (auto x = 0; x < w; x++) {
-			if (maxx < renderer.z_buffer[y][x]) {
-				maxx = renderer.z_buffer[y][x];
-			}
-			if (minn > renderer.z_buffer[y][x]) {
-				minn = renderer.z_buffer[y][x];
+			for (buffer_data data : renderer.z_buffer[y * w + x]) {
+				if (maxx < data.z) {
+					maxx = data.z;
+				}
+				if (minn > data.z) {
+					minn = data.z;
+				}
 			}
 		}
 	}
 	for (auto y = 0; y < h; y++) {
 		for (auto x = 0; x < w; x++) {
 			if (renderer.bitFlag[x + y * w]) {
-				float pp = 255.0f - ((renderer.z_buffer[y][x] - minn) * 255.0f / (maxx - minn));
+				float z = renderer.z_buffer[x + y * w][renderer.z_buffer[x + y * w].size() - 1].z;
+				float pp = 255.0f - ((z - minn) * 255.0f / (maxx - minn));
 				renderer.draw_pixel(POINT{ x, y }, RGB(pp, pp, pp));
 			}
 			else{
@@ -172,7 +175,7 @@ void CCGWorkView::CScene::drawMotionBlur() {
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
 	if (lastFrame != nullptr && sizeLastFrame == w * h * sizeof(DWORD)) {
-		double t = 0.25;
+		double t = 0.5;
 		for (int y = 0; y < h; y++){
 			for (int x = 0; x < w; x++){
 				unsigned int offset = 4 * ((h - y) * w + x);
@@ -190,7 +193,6 @@ void CCGWorkView::CScene::drawMotionBlur() {
 
 				COLORREF newCol = renderer.add(renderer.multiply(pCur, 1 - t), renderer.multiply(pLF, t));
 				renderer.draw_pixel(POINT{ x, y }, newCol);
-
 			}
 		}
 	}
@@ -266,7 +268,8 @@ void CCGWorkView::CScene::draw_fog() {
 				int G = renderer.bitmap[offset + 1];
 				int R = renderer.bitmap[offset + 2];
 				COLORREF col = RGB(R, G, B);
-				double f = abs(max(0, min(1, (renderer.z_buffer[y][x] - minBoundFog) / (maxBoundFog - minBoundFog))));
+				float z = renderer.z_buffer[x + y * w][renderer.z_buffer[x + y * w].size() - 1].z;
+				double f = abs(max(0, min(1, (z - minBoundFog) / (maxBoundFog - minBoundFog))));
 				f *= fogIntensity;
 				col = renderer.add(renderer.multiply(col, (1 - f)), renderer.multiply(fogColor, f));
 
@@ -288,7 +291,7 @@ void CCGWorkView::CScene::draw()
 
 
 	renderer.z_buffer.clear();
-	renderer.z_buffer.resize(h, std::vector<float>(w, 0));
+	renderer.z_buffer.resize(h * w, std::vector<buffer_data>());
 
 	renderer.bitFlag.clear();
 	renderer.bitFlag.resize(w*h, 0);
