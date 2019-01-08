@@ -50,8 +50,6 @@ void CCGWorkView::CRenderer::draw_pixel(POINT p, COLORREF c)
 	bitmap[offset] = GetBValue(c);
 	bitmap[offset + 1] = GetGValue(c);
 	bitmap[offset + 2] = GetRValue(c);
-
-	
 }
 
 //approximate the z of a point on a line
@@ -67,38 +65,22 @@ float get_approx_z(POINT p, const vec3& source, const vec3& dest) {
 	return source.z + t * (dest.z - source.z);
 }
 
-void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, COLORREF color, float transparency, bool forcePrint) {
+void CCGWorkView::CRenderer::set_pixel(POINT p, const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint) {
 	if (p.x >= 0 && p.y >= 0 && p.x < screen.Width() && p.y < screen.Height()) {
 		if (!bitFlag[p.x + p.y * screen.Width()]) {
 			bitFlag[p.x + p.y * screen.Width()] = 1;
+			z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
+			draw_pixel(p, color);
 		}
-		float z = get_approx_z(p, v1, v2);
-		if (forcePrint) {
-			z = -10.0f;
+		else {
+			if (forcePrint) {
+				draw_pixel(p, color);
+			}
+			else if (z_buffer[p.y][p.x] > get_approx_z(p, v1, v2)) {
+				z_buffer[p.y][p.x] = get_approx_z(p, v1, v2);
+				draw_pixel(p, color);
+			}
 		}
-		buffer_data data{ z, transparency, color };
-		int i = 0, index = p.y * screen.Width() + p.x;
-
-		// If there is already an closer opaque pixel, do nothing
-		// Assert that if there is an opaque pixel, it must be at index 0
-		if (!z_buffer[index].empty() && z_buffer[index][0].transparency >= 1.0f && z_buffer[index][0].z < data.z) {
-			return;
-		}
-
-		// If new pixel is closer and opaque, no need to keep old pixels
-		if (!z_buffer[index].empty() && data.transparency >= 1.0f && z_buffer[index][z_buffer[index].size() - 1].z >= data.z) {
-			z_buffer[index].clear();
-			z_buffer[index].push_back(data);
-			return;
-		}
-
-		std::vector<buffer_data>::iterator it = z_buffer[index].begin();
-		while (it != z_buffer[index].end() && z_buffer[index][i].z > data.z) {
-			i++;
-			it++;
-		}
-		z_buffer[index].insert(it, data);
-		//draw_pixel(p, color, z, transparency);
 	}
 }
 
@@ -116,7 +98,7 @@ void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF 
 	p.x = x1;
 	p.y = y1;
 
-	set_pixel(p, v1, v2, color, 1.0f, forcePrint);
+	set_pixel(p, v1, v2, color, forcePrint);
 
 
 	if (dy >= 0) {
@@ -134,7 +116,7 @@ void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				set_pixel(p, v1, v2, color, 1.0f, forcePrint);
+				set_pixel(p, v1, v2, color, forcePrint);
 			}
 		}
 		else {
@@ -151,7 +133,7 @@ void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF 
 					p.x++;
 					p.y++;
 				}
-				set_pixel(p, v1, v2, color, 1.0f, forcePrint);
+				set_pixel(p, v1, v2, color, forcePrint);
 
 			}
 		}
@@ -171,7 +153,7 @@ void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				set_pixel(p, v1, v2, color, 1.0f, forcePrint);
+				set_pixel(p, v1, v2, color, forcePrint);
 			}
 		}
 		else {
@@ -188,7 +170,7 @@ void CCGWorkView::CRenderer::draw_line(const vec3& v1, const vec3& v2, COLORREF 
 					p.x++;
 					p.y--;
 				}
-				set_pixel(p, v1, v2, color, 1.0f, forcePrint);
+				set_pixel(p, v1, v2, color, forcePrint);
 			}
 		}
 	}
@@ -526,22 +508,6 @@ void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
 	}
 }
 
-void CCGWorkView::CRenderer::copy_to_bitmap()
-{
-	int h = screen.Height();
-	int w = screen.Width();
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
-			COLORREF color = BLACK;
-			POINT p{ x, y };
-			for (buffer_data data : z_buffer[y * w + x]) {
-				color = add(color, multiply(data.color, data.transparency));
-			}
-			draw_pixel(p, color);
-		}
-	}
-}
-
 void CCGWorkView::CRenderer::draw_model(CModel & model)
 {
 	if (rendering_type == SQUELETON) {
@@ -566,8 +532,6 @@ void CCGWorkView::CRenderer::draw_model(CModel & model)
 	if (draw_bbox) {
 		draw_bounding_box(model);
 	}
-
-	copy_to_bitmap();
 
 	select_highlighted_pol = false;
 }
@@ -677,7 +641,7 @@ void CCGWorkView::CRenderer::draw_flat(const CModel & model)
 			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
 			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
 			for (int x = v1.x; x <= v2.x; x++) {
-				set_pixel(POINT{ x, y }, v1, v2, color, polygon.transparency, false);
+				set_pixel(POINT{ x, y }, v1, v2, color);
 			}
 		}
 	}
@@ -826,7 +790,7 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 					t = ((float)(x)-v1.x) / (v2.x - v1.x);
 				}
 				COLORREF color = add(multiply(color_left[y - min_y], (1.0f - t)), multiply(color_right[y - min_y], t));
-				set_pixel(POINT{ x, y }, v1, v2, color, polygon.transparency, false);
+				set_pixel(POINT{ x, y }, v1, v2, color);
 			}
 		}
 	}
@@ -980,7 +944,7 @@ void CCGWorkView::CRenderer::draw_phong(const CModel & model)
 				vec3 p = points_left[y - min_y].first * (1.0f - t) + points_right[y - min_y].first * t;
 				vec3 n = normalized(points_left[y - min_y].second * (1.0f - t) + points_right[y - min_y].second * t);
 				COLORREF color = calculate_light(p, n);
-				set_pixel(POINT{ x, y }, v1, v2, color, polygon.transparency, false);
+				set_pixel(POINT{ x, y }, v1, v2, color);
 			}
 		}
 	}

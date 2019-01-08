@@ -15,9 +15,8 @@ public:
 	vec3 included_normal;
 	vec3 calculated_normal;
 	bool highlight;
-	float transparency;
 
-	CPolygon(float transparency);
+	CPolygon();
 	void add_vertice(const CVertice& vertice);
 	void set_origin();
 	void set_origin_transformed();
