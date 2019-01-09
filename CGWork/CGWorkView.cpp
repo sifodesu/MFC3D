@@ -422,7 +422,7 @@ void CCGWorkView::OnFileLoad()
 		PngWrapper p;
 		CGSkelProcessIritDataFiles(m_strItdFileName, 1);
 		CModel model = get_current_model();
-		model.setup_model();
+		model.setup_model(scene.renderer.view_transform);
 		scene.add_model(model);
 
 		Invalidate();	// force a WM_PAINT for drawing.

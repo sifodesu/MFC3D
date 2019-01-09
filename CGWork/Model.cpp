@@ -3,7 +3,7 @@
 CModel::CModel(COLORREF color, COLORREF normalsColor) :
 	color(color), normalsColor(normalsColor) {}
 
-void CModel::setup_model()
+void CModel::setup_model(const mat4& view)
 {
 	vector<vec3> bounds(2);
 	bool first = true;
@@ -50,7 +50,7 @@ void CModel::setup_model()
 	for (vec3& point : bounding_box) {
 		point = transform * vec4(point.x, point.y, point.z, 1.0f);
 	}
-	apply_transform();
+	apply_transform(view);
 }
 
 void CModel::calculate_normals()
@@ -83,9 +83,9 @@ void CModel::add_polygon(const CPolygon & polygon)
 	polygons.push_back(polygon);
 }
 
-void CModel::apply_transform()
+void CModel::apply_transform(const mat4& view)
 {
-	mat4 transform = model_transform * view_transform;
+	mat4 transform = model_transform * view;
 	for (CPolygon& polygon : polygons) {
 		for (CVertice& vertice : polygon.vertices) {
 			vertice.transformed = transform * vertice.point;
@@ -96,14 +96,8 @@ void CModel::apply_transform()
 	calculate_normals();
 }
 
-void CModel::transform_model(const mat4 & m)
+void CModel::transform_model(const mat4 & m, const mat4& view)
 {
 	model_transform = m * model_transform;
-	apply_transform();
-}
-
-void CModel::transform_view(const mat4 & m)
-{
-	view_transform = m * view_transform;
-	apply_transform();
+	apply_transform(view);
 }

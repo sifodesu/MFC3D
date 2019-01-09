@@ -11,8 +11,8 @@ current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded
 
 void CCGWorkView::CScene::add_model(const CModel & model)
 {
-	models.clear();
 	models.push_back(model);
+	active_model = models.size() - 1;
 }
 
 void CCGWorkView::CScene::add_camera(const CCamera & camera)
@@ -69,15 +69,16 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 		break;
 	}
 
-	for (CModel& model : models) {
-		switch (app->transform_context) {
-		case TRANSFORM_MODEL:
-			model.transform_model(transformation);
-			break;
-		case TRANSFORM_VIEW:
-			model.transform_view(transformation);
-			break;
+	switch (app->transform_context) {
+	case TRANSFORM_MODEL:
+		models[active_model].transform_model(transformation, renderer.view_transform);
+		break;
+	case TRANSFORM_VIEW:
+		renderer.view_transform = transformation * renderer.view_transform;
+		for (CModel& model : models) {
+			model.apply_transform(renderer.view_transform);
 		}
+		break;
 	}
 }
 

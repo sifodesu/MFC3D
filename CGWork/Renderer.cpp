@@ -528,7 +528,7 @@ bool pointIsInside(vector<vec3> points, vec2 dot) {
 }
 
 void CCGWorkView::CRenderer::draw_bounding_box(const CModel& model) {
-	mat4 transform = model.model_transform * model.view_transform;
+	mat4 transform = model.model_transform * view_transform;
 	for (const vec3& p1 : model.bounding_box) {
 		for (const vec3& p2 : model.bounding_box) {
 			vec3 res = p1 - p2;
@@ -1072,7 +1072,7 @@ void CCGWorkView::CRenderer::draw_edges(CModel & model)
 
 void CCGWorkView::CRenderer::draw_normals(const CModel & model)
 {
-	mat4 transform = model.model_transform * model.view_transform;
+	mat4 transform = model.model_transform * view_transform;
 	float inverted_polygon = 1.0f;
 	float inverted_vertice = 1.0f;
 	if (invert_polygon_normals) {

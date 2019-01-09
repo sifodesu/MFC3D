@@ -31,6 +31,8 @@ public:
 	class CRenderer
 	{
 	public:
+		mat4 view_transform;
+
 		CCGWorkView* parent;
 		BYTE* bitmap;
 		CCamera camera;
@@ -82,7 +84,6 @@ public:
 		void draw_bounding_box(const CModel& model);
 
 		CRect screen;
-		//std::bitset<3840 * 2160> bitFlag;
 		vector<bool> bitFlag;
 		std::vector<std::vector<float>> z_buffer;
 		int mouse_x, mouse_y;
@@ -124,6 +125,7 @@ public:
 		CRenderer renderer;
 		bool display_z_buffer;
 		vector<CModel> models;
+		int active_model;
 		BYTE* lastFrame;
 		int sizeLastFrame;
 
