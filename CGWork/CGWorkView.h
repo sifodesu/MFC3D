@@ -49,7 +49,8 @@ public:
 		COLORREF add(COLORREF c1, COLORREF c2);
 		void apply_perspective(vec4& v);
 		vec3 cast(const vec3& v);
-		void draw_into_file();
+		void downsample(BYTE* buffer, BYTE* ss_buffer, int h, int w, int factor);
+		void set_filter(float* rate, float** weights);
 
 		bool draw_bbox;
 		bool draw_silouhette;
@@ -95,6 +96,9 @@ public:
 
 		LightParams lights[LIGHT_NUM];
 		AmbiantLightParams ambiant;
+
+		int ss_factor;
+		AAFilter filter_type;
 	};
 
 	class CScene
@@ -283,6 +287,20 @@ public:
 	afx_msg void OnUpdateBgStretch(CCmdUI *pCmdUI);
 	afx_msg void OnSilouhette();
 	afx_msg void OnUpdateSilouhette(CCmdUI *pCmdUI);
+	afx_msg void OnAntiNoaa();
+	afx_msg void OnUpdateAntiNoaa(CCmdUI *pCmdUI);
+	afx_msg void OnAntiSsaax3();
+	afx_msg void OnUpdateAntiSsaax3(CCmdUI *pCmdUI);
+	afx_msg void OnAntiSsaax5();
+	afx_msg void OnUpdateAntiSsaax5(CCmdUI *pCmdUI);
+	afx_msg void OnAntiBoxfilter();
+	afx_msg void OnUpdateAntiBoxfilter(CCmdUI *pCmdUI);
+	afx_msg void OnAntiTrianglefilter();
+	afx_msg void OnUpdateAntiTrianglefilter(CCmdUI *pCmdUI);
+	afx_msg void OnAntiGaussianfilter();
+	afx_msg void OnUpdateAntiGaussianfilter(CCmdUI *pCmdUI);
+	afx_msg void OnAntiSincfilter();
+	afx_msg void OnUpdateAntiSincfilter(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

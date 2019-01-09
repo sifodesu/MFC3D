@@ -44,7 +44,6 @@
 #define IDC_NORMAL_COLOR                1046
 #define IDC_BG_COLOR                    1047
 #define IDC_BBOX_COLOR                  1048
-#define IDC_NORMAL_COLOR2               1049
 #define IDC_SILOUHETTE_COLOR            1049
 #define IDC_LIGHT_DIFFUSE               1051
 #define IDC_LIGHT_SPECULAR              1052
@@ -112,13 +111,20 @@
 #define ID_BG_REPEAT                    32839
 #define ID_BG_STRETCH                   32840
 #define ID_SILOUHETTE                   32841
+#define ID_ANTI_NOAA                    32842
+#define ID_ANTI_SSAAX3                  32843
+#define ID_ANTI_SSAAX5                  32844
+#define ID_ANTI_BOXFILTER               32845
+#define ID_ANTI_TRIANGLEFILTER          32846
+#define ID_ANTI_GAUSSIANFILTER          32847
+#define ID_ANTI_SINCFILTER              32848
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         32842
+#define _APS_NEXT_COMMAND_VALUE         32849
 #define _APS_NEXT_CONTROL_VALUE         1061
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

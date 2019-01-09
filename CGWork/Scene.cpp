@@ -215,8 +215,6 @@ void CCGWorkView::CScene::screenshot(CCGWorkView* parent, float width, float hei
 	CString path = dlg.GetPathName();
 	CT2A ascii(path);
 
-	BYTE* old_buffer = renderer.bitmap;
-
 	renderer.set_bitmap_dimensions(height, width);
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
@@ -297,12 +295,12 @@ void CCGWorkView::CScene::draw()
 		renderer.draw_model(model);
 	}
 
-	draw_fog();
+	//draw_fog();
 
 	if (display_z_buffer) {
 		drawZBuffer();
 	}
 
-	drawMotionBlur();
+	//drawMotionBlur();
 
 }

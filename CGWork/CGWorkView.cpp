@@ -127,6 +127,20 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_BG_STRETCH, &CCGWorkView::OnUpdateBgStretch)
 	ON_COMMAND(ID_SILOUHETTE, &CCGWorkView::OnSilouhette)
 	ON_UPDATE_COMMAND_UI(ID_SILOUHETTE, &CCGWorkView::OnUpdateSilouhette)
+	ON_COMMAND(ID_ANTI_NOAA, &CCGWorkView::OnAntiNoaa)
+	ON_UPDATE_COMMAND_UI(ID_ANTI_NOAA, &CCGWorkView::OnUpdateAntiNoaa)
+	ON_COMMAND(ID_ANTI_SSAAX3, &CCGWorkView::OnAntiSsaax3)
+	ON_UPDATE_COMMAND_UI(ID_ANTI_SSAAX3, &CCGWorkView::OnUpdateAntiSsaax3)
+	ON_COMMAND(ID_ANTI_SSAAX5, &CCGWorkView::OnAntiSsaax5)
+	ON_UPDATE_COMMAND_UI(ID_ANTI_SSAAX5, &CCGWorkView::OnUpdateAntiSsaax5)
+	ON_COMMAND(ID_ANTI_BOXFILTER, &CCGWorkView::OnAntiBoxfilter)
+	ON_UPDATE_COMMAND_UI(ID_ANTI_BOXFILTER, &CCGWorkView::OnUpdateAntiBoxfilter)
+	ON_COMMAND(ID_ANTI_TRIANGLEFILTER, &CCGWorkView::OnAntiTrianglefilter)
+	ON_UPDATE_COMMAND_UI(ID_ANTI_TRIANGLEFILTER, &CCGWorkView::OnUpdateAntiTrianglefilter)
+	ON_COMMAND(ID_ANTI_GAUSSIANFILTER, &CCGWorkView::OnAntiGaussianfilter)
+	ON_UPDATE_COMMAND_UI(ID_ANTI_GAUSSIANFILTER, &CCGWorkView::OnUpdateAntiGaussianfilter)
+	ON_COMMAND(ID_ANTI_SINCFILTER, &CCGWorkView::OnAntiSincfilter)
+	ON_UPDATE_COMMAND_UI(ID_ANTI_SINCFILTER, &CCGWorkView::OnUpdateAntiSincfilter)
 END_MESSAGE_MAP()
 
 
@@ -330,7 +344,36 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	
 	scene.renderer.get_bitmap(pDCToUse);
 	scene.renderer.set_camera(scene.cameras[scene.current_camera]);
-	scene.draw();
+
+	int ss_factor = scene.renderer.ss_factor;
+
+	if (ss_factor > 1) {
+		BYTE* buffer = scene.renderer.bitmap;
+		int h = scene.renderer.screen.Height();
+		int w = scene.renderer.screen.Width();
+		scene.renderer.set_bitmap_dimensions(h * ss_factor, w * ss_factor);
+		for (int y = 0; y < h * ss_factor; y++) {
+			for (int x = 0; x < w * ss_factor; x++) {
+				unsigned int offset = 4 * (y * w * ss_factor + x);
+				scene.renderer.bitmap[offset] = GetBValue(scene.renderer.background_color);
+				scene.renderer.bitmap[offset + 1] = GetGValue(scene.renderer.background_color);
+				scene.renderer.bitmap[offset + 2] = GetRValue(scene.renderer.background_color);
+			}
+		}
+
+		scene.draw();
+
+		BYTE* ss_buffer = scene.renderer.bitmap;
+		scene.renderer.downsample(buffer, ss_buffer, h, w, ss_factor);
+
+		update_draw_bitmap(); // Reset the bitmap to screen size
+		delete[] scene.renderer.bitmap;
+		scene.renderer.bitmap = buffer;
+	}
+	else {
+		scene.draw();
+	}
+	
 	scene.renderer.draw_bitmap(pDCToUse);
 	m_pDC->BitBlt(r.left, r.top, r.Width(), r.Height(), pDCToUse, r.left, r.top, SRCCOPY);
 
@@ -881,4 +924,88 @@ void CCGWorkView::OnSilouhette()
 void CCGWorkView::OnUpdateSilouhette(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.renderer.draw_silouhette);
+}
+
+
+void CCGWorkView::OnAntiNoaa()
+{
+	scene.renderer.ss_factor = 1;
+}
+
+
+void CCGWorkView::OnUpdateAntiNoaa(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.ss_factor == 1);
+}
+
+
+void CCGWorkView::OnAntiSsaax3()
+{
+	scene.renderer.ss_factor = 3;
+}
+
+
+void CCGWorkView::OnUpdateAntiSsaax3(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.ss_factor == 3);
+}
+
+
+void CCGWorkView::OnAntiSsaax5()
+{
+	scene.renderer.ss_factor = 5;
+}
+
+
+void CCGWorkView::OnUpdateAntiSsaax5(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.ss_factor == 5);
+}
+
+
+void CCGWorkView::OnAntiBoxfilter()
+{
+	scene.renderer.filter_type = BOX;
+}
+
+
+void CCGWorkView::OnUpdateAntiBoxfilter(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.filter_type == BOX);
+}
+
+
+void CCGWorkView::OnAntiTrianglefilter()
+{
+	scene.renderer.filter_type = TRIANGLE;
+}
+
+
+void CCGWorkView::OnUpdateAntiTrianglefilter(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.filter_type == TRIANGLE);
+}
+
+
+void CCGWorkView::OnAntiGaussianfilter()
+{
+	scene.renderer.filter_type = GAUSSIAN;
+}
+
+
+void CCGWorkView::OnUpdateAntiGaussianfilter(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.filter_type == GAUSSIAN);
+}
+
+
+void CCGWorkView::OnAntiSincfilter()
+{
+	scene.renderer.filter_type = SINC;
+}
+
+
+void CCGWorkView::OnUpdateAntiSincfilter(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.renderer.filter_type == SINC);
 }

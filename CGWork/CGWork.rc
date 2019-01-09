@@ -147,6 +147,17 @@ BEGIN
         END
         MENUITEM "&Parameters...",              ID_LIGHT_CONSTANTS
     END
+    POPUP "Anti-Aliasing"
+    BEGIN
+        MENUITEM "No AA",                       ID_ANTI_NOAA
+        MENUITEM "SSAA x3",                     ID_ANTI_SSAAX3
+        MENUITEM "SSAA x5",                     ID_ANTI_SSAAX5
+        MENUITEM SEPARATOR
+        MENUITEM "Box Filter",                  ID_ANTI_BOXFILTER
+        MENUITEM "Triangle Filter",             ID_ANTI_TRIANGLEFILTER
+        MENUITEM "Gaussian Filter",             ID_ANTI_GAUSSIANFILTER
+        MENUITEM "Sinc Filter",                 ID_ANTI_SINCFILTER
+    END
     POPUP "Render"
     BEGIN
         MENUITEM "Squeleton",                   ID_RENDER_SQUELETON

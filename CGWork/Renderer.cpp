@@ -32,6 +32,9 @@ silouhette_color(YELLOW)
 	lights[0].data = vec3(10.0f, 10.0f, -10.0f);
 	lights[0].diffuse = 0.5;
 	lights[0].specular = 0.5;
+
+	ss_factor = 1;
+	filter_type = BOX;
 }
 
 CCGWorkView::CRenderer::~CRenderer()
@@ -410,6 +413,47 @@ vec3 CCGWorkView::CRenderer::cast(const vec3& v)
 	int scale = min(height, width);
 	vec3 v2(v.x * scale + width / 2, -v.y * scale + height / 2, v.z);
 	return v2;
+}
+
+void CCGWorkView::CRenderer::downsample(BYTE * buffer, BYTE * ss_buffer, int h, int w, int factor)
+{
+	AAKernel size = (factor == 3) ? X3 : X5;
+	float rate = RATE[filter_type][size];
+	vector<vector<float>> weights;
+	for (int x = 0; x < factor; x++) {
+		weights.push_back(vector<float>());
+		for (int y = 0; y < factor; y++) {
+			if (size == X3) {
+				weights[x].push_back(WEIGHTS_3X3[filter_type][x][y]);
+			}
+			else {
+				weights[x].push_back(WEIGHTS_5X5[filter_type][x][y]);
+			}
+
+		}
+	}
+
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			float R = 0.0f, G = 0.0f, B = 0.0f;
+			for (int i = x * factor, a = 0; i < (x + 1) * factor; i++, a++) {
+				for (int j = y * factor, b = 0; j < (y + 1) * factor; j++, b++) {
+					int offset = 4 * (i + j * w * factor);
+					R += ss_buffer[offset + 2] * rate * weights[a][b];
+					G += ss_buffer[offset + 1] * rate * weights[a][b];
+					B += ss_buffer[offset] * rate * weights[a][b];
+				}
+			}
+			int offset = 4 * (x + y * w);
+			buffer[offset] = B;
+			buffer[offset + 1] = G;
+			buffer[offset + 2] = R;
+		}
+	}
+}
+
+void CCGWorkView::CRenderer::set_filter(float * rate, float ** weights)
+{
 }
 
 void CCGWorkView::CRenderer::set_bitmap_dimensions(const BITMAPINFO& info)
