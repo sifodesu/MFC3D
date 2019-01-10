@@ -149,6 +149,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_COMMAND(ID_STOP, &CCGWorkView::OnStop)
 	ON_UPDATE_COMMAND_UI(ID_STOP, &CCGWorkView::OnUpdateStop)
 		ON_COMMAND(ID_ANIMATION_SPEED, &CCGWorkView::OnAnimationSpeed)
+		ON_COMMAND(ID_ANIMATION_SAVEANIMATION, &CCGWorkView::OnAnimationSaveanimation)
 		END_MESSAGE_MAP()
 
 
@@ -1121,4 +1122,89 @@ void CCGWorkView::OnAnimationSpeed()
 			}
 		}
 	}
+}
+
+
+void CCGWorkView::OnAnimationSaveanimation()
+{
+	if (scene.animator.keyframes.size() == 0) {
+		return;
+	}
+
+	CFolderPickerDialog dlg(nullptr, OFN_FILEMUSTEXIST, this, sizeof(OPENFILENAME));
+
+	if (dlg.DoModal() != IDOK) {
+		return;
+	}
+
+	CString path = dlg.GetPathName();
+	int i = 0;
+
+	scene.animator.next_keyframe = 0;
+	scene.animator.current_step = 0;
+	scene.models[scene.active_model].model_transform = scene.animator.start_model_mat;
+	scene.renderer.view_transform = scene.animator.start_view_mat;
+	for (CModel& model : scene.models) {
+		model.apply_transform(scene.renderer.view_transform);
+	}
+
+	while (true) {
+		i++;
+		CString filepath;
+		filepath.Format(_T("%s\\%d.png"), path, i);
+		CT2A ascii(filepath);
+
+		int height = scene.renderer.screen.Height();
+		int width = scene.renderer.screen.Width();
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				unsigned int offset = 4 * (y * width + x);
+				scene.renderer.bitmap[offset] = GetBValue(scene.renderer.background_color);
+				scene.renderer.bitmap[offset + 1] = GetGValue(scene.renderer.background_color);
+				scene.renderer.bitmap[offset + 2] = GetRValue(scene.renderer.background_color);
+			}
+		}
+		scene.draw();
+
+		PngWrapper res(ascii.m_psz, width, height);
+		res.InitWritePng();
+
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				unsigned int offset = 4 * (y * width + x);
+				int B = scene.renderer.bitmap[offset];
+				int G = scene.renderer.bitmap[offset + 1];
+				int R = scene.renderer.bitmap[offset + 2];
+
+				res.SetValue(x, height - y - 1, SET_RGB(R, G, B));
+			}
+		}
+		res.WritePng();
+
+		if (scene.animator.restart) {
+			break;
+		}
+		
+		bool is_view;
+		mat4 transform = scene.animator.get_transform(&is_view, mouse_sensitivity);
+		if (!is_view) {
+			// model transform
+			scene.models[scene.active_model].transform_model(transform, scene.renderer.view_transform);
+		}
+		else {
+			scene.renderer.view_transform = transform * scene.renderer.view_transform;
+			for (CModel& model : scene.models) {
+				model.apply_transform(scene.renderer.view_transform);
+			}
+		}
+	}
+	scene.animator.next_keyframe = 0;
+	scene.animator.current_step = 0;
+	scene.models[scene.active_model].model_transform = scene.animator.start_model_mat;
+	scene.renderer.view_transform = scene.animator.start_view_mat;
+	for (CModel& model : scene.models) {
+		model.apply_transform(scene.renderer.view_transform);
+	}
+	Invalidate();
 }

@@ -315,6 +315,7 @@ public:
 	afx_msg void OnStop();
 	afx_msg void OnUpdateStop(CCmdUI *pCmdUI);
 	afx_msg void OnAnimationSpeed();
+	afx_msg void OnAnimationSaveanimation();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp
