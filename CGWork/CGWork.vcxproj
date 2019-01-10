@@ -161,6 +161,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationSpeedDlg.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CGWork.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -235,6 +237,8 @@
     <ResourceCompile Include="CGWork.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationSpeedDlg.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CGWork.h" />
     <ClInclude Include="CGWorkDoc.h" />

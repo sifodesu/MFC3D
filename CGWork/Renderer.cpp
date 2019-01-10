@@ -380,7 +380,8 @@ COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& 
 		vec3 N = normal;
 		vec3 L;
 		if (light.type == LIGHT_POINT) {
-			L = normalized(light.data - point);
+			vec3 light_transformed = view_transform * light.data;
+			L = normalized(light_transformed - point);  
 		}
 		else {
 			L = normalized(-light.data);

@@ -10,6 +10,8 @@
 #define IDD_COLORS                      149
 #define IDD_LIGHTING_DLG                155
 #define IDD_SCREENSHOT                  156
+#define IDD_DIALOG1                     158
+#define IDD_ANIMATION_SPEED             158
 #define IDC_LIGHT_SPACE                 1010
 #define IDC_RADIO_LIGHT1                1017
 #define IDC_RADIO_LIGHT2                1018
@@ -118,13 +120,18 @@
 #define ID_ANTI_TRIANGLEFILTER          32846
 #define ID_ANTI_GAUSSIANFILTER          32847
 #define ID_ANTI_SINCFILTER              32848
+#define ID_RECORD                       32849
+#define ID_PLAY                         32850
+#define ID_STOP                         32852
+#define ID_ANIMATION_SPEED              32853
+#define ID_ANIMATION_SAVEANIMATION      32854
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        158
-#define _APS_NEXT_COMMAND_VALUE         32849
+#define _APS_NEXT_RESOURCE_VALUE        160
+#define _APS_NEXT_COMMAND_VALUE         32855
 #define _APS_NEXT_CONTROL_VALUE         1061
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

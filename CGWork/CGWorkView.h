@@ -24,6 +24,7 @@
 #include "CGWorkDoc.h"
 #include "cPNG.h"
 #include "PngWrapper.h"
+#include "Animation.h"
 
 class CCGWorkView : public CView
 {
@@ -107,6 +108,9 @@ public:
 	public:
 		vector<CCamera> cameras;
 		int current_camera;
+		Animation animator;
+		bool recording;
+		bool playing;
 		
 		CScene(CCGWorkView* parent);
 		void add_model(const CModel& model);
@@ -150,12 +154,11 @@ public:
 	bool X;
 	bool Y;
 	bool Z;
-	int m_nAction;				// Rotate, Translate, Scale
+	Transformation m_nAction;				// Rotate, Translate, Scale
 	int m_nView;				// Orthographic, perspective
 	bool m_bIsPerspective;			// is the view perspective
 
-	enum { TRANSFORM_MODEL, TRANSFORM_VIEW };
-	int transform_context;
+	Space transform_context;
 
 private:
 	CString m_strItdFileName;		// file name of IRIT data
@@ -303,6 +306,15 @@ public:
 	afx_msg void OnUpdateAntiGaussianfilter(CCmdUI *pCmdUI);
 	afx_msg void OnAntiSincfilter();
 	afx_msg void OnUpdateAntiSincfilter(CCmdUI *pCmdUI);
+	afx_msg void OnRecord();
+	afx_msg void OnUpdateRecord(CCmdUI *pCmdUI);
+	afx_msg void OnPlay();
+	afx_msg void OnUpdatePlay(CCmdUI *pCmdUI);
+	afx_msg void OnPause();
+	afx_msg void OnUpdatePause(CCmdUI *pCmdUI);
+	afx_msg void OnStop();
+	afx_msg void OnUpdateStop(CCmdUI *pCmdUI);
+	afx_msg void OnAnimationSpeed();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

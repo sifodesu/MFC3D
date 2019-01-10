@@ -20,6 +20,17 @@ const COLORREF PINK = RGB(255, 0, 255);
 const COLORREF CYAN = RGB(0, 255, 255);
 
 typedef enum {
+	TRANSLATION,
+	ROTATION,
+	SCALING
+} Transformation;
+
+typedef enum {
+	MODEL,
+	VIEW
+} Space;
+
+typedef enum {
 	BOX = 0,
 	TRIANGLE = 1,
 	GAUSSIAN = 2,

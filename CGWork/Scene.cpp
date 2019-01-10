@@ -7,6 +7,8 @@ CCGWorkView::CScene::CScene(CCGWorkView* parent) :
 current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(false), isBackgroundStretched(true), lastFrame(nullptr), sizeLastFrame(0)
 {
 	cameras.push_back(CCamera());
+	recording = false;
+	playing = false;
 }
 
 void CCGWorkView::CScene::add_model(const CModel & model)
@@ -55,25 +57,25 @@ void CCGWorkView::CScene::update(CCGWorkView* app, int mouse_dx)
 	}
 
 	switch (app->m_nAction) {
-	case ID_ACTION_TRANSLATE:
+	case TRANSLATION:
 		transformation = translation(x * TRANSLATION_FACTOR * app->mouse_sensitivity,
 			y * TRANSLATION_FACTOR * app->mouse_sensitivity, z * TRANSLATION_FACTOR * app->mouse_sensitivity);
 		break;
-	case ID_ACTION_ROTATE:
+	case ROTATION:
 		transformation = rotation(x * ROTATION_FACTOR * app->mouse_sensitivity,
 			y * ROTATION_FACTOR * app->mouse_sensitivity, z * ROTATION_FACTOR * app->mouse_sensitivity);
 		break;
-	case ID_ACTION_SCALE:
+	case SCALING:
 		transformation = scaling(1 + x * SCALING_FACTOR * app->mouse_sensitivity,
 			1 + y * SCALING_FACTOR * app->mouse_sensitivity, 1 + z * SCALING_FACTOR * app->mouse_sensitivity);
 		break;
 	}
 
 	switch (app->transform_context) {
-	case TRANSFORM_MODEL:
+	case MODEL:
 		models[active_model].transform_model(transformation, renderer.view_transform);
 		break;
-	case TRANSFORM_VIEW:
+	case VIEW:
 		renderer.view_transform = transformation * renderer.view_transform;
 		for (CModel& model : models) {
 			model.apply_transform(renderer.view_transform);

@@ -35,6 +35,7 @@ static char THIS_FILE[] = __FILE__;
 #include "ColorsSelect.h"
 #include "DiaFineNess.h"
 #include "DiaScreenshot.h"
+#include "AnimationSpeedDlg.h"
 
 // Use this macro to display text messages in the status bar.
 #define STATUS_BAR_TEXT(str) (((CMainFrame*)GetParentFrame())->getStatusBar().SetWindowText(str))
@@ -141,7 +142,14 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_ANTI_GAUSSIANFILTER, &CCGWorkView::OnUpdateAntiGaussianfilter)
 	ON_COMMAND(ID_ANTI_SINCFILTER, &CCGWorkView::OnAntiSincfilter)
 	ON_UPDATE_COMMAND_UI(ID_ANTI_SINCFILTER, &CCGWorkView::OnUpdateAntiSincfilter)
-END_MESSAGE_MAP()
+	ON_COMMAND(ID_RECORD, &CCGWorkView::OnRecord)
+	ON_UPDATE_COMMAND_UI(ID_RECORD, &CCGWorkView::OnUpdateRecord)
+	ON_COMMAND(ID_PLAY, &CCGWorkView::OnPlay)
+	ON_UPDATE_COMMAND_UI(ID_PLAY, &CCGWorkView::OnUpdatePlay)
+	ON_COMMAND(ID_STOP, &CCGWorkView::OnStop)
+	ON_UPDATE_COMMAND_UI(ID_STOP, &CCGWorkView::OnUpdateStop)
+		ON_COMMAND(ID_ANIMATION_SPEED, &CCGWorkView::OnAnimationSpeed)
+		END_MESSAGE_MAP()
 
 
 // A patch to fix GLaux disappearance from VS2005 to VS2008
@@ -162,10 +170,10 @@ CCGWorkView::CCGWorkView() :
 	X = true;
 	Y = false;
 	Z = false;
-	m_nAction = ID_ACTION_ROTATE;
+	m_nAction = ROTATION;
 	m_nView = ID_VIEW_ORTHOGRAPHIC;
 	m_bIsPerspective = false;
-	transform_context = TRANSFORM_MODEL;
+	transform_context = MODEL;
 	clicking = false;
 
 	m_nLightShading = ID_LIGHT_SHADING_FLAT;
@@ -337,8 +345,39 @@ void CCGWorkView::OnDraw(CDC* pDC)
 	CDC *pDCToUse = /*m_pDC*/m_pDbDC;
 
 	POINT mouse;
-	if (GetCursorPos(&mouse) && clicking) {
-		scene.update(this, mouse.x - mouse_pos_x);
+	if (scene.playing) {
+		if (scene.animator.restart) {
+			// First frame, restart the animation
+			scene.animator.restart = false;
+			scene.models[scene.active_model].model_transform = scene.animator.start_model_mat;
+			scene.renderer.view_transform = scene.animator.start_view_mat;
+			for (CModel& model : scene.models) {
+				model.apply_transform(scene.renderer.view_transform);
+			}
+		}
+		else {
+			bool is_view;
+			mat4 transform = scene.animator.get_transform(&is_view, mouse_sensitivity);
+			if (!is_view) {
+				// model transform
+				scene.models[scene.active_model].transform_model(transform, scene.renderer.view_transform);
+			}
+			else {
+				scene.renderer.view_transform = transform * scene.renderer.view_transform;
+				for (CModel& model : scene.models) {
+					model.apply_transform(scene.renderer.view_transform);
+				}
+			}
+		}
+	}
+	else {
+		if (GetCursorPos(&mouse) && clicking) {
+			int diff = mouse.x - mouse_pos_x;
+			if (scene.recording) {
+				scene.animator.acc += diff;
+			}
+			scene.update(this, diff);
+		}
 	}
 	mouse_pos_x = mouse.x;
 	
@@ -472,32 +511,32 @@ void CCGWorkView::OnUpdateViewPerspective(CCmdUI* pCmdUI)
 
 void CCGWorkView::OnActionRotate()
 {
-	m_nAction = ID_ACTION_ROTATE;
+	m_nAction = ROTATION;
 }
 
 void CCGWorkView::OnUpdateActionRotate(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nAction == ID_ACTION_ROTATE);
+	pCmdUI->SetCheck(m_nAction == ROTATION);
 }
 
 void CCGWorkView::OnActionTranslate()
 {
-	m_nAction = ID_ACTION_TRANSLATE;
+	m_nAction = TRANSLATION;
 }
 
 void CCGWorkView::OnUpdateActionTranslate(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nAction == ID_ACTION_TRANSLATE);
+	pCmdUI->SetCheck(m_nAction == TRANSLATION);
 }
 
 void CCGWorkView::OnActionScale()
 {
-	m_nAction = ID_ACTION_SCALE;
+	m_nAction = SCALING;
 }
 
 void CCGWorkView::OnUpdateActionScale(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_nAction == ID_ACTION_SCALE);
+	pCmdUI->SetCheck(m_nAction == SCALING);
 }
 
 
@@ -606,6 +645,9 @@ void CCGWorkView::OnLButtonUp(UINT nFlags, CPoint point)
 	scene.renderer.mouse_x = point.x;
 	scene.renderer.mouse_y = point.y;
 	scene.renderer.select_highlighted_pol = true;
+	if (scene.recording) {
+		scene.animator.add_keyframe(X, Y, Z, m_nAction, transform_context);
+	}
 }
 
 void CCGWorkView::OnPolygonIncluded()
@@ -650,24 +692,24 @@ void CCGWorkView::OnUpdateVertexCalculated(CCmdUI *pCmdUI)
 
 void CCGWorkView::OnActionTransformobject()
 {
-	transform_context = TRANSFORM_MODEL;
+	transform_context = MODEL;
 }
 
 void CCGWorkView::OnUpdateActionTransformobject(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck(transform_context == TRANSFORM_MODEL);
+	pCmdUI->SetCheck(transform_context == MODEL);
 }
 
 
 void CCGWorkView::OnActionTransformview()
 {
-	transform_context = TRANSFORM_VIEW;
+	transform_context = VIEW;
 }
 
 
 void CCGWorkView::OnUpdateActionTransformview(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck(transform_context == TRANSFORM_VIEW);
+	pCmdUI->SetCheck(transform_context == VIEW);
 }
 
 
@@ -1008,4 +1050,75 @@ void CCGWorkView::OnAntiSincfilter()
 void CCGWorkView::OnUpdateAntiSincfilter(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(scene.renderer.filter_type == SINC);
+}
+
+
+void CCGWorkView::OnRecord()
+{
+	if (scene.models.size() > 0 && !scene.playing) {
+		scene.recording = !scene.recording;
+		if (scene.recording) {
+			scene.animator.start_recording(scene.models[scene.active_model].model_transform, scene.renderer.view_transform);
+		}
+	}
+}
+
+
+void CCGWorkView::OnUpdateRecord(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.recording);
+}
+
+
+void CCGWorkView::OnPlay()
+{
+	if (scene.models.size() > 0) {
+		scene.recording = false;
+		scene.playing = true;
+		scene.animator.restart = true;
+	}
+}
+
+
+void CCGWorkView::OnUpdatePlay(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(scene.playing);
+}
+
+void CCGWorkView::OnStop()
+{
+	if (scene.models.size() > 0 && scene.playing) {
+		scene.playing = false;
+		scene.animator.next_keyframe = 0;
+		scene.animator.current_step = 0;
+		scene.models[scene.active_model].model_transform = scene.animator.start_model_mat;
+		scene.renderer.view_transform = scene.animator.start_view_mat;
+		for (CModel& model : scene.models) {
+			model.apply_transform(scene.renderer.view_transform);
+		}
+	}
+}
+
+
+void CCGWorkView::OnUpdateStop(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+void CCGWorkView::OnAnimationSpeed()
+{
+	AnimationSpeedDlg dlg(this);
+	if (dlg.DoModal() == IDOK) {
+		if (scene.models.size() > 0 && scene.playing) {
+			scene.animator.next_keyframe = 0;
+			scene.animator.current_step = 0;
+			scene.animator.restart = true;
+			scene.models[scene.active_model].model_transform = scene.animator.start_model_mat;
+			scene.renderer.view_transform = scene.animator.start_view_mat;
+			for (CModel& model : scene.models) {
+				model.apply_transform(scene.renderer.view_transform);
+			}
+		}
+	}
 }

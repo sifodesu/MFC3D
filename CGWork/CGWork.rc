@@ -76,6 +76,10 @@ BEGIN
     BUTTON      ID_RENDER_FLAT
     BUTTON      ID_RENDER_GOURAUD
     BUTTON      ID_RENDER_PHONG
+    SEPARATOR
+    BUTTON      ID_RECORD
+    BUTTON      ID_PLAY
+    BUTTON      ID_STOP
 END
 
 
@@ -157,6 +161,12 @@ BEGIN
         MENUITEM "Triangle Filter",             ID_ANTI_TRIANGLEFILTER
         MENUITEM "Gaussian Filter",             ID_ANTI_GAUSSIANFILTER
         MENUITEM "Sinc Filter",                 ID_ANTI_SINCFILTER
+    END
+    POPUP "Animation"
+    BEGIN
+        MENUITEM "Speed...",                    ID_ANIMATION_SPEED
+        MENUITEM SEPARATOR
+        MENUITEM "Save Animation",              ID_ANIMATION_SAVEANIMATION
     END
     POPUP "Render"
     BEGIN
@@ -313,6 +323,17 @@ BEGIN
     LTEXT           "Height",IDC_STATIC,49,30,21,8
 END
 
+IDD_ANIMATION_SPEED DIALOGEX 0, 0, 131, 53
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Animation Speed"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,32,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,74,32,50,14
+    EDITTEXT        IDC_EDIT1,61,12,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Speed",IDC_STATIC,36,14,21,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -414,6 +435,14 @@ BEGIN
         RIGHTMARGIN, 196
         TOPMARGIN, 7
         BOTTOMMARGIN, 107
+    END
+
+    IDD_ANIMATION_SPEED, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 124
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 46
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -601,6 +630,11 @@ BEGIN
     0, 0, 0, 0,
     0, 0, 0, 0,
     0, 0, 0, 0
+END
+
+IDD_ANIMATION_SPEED AFX_DIALOG_LAYOUT
+BEGIN
+    0
 END
 
 
