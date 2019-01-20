@@ -128,6 +128,14 @@ public:
 
 		CRenderer renderer;
 		bool display_z_buffer;
+
+		bool display_fog;
+		bool display_motionBlur;
+		double motionBlur_t;
+		double minBoundFog;
+		double maxBoundFog;
+		double fogIntensity;
+
 		vector<CModel> models;
 		int active_model;
 		BYTE* lastFrame;

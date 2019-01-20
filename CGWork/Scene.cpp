@@ -4,7 +4,8 @@
 #include "PngWrapper.h"
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
-current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(false), isBackgroundStretched(true), lastFrame(nullptr), sizeLastFrame(0)
+current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(false), isBackgroundStretched(true), lastFrame(nullptr), sizeLastFrame(0),
+display_fog(false), display_motionBlur(false), motionBlur_t(0.25), minBoundFog(-0.5), maxBoundFog(0.5), fogIntensity(0.5)
 {
 	cameras.push_back(CCamera());
 	recording = false;
@@ -175,7 +176,6 @@ void CCGWorkView::CScene::drawMotionBlur() {
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
 	if (lastFrame != nullptr && sizeLastFrame == w * h * sizeof(DWORD)) {
-		double t = 0.25;
 		for (int y = 0; y < h; y++){
 			for (int x = 0; x < w; x++){
 				unsigned int offset = 4 * ((h - y) * w + x);
@@ -191,7 +191,7 @@ void CCGWorkView::CScene::drawMotionBlur() {
 				R = lastFrame[offset + 2];
 				COLORREF pLF = RGB(R, G, B);
 
-				COLORREF newCol = renderer.add(renderer.multiply(pCur, 1 - t), renderer.multiply(pLF, t));
+				COLORREF newCol = renderer.add(renderer.multiply(pCur, 1 - motionBlur_t), renderer.multiply(pLF, motionBlur_t));
 				renderer.draw_pixel(POINT{ x, y }, newCol);
 
 			}
@@ -253,9 +253,7 @@ void CCGWorkView::CScene::draw_fog() {
 	int w = renderer.screen.Width();
 
 	COLORREF fogColor = RGB(255, 0, 255);
-	double minBoundFog = -0.5;
-	double maxBoundFog = 0.5;
-	double fogIntensity = 0.5;
+
 	for (int y = 0; y < h; y++){
 		for (int x = 0; x < w; x++){
 			if (renderer.bitFlag[x + y * w]) {
@@ -298,12 +296,16 @@ void CCGWorkView::CScene::draw()
 		renderer.draw_model(model);
 	}
 
-	//draw_fog();
+	if (display_fog) {
+		draw_fog();
+	}
 
 	if (display_z_buffer) {
 		drawZBuffer();
 	}
 
-	//drawMotionBlur();
+	if (drawMotionBlur) {
+		drawMotionBlur();
+	}
 
 }
