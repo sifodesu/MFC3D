@@ -135,6 +135,7 @@ public:
 		double minBoundFog;
 		double maxBoundFog;
 		double fogIntensity;
+		COLORREF fog_color;
 
 		vector<CModel> models;
 		int active_model;
@@ -324,6 +325,7 @@ public:
 	afx_msg void OnUpdateStop(CCmdUI *pCmdUI);
 	afx_msg void OnAnimationSpeed();
 	afx_msg void OnAnimationSaveanimation();
+	afx_msg void OnOptionsFog();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp

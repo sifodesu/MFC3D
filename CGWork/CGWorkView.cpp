@@ -36,6 +36,7 @@ static char THIS_FILE[] = __FILE__;
 #include "DiaFineNess.h"
 #include "DiaScreenshot.h"
 #include "AnimationSpeedDlg.h"
+#include "FogDlg.h"
 
 // Use this macro to display text messages in the status bar.
 #define STATUS_BAR_TEXT(str) (((CMainFrame*)GetParentFrame())->getStatusBar().SetWindowText(str))
@@ -150,6 +151,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 	ON_UPDATE_COMMAND_UI(ID_STOP, &CCGWorkView::OnUpdateStop)
 		ON_COMMAND(ID_ANIMATION_SPEED, &CCGWorkView::OnAnimationSpeed)
 		ON_COMMAND(ID_ANIMATION_SAVEANIMATION, &CCGWorkView::OnAnimationSaveanimation)
+		ON_COMMAND(ID_OPTIONS_FOG, &CCGWorkView::OnOptionsFog)
 		END_MESSAGE_MAP()
 
 
@@ -1207,4 +1209,13 @@ void CCGWorkView::OnAnimationSaveanimation()
 		model.apply_transform(scene.renderer.view_transform);
 	}
 	Invalidate();
+}
+
+
+void CCGWorkView::OnOptionsFog()
+{
+	FogDlg dlg(this);
+	if (dlg.DoModal() == IDOK) {
+
+	}
 }

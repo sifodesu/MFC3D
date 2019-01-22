@@ -10,8 +10,8 @@
 #define IDD_COLORS                      149
 #define IDD_LIGHTING_DLG                155
 #define IDD_SCREENSHOT                  156
-#define IDD_DIALOG1                     158
 #define IDD_ANIMATION_SPEED             158
+#define IDD_FOG                         160
 #define IDC_LIGHT_SPACE                 1010
 #define IDC_RADIO_LIGHT1                1017
 #define IDC_RADIO_LIGHT2                1018
@@ -55,6 +55,12 @@
 #define IDC_AMBIANT_EXPONENT            1056
 #define IDC_LIGHT_N                     1060
 #define IDC_EDITWSCRN                   1060
+#define IDC_FOG_ENABLED                 1061
+#define IDC_FOG_COLOR                   1062
+#define IDC_EDIT2                       1063
+#define IDC_FOG_FAR                     1063
+#define IDC_FOG_INTENSITY               1064
+#define IDC_FOG_NEAR                    1065
 #define ID_FILE_LOAD                    32771
 #define ID_VIEW_ORTHOGRAPHIC            32772
 #define ID_VIEW_PERSPECTIVE             32773
@@ -125,14 +131,16 @@
 #define ID_STOP                         32852
 #define ID_ANIMATION_SPEED              32853
 #define ID_ANIMATION_SAVEANIMATION      32854
+#define ID_OPTIONS_FOG                  32855
+#define ID_OPTIONS_MOTIONBLUR           32856
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         32855
-#define _APS_NEXT_CONTROL_VALUE         1061
+#define _APS_NEXT_RESOURCE_VALUE        163
+#define _APS_NEXT_COMMAND_VALUE         32857
+#define _APS_NEXT_CONTROL_VALUE         1066
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

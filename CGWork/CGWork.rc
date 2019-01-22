@@ -121,8 +121,10 @@ BEGIN
     END
     POPUP "Options"
     BEGIN
-        MENUITEM "Perspective Control...",      ID_OPTIONS_PERSPECTIVECONTROL
+        MENUITEM "Colors...",                   ID_OPTIONS_COLORS
+        MENUITEM "FineNess...",                 ID_MFINENESS
         MENUITEM "Mouse Sensitivity...",        ID_OPTIONS_MOUSESENSITIVITY
+        MENUITEM "Perspective Control...",      ID_OPTIONS_PERSPECTIVECONTROL
         POPUP "Normals Source"
         BEGIN
             POPUP "Polygon"
@@ -138,8 +140,9 @@ BEGIN
                 MENUITEM "Inverted",                    ID_VERTEX_INVERTED
             END
         END
-        MENUITEM "Colors...",                   ID_OPTIONS_COLORS
-        MENUITEM "FineNess...",                 ID_MFINENESS
+        MENUITEM SEPARATOR
+        MENUITEM "Fog...",                      ID_OPTIONS_FOG
+        MENUITEM "Motion Blur...",              ID_OPTIONS_MOTIONBLUR
     END
     POPUP "&Light"
     BEGIN
@@ -334,6 +337,25 @@ BEGIN
     LTEXT           "Speed",IDC_STATIC,36,14,21,8
 END
 
+IDD_FOG DIALOGEX 0, 0, 239, 86
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Fog Parameter"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,125,65,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,182,65,50,14
+    LTEXT           "Enable",IDC_STATIC,8,7,22,8
+    CONTROL         "",IDC_FOG_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,53,7,16,10
+    CONTROL         "",IDC_FOG_COLOR,"MfcColorButton",WS_TABSTOP,53,22,50,14
+    LTEXT           "Color",IDC_STATIC,8,24,18,8
+    EDITTEXT        IDC_FOG_NEAR,172,7,50,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FOG_FAR,172,25,50,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FOG_INTENSITY,53,40,50,14,ES_AUTOHSCROLL
+    LTEXT           "Near bound",IDC_STATIC,126,10,38,8
+    LTEXT           "Far bound",IDC_STATIC,125,28,34,8
+    LTEXT           "Intensity",IDC_STATIC,7,43,30,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -443,6 +465,14 @@ BEGIN
         RIGHTMARGIN, 124
         TOPMARGIN, 7
         BOTTOMMARGIN, 46
+    END
+
+    IDD_FOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -572,6 +602,24 @@ BEGIN
     0
 END
 
+IDD_FOG DLGINIT
+BEGIN
+    IDC_FOG_COLOR, 0x37c, 215, 0
+0x4d3c, 0x4346, 0x6f43, 0x6f6c, 0x4272, 0x7475, 0x6f74, 0x5f6e, 0x6e45, 
+0x6261, 0x656c, 0x744f, 0x6568, 0x4272, 0x7475, 0x6f74, 0x3e6e, 0x5254, 
+0x4555, 0x2f3c, 0x464d, 0x4343, 0x6c6f, 0x726f, 0x7542, 0x7474, 0x6e6f, 
+0x455f, 0x616e, 0x6c62, 0x4f65, 0x6874, 0x7265, 0x7542, 0x7474, 0x6e6f, 
+0x3c3e, 0x464d, 0x4343, 0x6c6f, 0x726f, 0x7542, 0x7474, 0x6e6f, 0x455f, 
+0x616e, 0x6c62, 0x4165, 0x7475, 0x6d6f, 0x7461, 0x6369, 0x7542, 0x7474, 
+0x6e6f, 0x463e, 0x4c41, 0x4553, 0x2f3c, 0x464d, 0x4343, 0x6c6f, 0x726f, 
+0x7542, 0x7474, 0x6e6f, 0x455f, 0x616e, 0x6c62, 0x4165, 0x7475, 0x6d6f, 
+0x7461, 0x6369, 0x7542, 0x7474, 0x6e6f, 0x3c3e, 0x464d, 0x4343, 0x6c6f, 
+0x726f, 0x7542, 0x7474, 0x6e6f, 0x435f, 0x6c6f, 0x6d75, 0x736e, 0x6f43, 
+0x6e75, 0x3e74, 0x3c35, 0x4d2f, 0x4346, 0x6f43, 0x6f6c, 0x4272, 0x7475, 
+0x6f74, 0x5f6e, 0x6f43, 0x756c, 0x6e6d, 0x4373, 0x756f, 0x746e, "\076" 
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -633,6 +681,11 @@ BEGIN
 END
 
 IDD_ANIMATION_SPEED AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FOG AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

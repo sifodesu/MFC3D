@@ -5,7 +5,7 @@
 
 CCGWorkView::CScene::CScene(CCGWorkView* parent) :
 current_camera(0), renderer(parent), display_z_buffer(false), isBackgroundLoaded(false), isBackgroundStretched(true), lastFrame(nullptr), sizeLastFrame(0),
-display_fog(false), display_motionBlur(false), motionBlur_t(0.25), minBoundFog(-0.5), maxBoundFog(0.5), fogIntensity(0.5)
+display_fog(false), display_motionBlur(false), motionBlur_t(0.25), minBoundFog(-0.5), maxBoundFog(0.5), fogIntensity(0.5), fog_color(PINK)
 {
 	cameras.push_back(CCamera());
 	recording = false;
@@ -252,26 +252,23 @@ void CCGWorkView::CScene::draw_fog() {
 	int h = renderer.screen.Height();
 	int w = renderer.screen.Width();
 
-	COLORREF fogColor = RGB(255, 0, 255);
-
 	for (int y = 0; y < h; y++){
 		for (int x = 0; x < w; x++){
-			if (renderer.bitFlag[x + y * w]) {
-				unsigned int offset = 4 * ((h - y) * w + x);
-				if (offset >= h * w * sizeof(DWORD) || offset < 0 || x >= w || x < 0) {
-					return;
-				}
-				int B = renderer.bitmap[offset];
-				int G = renderer.bitmap[offset + 1];
-				int R = renderer.bitmap[offset + 2];
-				COLORREF col = RGB(R, G, B);
-				double f = abs(max(0, min(1, (renderer.z_buffer[y][x] - minBoundFog) / (maxBoundFog - minBoundFog))));
-				f *= fogIntensity;
-				col = renderer.add(renderer.multiply(col, (1 - f)), renderer.multiply(fogColor, f));
-
-				renderer.draw_pixel(POINT{ x, y }, col);
-
+			unsigned int offset = 4 * ((h - y) * w + x);
+			if (offset >= h * w * 4 || offset < 0) {
+				continue;
 			}
+			int B = renderer.bitmap[offset];
+			int G = renderer.bitmap[offset + 1];
+			int R = renderer.bitmap[offset + 2];
+			COLORREF col = RGB(R, G, B);
+			double f = 1.0f;
+			if (renderer.bitFlag[x + y * w]) {
+				f = abs(max(0, min(1, (renderer.z_buffer[y][x] - minBoundFog) / (maxBoundFog - minBoundFog))));
+			}
+			f *= fogIntensity;
+			col = renderer.add(renderer.multiply(col, (1 - f)), renderer.multiply(fog_color, f));
+			renderer.draw_pixel(POINT{ x, y }, col);
 		}
 	}
 }
@@ -304,7 +301,7 @@ void CCGWorkView::CScene::draw()
 		drawZBuffer();
 	}
 
-	if (drawMotionBlur) {
+	if (display_motionBlur) {
 		drawMotionBlur();
 	}
 
