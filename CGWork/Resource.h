@@ -12,6 +12,8 @@
 #define IDD_SCREENSHOT                  156
 #define IDD_ANIMATION_SPEED             158
 #define IDD_FOG                         160
+#define IDD_DIALOG1                     163
+#define IDD_BLUR_DLG                    163
 #define IDC_LIGHT_SPACE                 1010
 #define IDC_RADIO_LIGHT1                1017
 #define IDC_RADIO_LIGHT2                1018
@@ -57,10 +59,11 @@
 #define IDC_EDITWSCRN                   1060
 #define IDC_FOG_ENABLED                 1061
 #define IDC_FOG_COLOR                   1062
-#define IDC_EDIT2                       1063
 #define IDC_FOG_FAR                     1063
 #define IDC_FOG_INTENSITY               1064
 #define IDC_FOG_NEAR                    1065
+#define IDC_BLUR_ENABLE                 1066
+#define IDC_BLUR_FACTOR                 1067
 #define ID_FILE_LOAD                    32771
 #define ID_VIEW_ORTHOGRAPHIC            32772
 #define ID_VIEW_PERSPECTIVE             32773
@@ -138,9 +141,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        163
+#define _APS_NEXT_RESOURCE_VALUE        165
 #define _APS_NEXT_COMMAND_VALUE         32857
-#define _APS_NEXT_CONTROL_VALUE         1066
+#define _APS_NEXT_CONTROL_VALUE         1068
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
