@@ -2,6 +2,7 @@
 #include <vector>
 #include "Vec.h"
 #include "Vertice.h"
+#include "Globals.h"
 #include <map>
 
 using namespace std;
@@ -15,6 +16,7 @@ public:
 	vec3 included_normal;
 	vec3 calculated_normal;
 	bool highlight;
+	COLORREF color;
 
 	CPolygon();
 	void add_vertice(const CVertice& vertice);

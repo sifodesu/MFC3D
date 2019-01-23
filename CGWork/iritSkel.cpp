@@ -139,7 +139,7 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 {
 	int i;
 	const char *Str;
-	double RGB[3], Transp;
+	double rgb[3], Transp;
 	IPPolygonStruct *PPolygon;
 	IPVertexStruct *PVertex;
 	const IPAttributeStruct *Attrs =
@@ -152,10 +152,14 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 
 	/* You can use IP_IS_POLYGON_OBJ(PObj) and IP_IS_POINTLIST_OBJ(PObj)
 	   to identify the type of the object*/
+	COLORREF color = BLACK;
 
-	if (CGSkelGetObjectColor(PObj, RGB))
+	if (CGSkelGetObjectColor(PObj, rgb))
 	{
-		/* color code */
+		int R = 255.0f * rgb[0];
+		int G = 255.0f * rgb[1];
+		int B = 255.0f * rgb[2];
+		color = RGB(R, G, B);
 	}
 	if (CGSkelGetObjectTransp(PObj, &Transp))
 	{
@@ -194,10 +198,10 @@ bool CGSkelStoreData(IPObjectStruct *PObj)
 		   access the normal by the first 3 components of PPolygon->Plane */
 
 		CPolygon polygon;
+		polygon.color = color;
 		if (IP_HAS_PLANE_POLY(PPolygon)) {
 			polygon.included_normal = vec3(PPolygon->Plane[0], PPolygon->Plane[1], PPolygon->Plane[2]);
 		}
-
 
 		PVertex = PPolygon->PVertex;
 		do {			     /* Assume at least one edge in polygon! */

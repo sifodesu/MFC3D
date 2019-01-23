@@ -368,7 +368,7 @@ void CCGWorkView::CRenderer::calculate_right(const vec3 & v1, const vec3 & v2, v
 	}
 }
 
-COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& normal)
+COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& normal, const COLORREF& base)
 {
 	COLORREF color = multiply(ambiant.color, ambiant.intensity);
 	for (const LightParams& light : lights) {
@@ -399,7 +399,8 @@ COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& 
 			color = add(color, multiply(light.color, theta * light.specular * pow));
 		}
 	}
-	return color;
+	float base_ratio = 0.2;
+	return add(multiply(color, 1.0f - base_ratio), multiply(base, base_ratio));
 }
 
 void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
@@ -681,7 +682,7 @@ void CCGWorkView::CRenderer::draw_flat(const CModel & model)
 				rr -= i;
 			}
 		}
-		COLORREF color = calculate_light(polygon.origin_transformed, polygon.calculated_normal * inverted_polygon);
+		COLORREF color = calculate_light(polygon.origin_transformed, polygon.calculated_normal * inverted_polygon, polygon.color);
 		for (int y = min_y; y <= max_y; y++) {
 			vec3 v1(left[y - min_y].first, y, left[y - min_y].second);
 			vec3 v2(right[y - min_y].first, y, right[y - min_y].second);
@@ -728,11 +729,11 @@ void CCGWorkView::CRenderer::draw_gouraud(const CModel & model)
 			}
 			if (inverted) {
 				points.insert(points.begin(), v);
-				colors.insert(colors.begin(), calculate_light(vertice.transformed, vertice.calculated_normal * inverted_polygon));
+				colors.insert(colors.begin(), calculate_light(vertice.transformed, vertice.calculated_normal * inverted_polygon, polygon.color));
 			}
 			else {
 				points.push_back(v);
-				colors.push_back(calculate_light(vertice.transformed, vertice.calculated_normal * inverted_polygon));
+				colors.push_back(calculate_light(vertice.transformed, vertice.calculated_normal * inverted_polygon, polygon.color));
 			}
 			i++;
 		}
@@ -988,7 +989,7 @@ void CCGWorkView::CRenderer::draw_phong(const CModel & model)
 				}
 				vec3 p = points_left[y - min_y].first * (1.0f - t) + points_right[y - min_y].first * t;
 				vec3 n = normalized(points_left[y - min_y].second * (1.0f - t) + points_right[y - min_y].second * t);
-				COLORREF color = calculate_light(p, n);
+				COLORREF color = calculate_light(p, n, polygon.color);
 				set_pixel(POINT{ x, y }, v1, v2, color);
 			}
 		}

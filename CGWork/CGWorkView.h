@@ -47,7 +47,7 @@ public:
 		void draw_line(const vec3& v1, const vec3& v2, COLORREF color, bool forcePrint = false);
 		void calculate_left(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
 		void calculate_right(const vec3& v1, const vec3& v2, vector<pair<int, float>>& points, int min_y);
-		COLORREF calculate_light(const vec3& point, const vec3& normal);
+		COLORREF calculate_light(const vec3& point, const vec3& normal, const COLORREF& base);
 		COLORREF multiply(COLORREF color, float k);
 		COLORREF add(COLORREF c1, COLORREF c2);
 		void apply_perspective(vec4& v);
