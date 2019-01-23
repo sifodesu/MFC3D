@@ -370,7 +370,8 @@ void CCGWorkView::CRenderer::calculate_right(const vec3 & v1, const vec3 & v2, v
 
 COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& normal, const COLORREF& base)
 {
-	COLORREF color = multiply(ambiant.color, ambiant.intensity);
+	float base_ratio = 0.3;
+	COLORREF color = add(multiply(ambiant.color, ambiant.intensity), multiply(base, base_ratio));
 	for (const LightParams& light : lights) {
 		if (!light.enabled) {
 			continue;
@@ -399,8 +400,8 @@ COLORREF CCGWorkView::CRenderer::calculate_light(const vec3& point, const vec3& 
 			color = add(color, multiply(light.color, theta * light.specular * pow));
 		}
 	}
-	float base_ratio = 0.2;
-	return add(multiply(color, 1.0f - base_ratio), multiply(base, base_ratio));
+	
+	return color;
 }
 
 void CCGWorkView::CRenderer::apply_perspective(vec4 & v)
