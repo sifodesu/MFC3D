@@ -154,6 +154,7 @@ BEGIN_MESSAGE_MAP(CCGWorkView, CView)
 		ON_COMMAND(ID_ANIMATION_SAVEANIMATION, &CCGWorkView::OnAnimationSaveanimation)
 		ON_COMMAND(ID_OPTIONS_FOG, &CCGWorkView::OnOptionsFog)
 		ON_COMMAND(ID_OPTIONS_MOTIONBLUR, &CCGWorkView::OnOptionsMotionblur)
+		ON_COMMAND(ID_CLEAR_VIEW, &CCGWorkView::OnClearView)
 		END_MESSAGE_MAP()
 
 
@@ -1229,4 +1230,10 @@ void CCGWorkView::OnOptionsMotionblur()
 	if (dlg.DoModal() == IDOK) {
 
 	}
+}
+
+
+void CCGWorkView::OnClearView()
+{
+	scene.models.clear();
 }

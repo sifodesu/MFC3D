@@ -12,7 +12,6 @@
 #define IDD_SCREENSHOT                  156
 #define IDD_ANIMATION_SPEED             158
 #define IDD_FOG                         160
-#define IDD_DIALOG1                     163
 #define IDD_BLUR_DLG                    163
 #define IDC_LIGHT_SPACE                 1010
 #define IDC_RADIO_LIGHT1                1017
@@ -136,13 +135,15 @@
 #define ID_ANIMATION_SAVEANIMATION      32854
 #define ID_OPTIONS_FOG                  32855
 #define ID_OPTIONS_MOTIONBLUR           32856
+#define ID_BUTTON32857                  32857
+#define ID_CLEAR_VIEW                   32857
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        165
-#define _APS_NEXT_COMMAND_VALUE         32857
+#define _APS_NEXT_COMMAND_VALUE         32858
 #define _APS_NEXT_CONTROL_VALUE         1068
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

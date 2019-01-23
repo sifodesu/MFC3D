@@ -327,6 +327,7 @@ public:
 	afx_msg void OnAnimationSaveanimation();
 	afx_msg void OnOptionsFog();
 	afx_msg void OnOptionsMotionblur();
+	afx_msg void OnClearView();
 };
 
 #ifndef _DEBUG  // debug version in CGWorkView.cpp
