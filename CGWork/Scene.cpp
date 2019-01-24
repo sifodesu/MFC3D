@@ -10,6 +10,7 @@ display_fog(false), display_motionBlur(false), motionBlur_t(0.25), minBoundFog(-
 	cameras.push_back(CCamera());
 	recording = false;
 	playing = false;
+	fog_on_bg = false;
 }
 
 void CCGWorkView::CScene::add_model(const CModel & model)
@@ -262,7 +263,7 @@ void CCGWorkView::CScene::draw_fog() {
 			int G = renderer.bitmap[offset + 1];
 			int R = renderer.bitmap[offset + 2];
 			COLORREF col = RGB(R, G, B);
-			double f = 1.0f;
+			double f = (!fog_on_bg) ? 0.0f : 1.0f;
 			if (renderer.bitFlag[x + y * w]) {
 				f = abs(max(0, min(1, (renderer.z_buffer[y][x] - minBoundFog) / (maxBoundFog - minBoundFog))));
 			}

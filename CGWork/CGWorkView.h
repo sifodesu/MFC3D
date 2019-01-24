@@ -136,6 +136,7 @@ public:
 		double maxBoundFog;
 		double fogIntensity;
 		COLORREF fog_color;
+		bool fog_on_bg;
 
 		vector<CModel> models;
 		int active_model;

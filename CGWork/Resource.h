@@ -63,6 +63,7 @@
 #define IDC_FOG_NEAR                    1065
 #define IDC_BLUR_ENABLE                 1066
 #define IDC_BLUR_FACTOR                 1067
+#define IDC_CHECK1                      1068
 #define ID_FILE_LOAD                    32771
 #define ID_VIEW_ORTHOGRAPHIC            32772
 #define ID_VIEW_PERSPECTIVE             32773
@@ -135,7 +136,6 @@
 #define ID_ANIMATION_SAVEANIMATION      32854
 #define ID_OPTIONS_FOG                  32855
 #define ID_OPTIONS_MOTIONBLUR           32856
-#define ID_BUTTON32857                  32857
 #define ID_CLEAR_VIEW                   32857
 
 // Next default values for new objects
@@ -144,7 +144,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        165
 #define _APS_NEXT_COMMAND_VALUE         32858
-#define _APS_NEXT_CONTROL_VALUE         1068
+#define _APS_NEXT_CONTROL_VALUE         1069
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

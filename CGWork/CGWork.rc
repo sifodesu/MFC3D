@@ -355,6 +355,8 @@ BEGIN
     LTEXT           "Near bound",IDC_STATIC,126,10,38,8
     LTEXT           "Far bound",IDC_STATIC,125,28,34,8
     LTEXT           "Intensity",IDC_STATIC,7,43,30,8
+    CONTROL         "",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,172,44,16,10
+    LTEXT           "Show on BG",IDC_STATIC,126,45,39,8
 END
 
 IDD_BLUR_DLG DIALOGEX 0, 0, 139, 61
